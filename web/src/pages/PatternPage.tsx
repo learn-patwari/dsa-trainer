@@ -109,7 +109,14 @@ export function PatternPage() {
                   <td>
                     <DifficultyTag difficulty={q.difficulty} />
                   </td>
-                  <td className="mono">{q.bestPercent != null ? `${q.bestPercent}%` : <span className="muted">—</span>}</td>
+                  <td className="mono">
+                    {q.bestPercent != null ? `${q.bestPercent}%` : <span className="muted">—</span>}
+                    {q.codeVerified && (
+                      <span className="tag tag-good" style={{ marginLeft: '0.4rem' }} title="Your code passed every example test">
+                        code ✓
+                      </span>
+                    )}
+                  </td>
                   <td>{q.lcSolved ? <span className="tag tag-good">Solved</span> : <span className="muted small">—</span>}</td>
                   <td style={{ textAlign: 'right' }}>
                     <Link className="btn btn-sm" to={`/problems/${q.slug}?mode=pattern`}>

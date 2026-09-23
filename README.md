@@ -2,11 +2,13 @@
 
 A local web app for pattern-based interview prep. Learn one of 23 problem-solving patterns, apply it to curated LeetCode
 problems, and get rated on your **approach**: pattern, key insight, time/space complexity and edge cases. Every
-pattern has its own rating, so you can see exactly where you're weak.
+pattern has its own rating, so you can see exactly where you're weak. Your Java solution compiles and runs here too,
+against LeetCode's own example tests.
 
 ## Quick start
 
-Requires Node.js 20+ (developed on Node 24).
+Requires Node.js 20+ (developed on Node 24). A JDK (17+, developed on 21) is optional: without one everything works
+except "Compile & run".
 
 ```bash
 cd dsa-trainer
@@ -47,8 +49,26 @@ retakes are practice, since you've already seen the answers. Tiers: Novice (belo
 **Up next** keeps you on a pattern until it has three rated attempts, then moves you to your weakest pattern. With a
 LeetCode import it also favors patterns you've rarely practiced there, and skips problems you've already solved.
 
-The **Java** tab has an editor pre-filled with LeetCode's starter code, and your code autosaves locally. Code isn't
-run or graded here: paste it into LeetCode to test it. The **Notes** tab is for sketching your approach first.
+The **Java** tab has an editor pre-filled with LeetCode's starter code, and your code autosaves locally. The **Notes**
+tab is for sketching your approach first.
+
+## Compile & run
+
+Press **Compile & run** (or Ctrl/Cmd+Enter) in the Java tab. Your solution is compiled with `javac` and executed
+against LeetCode's own example tests, on your machine:
+
+- **Per test**: PASS / FAIL with the expected and actual values, the runtime in ms, and anything the code printed.
+- **Compile errors** are listed with the line numbers from your editor.
+- A crash in one test is reported for that test only; the rest still run. An infinite loop is stopped after 10s.
+- Answers that may come in any order are compared again ignoring order, and doubles use LeetCode's 1e-5 tolerance.
+
+It works for all 151 curated problems, including linked lists, trees and design classes (LRU Cache, Trie, Min
+Stack…). LeetCode's `metaData` supplies each signature, so the harness converts every input line to the right Java
+type; expected values are read from the statement. Everything the harness needs sits next to your code in a temporary
+folder that's deleted afterwards, and your code is never uploaded anywhere.
+
+Test results do **not** change your rating, which stays a measure of your approach. Problems whose code passes every
+checked test get a "code verified" badge.
 
 ## LeetCode import
 
@@ -65,7 +85,8 @@ with cached data and the approach checks.
 
 Everything lives in `dsa-trainer/data/` (gitignored): `progress.json` (ratings, attempts, code, notes, import) and
 `cache/`. "Start over" on the LeetCode page erases progress. The server listens on 127.0.0.1 only, rejects
-non-local `Host` headers, and requires JSON on writes.
+non-local `Host` headers, and requires JSON on writes. Compile & run executes your own Java on your machine, with a
+10s time limit and a 256 MB heap — treat pasted code as you would any code you run locally.
 
 ## Scripts
 
@@ -73,7 +94,7 @@ non-local `Host` headers, and requires JSON on writes.
 |---|---|
 | `npm run dev` | API (tsx watch) + Vite dev server |
 | `npm start` | Build the UI and serve everything on port 5179 |
-| `npm test` | Vitest: bank integrity, scoring, trainer logic, HTTP API |
+| `npm test` | Vitest: bank integrity, scoring, trainer logic, harness generation, real compile & run, HTTP API |
 | `npm run typecheck` | `tsc --noEmit` over server, shared, web and tests |
 | `npm run verify:bank` | Re-check all 151 problems against LeetCode (exists, free, id/title/difficulty) |
 | `npm run verify:java` | Compile every pattern's Java template with `javac` |
@@ -83,6 +104,7 @@ non-local `Host` headers, and requires JSON on writes.
 ```
 shared/     types, scoring/rating, pattern lessons, problem bank (answer keys stay server-side)
 server/     Express API, JSON store, LeetCode client, grading + recommendations
+            harness.ts (generates Main.java), java-run.ts (javac/java), compare.ts, java/J.java
 web/        React UI (Vite): dashboard, patterns, problem page, LeetCode import
 tests/      Vitest suites
 scripts/    content verification (LeetCode metadata, javac)

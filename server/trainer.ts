@@ -14,6 +14,7 @@ import type {
   ProblemView,
   Progress,
   Recommendation,
+  RunResult,
 } from '../shared/types.ts';
 
 const HISTORY_LIMIT = 1000;
@@ -172,6 +173,23 @@ export function saveWork(p: Progress, slug: string, body: unknown): void {
   };
 }
 
+/** Records a compile & run: the code that ran plus a summary for the "code verified" badge. */
+export function recordRun(p: Progress, slug: string, code: string, result: RunResult): void {
+  saveWork(p, slug, { code });
+  p.problems[slug]!.lastRun = {
+    at: result.at,
+    compiled: result.compiled,
+    passed: result.passed,
+    checked: result.checked,
+    total: result.total,
+  };
+}
+
+export function codeVerified(p: Progress, slug: string): boolean {
+  const run = p.problems[slug]?.lastRun;
+  return run != null && run.compiled && run.checked > 0 && run.passed === run.checked;
+}
+
 // ---------------------------------------------------------------- summaries
 
 function lcTagSolved(p: Progress, id: PatternId): number | null {
@@ -217,6 +235,7 @@ export function patternDetail(p: Progress, id: PatternId): PatternDetail {
       attempts: p.problems[q.slug]?.attempts ?? 0,
       bestPercent: attempted(p, q.slug) ? (p.problems[q.slug]?.bestPercent ?? 0) : null,
       lcSolved: solvedOnLc.has(q.slug),
+      codeVerified: codeVerified(p, q.slug),
     })),
   };
 }

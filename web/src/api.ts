@@ -3,11 +3,13 @@ import type {
   AttemptResult,
   AttemptSubmission,
   DashboardState,
+  JavaStatus,
   LeetCodeImport,
   LeetCodeProblem,
   PatternDetail,
   PracticeMode,
   ProblemView,
+  RunResult,
 } from '../../shared/types.ts';
 
 async function call<T>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
@@ -31,6 +33,8 @@ export const api = {
     call<AttemptResult>(`/problems/${encodeURIComponent(slug)}/attempts`, { method: 'POST', body: sub }),
   saveWork: (slug: string, work: { code?: string; notes?: string }) =>
     call<{ ok: true }>(`/problems/${encodeURIComponent(slug)}/work`, { method: 'PUT', body: work }),
+  javaStatus: () => call<JavaStatus>('/java/status'),
+  run: (slug: string, code: string) => call<RunResult>(`/problems/${encodeURIComponent(slug)}/run`, { method: 'POST', body: { code } }),
   blind: (exclude?: string) => call<{ slug: string }>(`/practice/blind${exclude ? `?exclude=${encodeURIComponent(exclude)}` : ''}`),
   importProfile: (body: { username?: string; useSession?: boolean }) =>
     call<LeetCodeImport>('/leetcode/import', { method: 'POST', body }),

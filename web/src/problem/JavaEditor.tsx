@@ -1,6 +1,9 @@
-import { java } from '@codemirror/lang-java';
+import { java as javaLang } from '@codemirror/lang-java';
 import CodeMirror from '@uiw/react-codemirror';
 import { useEffect, useState } from 'react';
+import type { JavaStatus, RunResult } from '../../../shared/types.ts';
+import { api } from '../api.ts';
+import { RunResults } from './RunResults.tsx';
 import { StatusText, useAutosave } from './Workbench.tsx';
 
 // Loaded lazily by the problem page: CodeMirror is most of the app's JavaScript.
@@ -24,31 +27,71 @@ interface Props {
   savedCode: string | null;
   starter: string | null;
   save: (code: string) => Promise<unknown>;
+  onRan: () => void;
 }
 
-export default function JavaEditor({ slug, savedCode, starter, save }: Props) {
+export default function JavaEditor({ slug, savedCode, starter, save, onRan }: Props) {
   const [code, setCode] = useState<string | null>(savedCode);
   const [status, edit] = useAutosave(save);
   const dark = usePrefersDark();
+  const [java, setJava] = useState<JavaStatus | null>(null);
+  const [running, setRunning] = useState(false);
+  const [result, setResult] = useState<RunResult | null>(null);
+  const [runError, setRunError] = useState<string | null>(null);
 
   // Until you type something, show LeetCode's Java stub once it arrives.
   useEffect(() => {
     if (code == null && starter != null) setCode(starter);
   }, [code, starter]);
 
+  useEffect(() => {
+    let alive = true;
+    api
+      .javaStatus()
+      .then((s) => alive && setJava(s))
+      .catch(() => alive && setJava({ available: false, version: null, message: null }));
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const value = code ?? starter ?? FALLBACK;
+
+  const run = async () => {
+    if (running) return;
+    setRunning(true);
+    setRunError(null);
+    try {
+      setResult(await api.run(slug, value));
+      onRan();
+    } catch (e) {
+      setRunError((e as Error).message);
+    } finally {
+      setRunning(false);
+    }
+  };
+
   return (
     <div className="stack" style={{ gap: '0.6rem' }}>
       <div className="spread">
-        <span className="small muted">Your code is saved locally. It isn't run or graded; paste it into LeetCode to test it.</span>
+        <span className="small muted">Compiled and run on your machine against LeetCode's example tests. Your code is saved locally.</span>
         <StatusText status={status} />
       </div>
-      <div className="editor-wrap">
+      {java && !java.available && <div className="callout warn small">{java.message}</div>}
+      <div
+        className="editor-wrap"
+        onKeyDown={(e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            void run();
+          }
+        }}
+      >
         <CodeMirror
           value={value}
           height="460px"
           theme={dark ? 'dark' : 'light'}
-          extensions={[java()]}
+          extensions={[javaLang()]}
           basicSetup={{ tabSize: 4 }}
           onChange={(v) => {
             setCode(v);
@@ -58,6 +101,15 @@ export default function JavaEditor({ slug, savedCode, starter, save }: Props) {
         />
       </div>
       <div className="row">
+        <button className="btn btn-primary btn-sm" onClick={run} disabled={running || java?.available === false} title="Ctrl+Enter">
+          {running ? (
+            <>
+              <span className="spinner" /> Compiling…
+            </>
+          ) : (
+            'Compile & run'
+          )}
+        </button>
         <button className="btn btn-sm" onClick={() => navigator.clipboard?.writeText(value)}>
           Copy code
         </button>
@@ -77,6 +129,8 @@ export default function JavaEditor({ slug, savedCode, starter, save }: Props) {
           Submit on LeetCode ↗
         </a>
       </div>
+      {runError && <div className="callout bad small">{runError}</div>}
+      {result && <RunResults result={result} />}
     </div>
   );
 }

@@ -87,8 +87,12 @@ const QUESTION_QUERY = `query question($slug: String!) {
     codeSnippets { langSlug code }
     hints
     exampleTestcaseList
+    metaData
   }
 }`;
+
+/** Bump when a new field is needed, so older cached copies are refetched. */
+const CACHE_VERSION = 2;
 
 interface RawQuestion {
   questionFrontendId: string;
@@ -101,6 +105,35 @@ interface RawQuestion {
   codeSnippets: { langSlug: string; code: string }[] | null;
   hints: string[];
   exampleTestcaseList: string[] | null;
+  metaData: string | null;
+}
+
+const ENTITIES: Record<string, string> = {
+  '&quot;': '"', '&#39;': "'", '&apos;': "'", '&amp;': '&', '&lt;': '<', '&gt;': '>', '&nbsp;': ' ', '&#34;': '"',
+};
+
+function decodeEntities(s: string): string {
+  return s.replace(/&(?:quot|#39|apos|amp|lt|gt|nbsp|#34);/g, (m) => ENTITIES[m] ?? m);
+}
+
+/**
+ * Pulls the expected outputs out of a statement. LeetCode uses three shapes:
+ * `<strong>Output:</strong> <span…>V</span>`, `<strong>Output:</strong> V` inside a <pre>,
+ * and `<strong>Output</strong>` with the value on the next line.
+ */
+export function extractExampleOutputs(contentHtml: string | null): string[] {
+  if (!contentHtml) return [];
+  const outputs: string[] = [];
+  const label = /<strong[^>]*>\s*Output:?\s*<\/strong>/gi;
+  for (let m = label.exec(contentHtml); m; m = label.exec(contentHtml)) {
+    const rest = contentHtml.slice(m.index + m[0].length);
+    const end = rest.search(/<strong|<\/pre>|<\/div>/i);
+    const chunk = end === -1 ? rest.slice(0, 600) : rest.slice(0, end);
+    const text = decodeEntities(chunk.replace(/<[^>]+>/g, '')).trim();
+    const firstLine = text.split('\n').map((l) => l.trim()).find((l) => l.length > 0);
+    if (firstLine) outputs.push(firstLine);
+  }
+  return outputs;
 }
 
 const inFlight = new Map<string, Promise<LeetCodeProblem>>();
@@ -108,7 +141,7 @@ const inFlight = new Map<string, Promise<LeetCodeProblem>>();
 /** Returns a problem from the local cache, fetching (and caching) it from LeetCode when needed. */
 export async function getProblem(slug: string, { refresh = false } = {}): Promise<LeetCodeProblem & { stale?: boolean }> {
   const cached = await readCachedProblem(slug);
-  if (cached && !refresh) return cached;
+  if (cached && !refresh && cached.cacheVersion === CACHE_VERSION) return cached;
   try {
     return await fetchProblemOnce(slug);
   } catch (err) {
@@ -141,7 +174,10 @@ async function fetchProblem(slug: string): Promise<LeetCodeProblem> {
     topicTags: q.topicTags ?? [],
     javaSnippet: q.codeSnippets?.find((s) => s.langSlug === 'java')?.code ?? null,
     exampleTestcases: q.exampleTestcaseList ?? [],
+    metaData: q.metaData ?? null,
+    exampleOutputs: extractExampleOutputs(q.content),
     fetchedAt: new Date().toISOString(),
+    cacheVersion: CACHE_VERSION,
   };
   await writeCachedProblem(problem);
   return problem;

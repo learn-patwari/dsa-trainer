@@ -139,6 +139,7 @@ textarea.input { width: 100%; resize: vertical; min-height: 12rem; font-family: 
 .tag-accent { color: var(--accent-text); background: var(--accent-soft); }
 .tag-good { color: var(--good); background: var(--good-soft); }
 .tag-warn { color: var(--warn); background: var(--warn-soft); }
+.tag-bad { color: var(--bad); background: var(--bad-soft); }
 .tier { font-weight: 600; font-size: 0.8rem; }
 .tier-Not-started { color: var(--muted); }
 .tier-Novice { color: var(--muted); }

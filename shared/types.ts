@@ -131,6 +131,8 @@ export interface ProblemProgress {
   lastResult?: AttemptResult;
   code?: string;
   notes?: string;
+  /** Summary of the last compile & run, for the "code verified" badge. */
+  lastRun?: { at: string; compiled: boolean; passed: number; checked: number; total: number };
 }
 
 export interface LeetCodeTagCount {
@@ -171,7 +173,53 @@ export interface LeetCodeProblem {
   topicTags: { name: string; slug: string }[];
   javaSnippet: string | null;
   exampleTestcases: string[];
+  /** LeetCode's signature description (JSON): method name, parameter types, return type. */
+  metaData: string | null;
+  /** Expected outputs scraped from the statement, aligned with exampleTestcases. */
+  exampleOutputs: string[];
   fetchedAt: string;
+  cacheVersion?: number;
+}
+
+// ---------- compile & run ----------
+
+export interface CompileError {
+  line: number | null;
+  message: string;
+}
+
+export type TestVerdict = 'pass' | 'pass-unordered' | 'fail' | 'error' | 'timeout' | 'unchecked' | 'not-run';
+
+export interface TestResult {
+  index: number;
+  input: string;
+  expected: string | null;
+  actual: string | null;
+  verdict: TestVerdict;
+  ms: number | null;
+  stdout: string;
+  error: string | null;
+}
+
+export interface RunResult {
+  compiled: boolean;
+  compileMs: number;
+  compileErrors: CompileError[];
+  compilerOutput: string;
+  tests: TestResult[];
+  passed: number;
+  checked: number;
+  total: number;
+  runMs: number;
+  /** Why tests were skipped or couldn't be checked, when that happened. */
+  note: string | null;
+  at: string;
+}
+
+export interface JavaStatus {
+  available: boolean;
+  version: string | null;
+  message: string | null;
 }
 
 // ---------- API response shapes ----------
@@ -223,6 +271,8 @@ export interface ProblemRow {
   attempts: number;
   bestPercent: number | null;
   lcSolved: boolean;
+  /** Your saved code compiled and passed every checked example test. */
+  codeVerified: boolean;
 }
 
 export interface PatternDetail {

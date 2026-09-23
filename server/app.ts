@@ -1,6 +1,7 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { compileAndRun, javaStatus } from './java-run.ts';
 import { getProblem, importPublicProfile, importWithSession, LeetCodeError, sessionFromEnv, USERNAME_RE } from './leetcode.ts';
 import { readProgress, resetProgress, updateProgress } from './store.ts';
 import {
@@ -11,6 +12,7 @@ import {
   pickBlind,
   problemView,
   recordAttempt,
+  recordRun,
   requirePatternId,
   requireProblem,
   saveWork,
@@ -64,6 +66,21 @@ export function createApp({ webDir = resolve('dist/web') } = {}) {
     requireProblem(req.params.slug);
     await updateProgress((p) => saveWork(p, req.params.slug, req.body));
     res.json({ ok: true });
+  });
+
+  api.get('/java/status', async (_req, res) => {
+    res.json(await javaStatus());
+  });
+
+  api.post('/problems/:slug/run', async (req, res) => {
+    requireProblem(req.params.slug);
+    const { code } = (req.body ?? {}) as { code?: unknown };
+    if (typeof code !== 'string' || code.trim() === '') throw new HttpError(400, 'Send the Java code to compile.');
+    if (code.length > 100_000) throw new HttpError(400, 'That code is larger than 100 KB.');
+    const problem = await getProblem(req.params.slug);
+    const result = await compileAndRun(problem, code);
+    await updateProgress((p) => recordRun(p, req.params.slug, code, result));
+    res.json(result);
   });
 
   api.get('/practice/blind', async (req, res) => {

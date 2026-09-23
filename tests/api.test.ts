@@ -12,6 +12,8 @@ delete process.env.LEETCODE_SESSION;
 let server: Server;
 let base: string;
 const realFetch = globalThis.fetch;
+const { javaStatus } = await import('../server/java-run.ts');
+const jdk = await javaStatus();
 
 /** Stand-in for leetcode.com so tests never depend on the network. */
 const leetcode = vi.fn(async (url: string | URL | Request, init?: RequestInit): Promise<Response> => {
@@ -20,10 +22,16 @@ const leetcode = vi.fn(async (url: string | URL | Request, init?: RequestInit): 
     return Response.json({
       data: {
         question: {
-          questionFrontendId: '1', title: 'Two Sum', titleSlug: 'two-sum', content: '<p>Given an array…</p>',
+          questionFrontendId: '1', title: 'Two Sum', titleSlug: 'two-sum',
+          content: '<p>Given an array…</p><p><strong>Output:</strong> <span class="example-io">[0,1]</span></p><p><strong>Output:</strong> <span class="example-io">[1,2]</span></p>',
           difficulty: 'Easy', isPaidOnly: false, topicTags: [{ name: 'Array', slug: 'array' }],
           codeSnippets: [{ langSlug: 'java', code: 'class Solution {}' }, { langSlug: 'cpp', code: '' }],
-          hints: ['Think about complements.'], exampleTestcaseList: ['[2,7,11,15]\n9'],
+          hints: ['Think about complements.'], exampleTestcaseList: ['[2,7,11,15]\n9', '[3,2,4]\n6'],
+          metaData: JSON.stringify({
+            name: 'twoSum',
+            params: [{ name: 'nums', type: 'integer[]' }, { name: 'target', type: 'integer' }],
+            return: { type: 'integer[]' },
+          }),
         },
       },
     });
@@ -117,6 +125,35 @@ describe('API', () => {
     const calls = leetcode.mock.calls.length;
     await api('/problems/two-sum/leetcode');
     expect(leetcode.mock.calls.length).toBe(calls); // served from data/cache
+  });
+
+  it.skipIf(!jdk.available)('compiles and runs the code, then marks the problem code-verified', async () => {
+    const code = `import java.util.*;
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        Map<Integer, Integer> seen = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            if (seen.containsKey(target - nums[i])) return new int[] {seen.get(target - nums[i]), i};
+            seen.put(nums[i], i);
+        }
+        return new int[0];
+    }
+}`;
+    const res = await api('/problems/two-sum/run', { method: 'POST', body: JSON.stringify({ code }) });
+    expect(res.status).toBe(200);
+    const run = await res.json();
+    expect(run).toMatchObject({ compiled: true, passed: 2, checked: 2, total: 2 });
+    expect(run.tests.map((t: { verdict: string }) => t.verdict)).toEqual(['pass', 'pass']);
+
+    const detail = await (await api('/patterns/hashing')).json();
+    expect(detail.problems.find((r: { slug: string }) => r.slug === 'two-sum').codeVerified).toBe(true);
+    const view = await (await api('/problems/two-sum')).json();
+    expect(view.progress.code).toBe(code); // running also saves what ran
+  }, 60_000);
+
+  it('rejects a run request with no code', async () => {
+    const res = await api('/problems/two-sum/run', { method: 'POST', body: JSON.stringify({ code: '   ' }) });
+    expect(res.status).toBe(400);
   });
 
   it('imports a public profile and flags problems solved there', async () => {

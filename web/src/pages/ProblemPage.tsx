@@ -106,6 +106,11 @@ export function ProblemPage() {
             <DifficultyTag difficulty={v.difficulty} />
             {v.pattern ? <span className="tag tag-accent">{v.pattern.name}</span> : <span className="tag">Pattern hidden</span>}
             {v.lcSolved && <span className="tag tag-good">Solved on LeetCode</span>}
+            {v.progress?.lastRun && v.progress.lastRun.checked > 0 && v.progress.lastRun.passed === v.progress.lastRun.checked && (
+              <span className="tag tag-good" title={`All ${v.progress.lastRun.checked} example tests passed`}>
+                Code verified
+              </span>
+            )}
             {attemptedBefore && (
               <span className="muted">
                 {v.progress!.attempts} attempt{v.progress!.attempts > 1 ? 's' : ''} · best {v.progress!.bestPercent}%
@@ -167,6 +172,7 @@ export function ProblemPage() {
                 savedCode={v.progress?.code ?? null}
                 starter={lcProblem?.javaSnippet ?? null}
                 save={(code) => api.saveWork(slug, { code })}
+                onRan={view.reload}
               />
             </Suspense>
           </div>
