@@ -103,6 +103,35 @@ export function Dashboard() {
 
       <PlanCard data={data} reload={reload} />
 
+      {data.review.due.length > 0 && (
+        <section className="card">
+          <div className="spread">
+            <h2 style={{ margin: 0 }}>Due for review</h2>
+            <Link className="btn btn-sm" to="/review">
+              All {data.review.summary.due} due
+            </Link>
+          </div>
+          <p className="small muted">
+            You answered these a while back. Retake the approach check — a good score pushes the next review further
+            out, a weak one brings it back.
+          </p>
+          <div className="grid grid-3">
+            {data.review.due.map((r) => (
+              <Link key={r.slug} to={`/problems/${r.slug}?mode=pattern`} className="card card-flat card-link">
+                <div className="spread small">
+                  <span className="tag tag-accent">{r.patternName}</span>
+                  <DifficultyTag difficulty={r.difficulty} />
+                </div>
+                <h3 style={{ margin: '0.6rem 0 0.3rem' }}>{r.title}</h3>
+                <p className="small muted" style={{ margin: 0 }}>
+                  Last time {r.lastPercent}% · {r.overdueDays === 0 ? 'due today' : `${r.overdueDays} day${r.overdueDays === 1 ? '' : 's'} late`}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="card">
         <h2>Up next</h2>
         {data.upNext.length === 0 ? (

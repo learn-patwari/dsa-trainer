@@ -5,10 +5,12 @@ import { ErrorBox, Loading } from './components.tsx';
 import { ChallengePage } from './pages/ChallengePage.tsx';
 import { Dashboard } from './pages/Dashboard.tsx';
 import { FinderPage } from './pages/FinderPage.tsx';
+import { GuidePage } from './pages/GuidePage.tsx';
 import { LeetCodePage } from './pages/LeetCodePage.tsx';
 import { PatternPage } from './pages/PatternPage.tsx';
 import { PatternsPage } from './pages/PatternsPage.tsx';
 import { ProblemPage } from './pages/ProblemPage.tsx';
+import { ReviewPage } from './pages/ReviewPage.tsx';
 
 export function App() {
   const { pathname } = useLocation();
@@ -30,10 +32,12 @@ export function App() {
             Dashboard
           </NavLink>
           <NavLink to="/patterns">Patterns</NavLink>
+          <NavLink to="/review">Review</NavLink>
           <NavLink to="/blind">Blind practice</NavLink>
           <NavLink to="/challenge">Challenge</NavLink>
           <NavLink to="/finder">Pattern finder</NavLink>
           <NavLink to="/leetcode">LeetCode</NavLink>
+          <NavLink to="/guide">Guide</NavLink>
         </nav>
       </header>
       <Routes>
@@ -45,6 +49,8 @@ export function App() {
         <Route path="/challenge" element={<ChallengePage />} />
         <Route path="/finder" element={<FinderPage />} />
         <Route path="/leetcode" element={<LeetCodePage />} />
+        <Route path="/review" element={<ReviewPage />} />
+        <Route path="/guide" element={<GuidePage />} />
         <Route
           path="*"
           element={

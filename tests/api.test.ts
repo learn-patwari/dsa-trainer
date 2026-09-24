@@ -237,6 +237,17 @@ class Solution {
     }
   });
 
+  it('puts every attempt into the review queue', async () => {
+    const queue = await (await api('/review')).json();
+    expect(queue.summary).toMatchObject({ due: 0, scheduled: 1 });
+    // The two-sum attempt above scored well, so it is scheduled rather than due.
+    expect(queue.due).toEqual([]);
+    expect(queue.upcoming[0]).toMatchObject({ slug: 'two-sum', pattern: 'hashing', of: 5 });
+
+    const state = await (await api('/state')).json();
+    expect(state.review.summary.scheduled).toBe(1);
+  });
+
   it('starts, reports and stops a study plan', async () => {
     expect((await api('/plan', { method: 'POST', body: JSON.stringify({ size: 0, weeks: 8 }) })).status).toBe(400);
     expect((await api('/plan', { method: 'POST', body: JSON.stringify({ size: 60, weeks: 99 }) })).status).toBe(400);

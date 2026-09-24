@@ -140,6 +140,42 @@ export interface ProblemProgress {
   lastRun?: { at: string; compiled: boolean; passed: number; checked: number; total: number };
   /** Your accepted LeetCode submission for this problem, fetched with the session cookie. */
   leetcodeSolution?: LeetCodeSolution;
+  /** When to practise this again, and how well it's sticking. */
+  review?: ReviewState;
+}
+
+export interface ReviewState {
+  /** How many reviews you've passed in a row; the interval widens with it. */
+  step: number;
+  dueAt: string;
+  /** Times you forgot a problem you'd already learned. */
+  lapses: number;
+  reviews: number;
+  lastGrade: 'again' | 'hard' | 'good';
+}
+
+export interface ReviewItem {
+  slug: string;
+  title: string;
+  difficulty: Difficulty;
+  pattern: PatternId;
+  patternName: string;
+  dueAt: string;
+  /** 0 when it's due today, higher the longer it has been waiting. */
+  overdueDays: number;
+  step: number;
+  of: number;
+  lapses: number;
+  lastPercent: number;
+}
+
+export interface ReviewSummary {
+  due: number;
+  /** Due in the next seven days. */
+  next7: number;
+  scheduled: number;
+  /** Survived the longest interval. */
+  mastered: number;
 }
 
 export interface LeetCodeSolution {
@@ -391,6 +427,8 @@ export interface DashboardState {
   /** Solved on LeetCode long enough ago to be worth another go. */
   revisit: RevisitItem[];
   challenge: ChallengeStats;
+  /** Spaced repetition: what to practise again today. */
+  review: { summary: ReviewSummary; due: ReviewItem[] };
   plan: StudyPlan | null;
   streak: StreakInfo;
   difficulty: DifficultyProgress[];

@@ -8,6 +8,7 @@ import { challengeStats, gradeChallenge, pickChallenge } from './challenge.ts';
 import { compileAndRun, javaStatus } from './java-run.ts';
 import { lookup } from './lookup.ts';
 import { setPlan } from './plan.ts';
+import { dueList, reviewSummary, upcomingList } from './review.ts';
 import { fetchMySolution, getProblem, importPublicProfile, importWithSession, LeetCodeError, sessionFromEnv, USERNAME_RE } from './leetcode.ts';
 import { readProgress, resetProgress, updateProgress } from './store.ts';
 import {
@@ -197,6 +198,12 @@ export function createApp({ webDir = resolve('dist/web') } = {}) {
       delete p.leetcode;
     });
     res.json({ ok: true });
+  });
+
+  /** The whole spaced-repetition queue: due now, then what's scheduled. */
+  api.get('/review', async (_req, res) => {
+    const p = await readProgress();
+    res.json({ summary: reviewSummary(p), due: dueList(p), upcoming: upcomingList(p, 30) });
   });
 
   /** Start (or restart) a study plan: N problems over W weeks. */

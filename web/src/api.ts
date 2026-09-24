@@ -14,9 +14,17 @@ import type {
   PatternDetail,
   PracticeMode,
   ProblemView,
+  ReviewItem,
+  ReviewSummary,
   RunResult,
   StudyPlan,
 } from '../../shared/types.ts';
+
+export interface ReviewQueue {
+  summary: ReviewSummary;
+  due: ReviewItem[];
+  upcoming: ReviewItem[];
+}
 
 export interface CatalogMatch {
   slug: string;
@@ -64,6 +72,7 @@ export const api = {
       body: {},
     }),
   removeImport: () => call<{ ok: true }>('/leetcode/import', { method: 'DELETE', body: {} }),
+  review: () => call<ReviewQueue>('/review'),
   setPlan: (size: number, weeks: number) => call<StudyPlan>('/plan', { method: 'POST', body: { size, weeks } }),
   clearPlan: () => call<{ ok: true }>('/plan', { method: 'DELETE', body: {} }),
   reset: () => call<{ ok: true }>('/reset', { method: 'POST', body: { confirm: 'RESET' } }),

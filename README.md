@@ -93,6 +93,21 @@ marking the ones you've already solved on LeetCode.
 Both work for any problem: the pattern comes from the curated bank when it's in there, otherwise it is inferred from
 LeetCode's topic tags and the wording of the statement.
 
+## Review (spaced repetition)
+
+Solving a problem once doesn't keep it — most of it is gone within a month. So every attempt schedules the next one:
+
+| Passes in a row | 0 | 1 | 2 | 3 | 4 |
+|---|---|---|---|---|---|
+| Next review in | 1 day | 3 days | 1 week | 3 weeks | 2 months |
+
+Score **85%+** and the problem moves up a step; **60–84%** repeats the same interval; **below 60%** sends it back to
+day one and counts a lapse. A problem that survives the two-month interval is marked settled. The **Review** tab shows
+what's due, what's coming, and how many problems have stuck; the dashboard surfaces the first six due.
+
+This is the Anki model, minus the deck management — your score on the approach check is the grade, so there's nothing
+extra to rate.
+
 ## Study plan, streak and difficulty
 
 Pick a target on the dashboard — say 75 problems in 8 weeks — and the app turns it into a **daily target**: how many
@@ -120,9 +135,17 @@ with cached data and the approach checks.
 ## Your data
 
 Everything lives in `dsa-trainer/data/` (gitignored): `progress.json` (ratings, attempts, code, notes, LeetCode
-import, challenge stats, study plan) and `cache/` (statements and the problem catalog). "Start over" on the LeetCode page erases progress. The server listens on 127.0.0.1 only, rejects
+import, challenge stats, study plan, review schedule) and `cache/` (statements and the problem catalog). "Start over" on the LeetCode page erases progress. The server listens on 127.0.0.1 only, rejects
 non-local `Host` headers, and requires JSON on writes. Compile & run executes your own Java on your machine, with a
 10s time limit and a 256 MB heap — treat pasted code as you would any code you run locally.
+
+## The guide
+
+The **Guide** tab in the app is the written version of all of this: the per-problem loop, the order to learn patterns
+in and why each stage needs the one before it, pace (per week, per problem, per day), what to say in the room, how the
+rating works, and a table of the other portals worth opening — Striver's A2Z sheet, NeetCode's roadmap, Grind 75,
+Sean Prashad's pattern list, GeeksforGeeks, VisuAlgo, interviewing.io, Pramp, LeetCode contests, CSES, the Tech
+Interview Handbook and the System Design Primer — with a line on when each one is the right thing to open.
 
 ## Scripts
 
@@ -142,7 +165,8 @@ shared/     types, scoring/rating, pattern lessons, problem bank (answer keys st
 server/     Express API, JSON store, LeetCode client, grading + recommendations
             harness.ts (generates Main.java), java-run.ts (javac/java), compare.ts, java/J.java
             catalog.ts + infer.ts + lookup.ts (pattern finder), challenge.ts, plan.ts (study plan/streak)
-web/        React UI (Vite): dashboard, patterns, problem page, finder, challenge, LeetCode import
+            review.ts (spaced repetition)
+web/        React UI (Vite): dashboard, patterns, problem page, finder, challenge, review, guide, LeetCode import
 tests/      Vitest suites
 scripts/    content verification (LeetCode metadata, javac)
 ```

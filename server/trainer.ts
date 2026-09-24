@@ -5,6 +5,7 @@ import { scoreAttempt, START_RATING, tierFor, updateRating } from '../shared/sco
 import { challengeStats } from './challenge.ts';
 import { sessionFromEnv } from './leetcode.ts';
 import { difficultyProgress, streak, studyPlan } from './plan.ts';
+import { dueList, reviewSummary, schedule } from './review.ts';
 import type {
   AttemptResult,
   AttemptSubmission,
@@ -179,6 +180,7 @@ export function recordAttempt(p: Progress, slug: string, sub: AttemptSubmission)
     lastPercent: outcome.percent,
     lastAt: result.at,
     lastResult: result,
+    review: schedule(prior?.review, outcome.percent, result.at),
   };
   p.history.push(result);
   if (p.history.length > HISTORY_LIMIT) p.history.splice(0, p.history.length - HISTORY_LIMIT);
@@ -404,6 +406,7 @@ export function dashboard(p: Progress, sessionConfigured: boolean): DashboardSta
     sessionConfigured,
     revisit: revisitList(p),
     challenge: challengeStats(p),
+    review: { summary: reviewSummary(p), due: dueList(p, 6) },
     plan: studyPlan(p),
     streak: streak(p),
     difficulty: difficultyProgress(p),
