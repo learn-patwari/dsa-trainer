@@ -62,6 +62,24 @@ search and **takeuforward** (Striver) for that problem, so the next step is alwa
 The **Java** tab has an editor pre-filled with LeetCode's starter code, and your code autosaves locally. The **Notes**
 tab is for sketching your approach first.
 
+## The timer
+
+Every problem page runs two clocks side by side, with **Pause**, **Stop** and **Restart**:
+
+- **Wall clock** — from the moment the page opens until you pause or stop it, whatever you do with the window.
+- **Active** — only the seconds this tab was genuinely in front of you. Switch tab, minimise, or click into another
+  window and it holds; come back and it picks up. The gap between the two is the time you only *thought* you spent.
+
+Leave the tab in the background for more than five minutes and the whole timer pauses itself, so a problem forgotten
+behind another window doesn't bank the rest of the afternoon.
+
+Both clocks go with the attempt (the result card shows "Time 8:00 (5:05 at the screen)") and both accumulate into a
+running total per problem — shown as "on this problem all up" whenever you come back to it. Time is banked every 30
+seconds, on pause, on stop, when the tab is hidden and when you leave the page, so closing the tab loses nothing.
+
+The wall clock turns amber past the interview budget for that difficulty: 15 minutes for Easy, 30 for Medium, 45 for
+Hard.
+
 ## Compile & run
 
 Press **Compile & run** (or Ctrl/Cmd+Enter) in the Java tab. Your solution is compiled with `javac` and executed
@@ -135,7 +153,8 @@ with cached data and the approach checks.
 ## Your data
 
 Everything lives in `dsa-trainer/data/` (gitignored): `progress.json` (ratings, attempts, code, notes, LeetCode
-import, challenge stats, study plan, review schedule) and `cache/` (statements and the problem catalog). "Start over" on the LeetCode page erases progress. The server listens on 127.0.0.1 only, rejects
+import, challenge stats, study plan, review schedule, time per problem) and `cache/` (statements and the problem
+catalog). "Start over" on the LeetCode page erases progress. The server listens on 127.0.0.1 only, rejects
 non-local `Host` headers, and requires JSON on writes. Compile & run executes your own Java on your machine, with a
 10s time limit and a 256 MB heap — treat pasted code as you would any code you run locally.
 
@@ -165,7 +184,7 @@ shared/     types, scoring/rating, pattern lessons, problem bank (answer keys st
 server/     Express API, JSON store, LeetCode client, grading + recommendations
             harness.ts (generates Main.java), java-run.ts (javac/java), compare.ts, java/J.java
             catalog.ts + infer.ts + lookup.ts (pattern finder), challenge.ts, plan.ts (study plan/streak)
-            review.ts (spaced repetition)
+            review.ts (spaced repetition), time banked per problem via addTime
 web/        React UI (Vite): dashboard, patterns, problem page, finder, challenge, review, guide, LeetCode import
 tests/      Vitest suites
 scripts/    content verification (LeetCode metadata, javac)

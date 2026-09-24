@@ -18,6 +18,7 @@ import type {
   ReviewSummary,
   RunResult,
   StudyPlan,
+  TimeSpent,
 } from '../../shared/types.ts';
 
 export interface ReviewQueue {
@@ -72,6 +73,8 @@ export const api = {
       body: {},
     }),
   removeImport: () => call<{ ok: true }>('/leetcode/import', { method: 'DELETE', body: {} }),
+  addTime: (slug: string, delta: { elapsedSec: number; activeSec: number }) =>
+    call<TimeSpent>(`/problems/${encodeURIComponent(slug)}/time`, { method: 'POST', body: delta }),
   review: () => call<ReviewQueue>('/review'),
   setPlan: (size: number, weeks: number) => call<StudyPlan>('/plan', { method: 'POST', body: { size, weeks } }),
   clearPlan: () => call<{ ok: true }>('/plan', { method: 'DELETE', body: {} }),

@@ -26,6 +26,7 @@ function answers(slug: string, mode: AttemptSubmission['mode'] = 'pattern'): Att
     space: p.space[0],
     edgeCasesHandled: p.edgeCases.map((_, i) => i),
     hintsUsed: 0,
+    activeSec: 20,
     elapsedSec: 30,
   };
 }

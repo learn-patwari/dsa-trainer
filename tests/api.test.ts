@@ -237,6 +237,19 @@ class Solution {
     }
   });
 
+  it('banks time against a problem', async () => {
+    const first = await (await api('/problems/two-sum/time', { method: 'POST', body: JSON.stringify({ elapsedSec: 90, activeSec: 60 }) })).json();
+    expect(first).toMatchObject({ totalSec: 90, activeSec: 60 });
+
+    const second = await (await api('/problems/two-sum/time', { method: 'POST', body: JSON.stringify({ elapsedSec: 30, activeSec: 30 }) })).json();
+    expect(second).toMatchObject({ totalSec: 120, activeSec: 90 });
+
+    const view = await (await api('/problems/two-sum')).json();
+    expect(view.progress.time).toMatchObject({ totalSec: 120, activeSec: 90 });
+
+    expect((await api('/problems/nope/time', { method: 'POST', body: JSON.stringify({ elapsedSec: 5, activeSec: 5 }) })).status).toBe(404);
+  });
+
   it('puts every attempt into the review queue', async () => {
     const queue = await (await api('/review')).json();
     expect(queue.summary).toMatchObject({ due: 0, scheduled: 1 });

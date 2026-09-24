@@ -32,7 +32,7 @@ export function ResultCard({ result: r, nextHref, nextLabel, onRetake }: Props) 
           )}
           <div className="tiny muted">
             {r.hintPenalty > 0 && `Hint penalty −${r.hintPenalty} · `}
-            {r.elapsedSec > 0 && `Time ${formatDuration(r.elapsedSec)} · `}
+            {r.elapsedSec > 0 && `Time ${formatDuration(r.elapsedSec)}${r.activeSec > 0 && r.activeSec < r.elapsedSec ? ` (${formatDuration(r.activeSec)} at the screen)` : ''} · `}
             {r.mode === 'blind' ? 'Blind mode' : 'Pattern mode'}
           </div>
         </div>

@@ -21,6 +21,7 @@ import {
   recordAttempt,
   recordRun,
   recordSolution,
+  addTime,
   requirePatternId,
   requireProblem,
   saveWork,
@@ -198,6 +199,11 @@ export function createApp({ webDir = resolve('dist/web') } = {}) {
       delete p.leetcode;
     });
     res.json({ ok: true });
+  });
+
+  /** Adds to the time banked against a problem; the body is the delta since the last call. */
+  api.post('/problems/:slug/time', async (req, res) => {
+    res.json(await updateProgress((p) => addTime(p, req.params.slug, req.body)));
   });
 
   /** The whole spaced-repetition queue: due now, then what's scheduled. */

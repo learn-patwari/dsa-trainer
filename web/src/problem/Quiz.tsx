@@ -7,7 +7,7 @@ interface Props {
   quiz: QuizView;
   mode: PracticeMode;
   submitting: boolean;
-  onSubmit: (answers: Omit<AttemptSubmission, 'hintsUsed' | 'elapsedSec'>) => void;
+  onSubmit: (answers: Omit<AttemptSubmission, 'hintsUsed' | 'elapsedSec' | 'activeSec'>) => void;
 }
 
 const GROUPS = [...new Set(PATTERNS.map((p) => p.group))];

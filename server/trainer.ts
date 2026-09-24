@@ -21,6 +21,7 @@ import type {
   Recommendation,
   RevisitItem,
   RunResult,
+  TimeSpent,
 } from '../shared/types.ts';
 
 const HISTORY_LIMIT = 1000;
@@ -139,7 +140,34 @@ export function validateSubmission(body: unknown): AttemptSubmission {
     edgeCasesHandled: Array.isArray(b.edgeCasesHandled) ? b.edgeCasesHandled.filter((i): i is number => Number.isInteger(i)) : [],
     hintsUsed: Math.floor(num(b.hintsUsed, 20)),
     elapsedSec: Math.round(num(b.elapsedSec, 24 * 3600)),
+    activeSec: Math.round(num(b.activeSec, 24 * 3600)),
   };
+}
+
+/** Seconds the timer reports; the client sends the delta since it last checked in. */
+const MAX_TIME_DELTA_SEC = 6 * 3600;
+
+/**
+ * Adds to a problem's running total. The client flushes on pause, stop, submit
+ * and whenever you leave the page, so the total survives a closed tab.
+ */
+export function addTime(p: Progress, slug: string, body: unknown): TimeSpent {
+  requireProblem(slug);
+  if (typeof body !== 'object' || body === null) throw new HttpError(400, 'Expected a JSON body.');
+  const b = body as Record<string, unknown>;
+  const secs = (v: unknown) =>
+    typeof v === 'number' && Number.isFinite(v) ? Math.min(MAX_TIME_DELTA_SEC, Math.max(0, Math.round(v))) : 0;
+  const elapsed = secs(b.elapsedSec);
+  const active = Math.min(elapsed, secs(b.activeSec)); // active time can't exceed the wall clock
+
+  const prior = p.problems[slug];
+  const time: TimeSpent = {
+    totalSec: (prior?.time?.totalSec ?? 0) + elapsed,
+    activeSec: (prior?.time?.activeSec ?? 0) + active,
+    updatedAt: new Date().toISOString(),
+  };
+  p.problems[slug] = { ...prior, attempts: prior?.attempts ?? 0, bestPercent: prior?.bestPercent ?? 0, lastPercent: prior?.lastPercent ?? 0, lastAt: prior?.lastAt ?? time.updatedAt, time };
+  return time;
 }
 
 /**
@@ -167,6 +195,7 @@ export function recordAttempt(p: Progress, slug: string, sub: AttemptSubmission)
     approach: problem.approach,
     at: new Date().toISOString(),
     elapsedSec: sub.elapsedSec,
+    activeSec: Math.min(sub.elapsedSec, sub.activeSec),
   };
 
   if (rated) {

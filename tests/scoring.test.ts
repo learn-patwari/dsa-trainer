@@ -17,6 +17,7 @@ function perfect(mode: AttemptSubmission['mode'], p = twoSum): AttemptSubmission
     space: p.space[0],
     edgeCasesHandled: p.edgeCases.map((_, i) => i),
     hintsUsed: 0,
+    activeSec: 20,
     elapsedSec: 60,
   };
 }
@@ -69,7 +70,7 @@ describe('scoreAttempt', () => {
     expect(scoreAttempt(twoSum, { ...perfect('blind'), hintsUsed: 2 }, patternName)).toMatchObject({ score: 9, hintPenalty: 2 });
     const none = scoreAttempt(
       twoSum,
-      { mode: 'blind', pattern: null, brute: null, insight: null, time: null, space: null, edgeCasesHandled: [], hintsUsed: 5, elapsedSec: 0 },
+      { mode: 'blind', pattern: null, brute: null, insight: null, time: null, space: null, edgeCasesHandled: [], hintsUsed: 5, elapsedSec: 0, activeSec: 0 },
       patternName,
     );
     expect(none.score).toBe(0);

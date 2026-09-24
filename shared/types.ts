@@ -93,7 +93,10 @@ export interface AttemptSubmission {
   space: string | null;
   edgeCasesHandled: number[];
   hintsUsed: number;
+  /** Wall-clock seconds on this attempt. */
   elapsedSec: number;
+  /** Of those, the seconds the page was actually in front of you. */
+  activeSec: number;
 }
 
 export type QuestionKey = 'pattern' | 'brute' | 'insight' | 'time' | 'space' | 'edgeCases';
@@ -126,6 +129,7 @@ export interface AttemptResult {
   approach: string;
   at: string;
   elapsedSec: number;
+  activeSec: number;
 }
 
 export interface ProblemProgress {
@@ -142,6 +146,16 @@ export interface ProblemProgress {
   leetcodeSolution?: LeetCodeSolution;
   /** When to practise this again, and how well it's sticking. */
   review?: ReviewState;
+  /** Everything this problem has cost you, across every visit. */
+  time?: TimeSpent;
+}
+
+export interface TimeSpent {
+  /** Wall-clock seconds with the problem open and the timer running. */
+  totalSec: number;
+  /** Of those, the seconds this tab was actually visible and focused. */
+  activeSec: number;
+  updatedAt: string;
 }
 
 export interface ReviewState {

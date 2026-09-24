@@ -1,12 +1,14 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import type { AttemptResult, AttemptSubmission, PracticeMode } from '../../../shared/types.ts';
 import { api, useLoad } from '../api.ts';
-import { DifficultyTag, ErrorBox, formatDuration, Loading } from '../components.tsx';
+import { DifficultyTag, ErrorBox, Loading } from '../components.tsx';
 import { Quiz } from '../problem/Quiz.tsx';
 import { ResultCard } from '../problem/ResultCard.tsx';
 import { Statement } from '../problem/Statement.tsx';
 import { MySolution } from '../problem/MySolution.tsx';
+import { BUDGET_SEC, TimerBar } from '../problem/TimerBar.tsx';
+import { useTimer } from '../problem/useTimer.ts';
 import { NotesEditor } from '../problem/Workbench.tsx';
 
 /** "3 months ago", for a unix timestamp in seconds. */
@@ -39,8 +41,8 @@ export function ProblemPage() {
   const [retakes, setRetakes] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const startedAt = useRef(Date.now());
-  const [now, setNow] = useState(Date.now());
+  const timer = useTimer();
+  const { restart: restartTimer, takeUnflushed } = timer;
 
   useEffect(() => {
     setTab('approach');
@@ -48,13 +50,41 @@ export function ProblemPage() {
     setResult(null);
     setRetakes(0);
     setSubmitError(null);
-    startedAt.current = Date.now();
-  }, [slug, mode]);
+    restartTimer();
+  }, [slug, mode, restartTimer]);
 
+  /** Hands the seconds since the last call to the server, so a closed tab loses nothing. */
+  const flush = useCallback(
+    (useBeacon = false) => {
+      const delta = takeUnflushed();
+      if (delta.elapsedSec <= 0) return;
+      if (useBeacon && navigator.sendBeacon) {
+        // The page is going away; fetch would be cancelled, a beacon isn't.
+        navigator.sendBeacon(`/api/problems/${slug}/time`, new Blob([JSON.stringify(delta)], { type: 'application/json' }));
+        return;
+      }
+      void api.addTime(slug, delta).catch(() => {}); // a lost tick isn't worth an error
+    },
+    [slug, takeUnflushed],
+  );
+
+  // Pausing or stopping is a deliberate break: bank what's counted so far right away.
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
+    if (timer.status === 'paused' || timer.status === 'stopped') flush();
+  }, [timer.status, flush]);
+
+  // Bank the time on a schedule, when the tab goes away, and when you leave the page.
+  useEffect(() => {
+    const id = setInterval(() => flush(), 30_000);
+    const onHide = () => document.visibilityState === 'hidden' && flush(true);
+    document.addEventListener('visibilitychange', onHide);
+    window.addEventListener('pagehide', () => flush(true));
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', onHide);
+      flush(true);
+    };
+  }, [flush]);
 
   if (view.error) return <main className="page"><ErrorBox message={view.error} onRetry={view.reload} /></main>;
   const v = view.data?.slug === slug ? view.data : null;
@@ -64,19 +94,21 @@ export function ProblemPage() {
   // Show the stored result when revisiting, unless you chose to retake.
   const shown = result ?? (retakes === 0 ? (v.progress?.lastResult ?? null) : null);
   const attemptedBefore = (v.progress?.attempts ?? 0) > 0;
-  const elapsed = Math.max(0, Math.round((now - startedAt.current) / 1000));
   const solveAgeDays = v.lcSolvedAt != null ? Math.floor((Date.now() / 1000 - v.lcSolvedAt) / 86_400) : null;
   const staleSolve = solveAgeDays != null && solveAgeDays >= REVISIT_AFTER_DAYS;
 
-  const submit = async (answers: Omit<AttemptSubmission, 'hintsUsed' | 'elapsedSec'>) => {
+  const submit = async (answers: Omit<AttemptSubmission, 'hintsUsed' | 'elapsedSec' | 'activeSec'>) => {
     setSubmitting(true);
     setSubmitError(null);
     try {
       const r = await api.submit(slug, {
         ...answers,
         hintsUsed: hintsShown,
-        elapsedSec: Math.round((Date.now() - startedAt.current) / 1000),
+        elapsedSec: timer.elapsedSec,
+        activeSec: timer.activeSec,
       });
+      timer.stop();
+      flush();
       setResult(r);
       view.reload();
     } catch (e) {
@@ -87,9 +119,10 @@ export function ProblemPage() {
   };
 
   const retake = () => {
+    flush();
     setResult(null);
     setRetakes((n) => n + 1);
-    startedAt.current = Date.now();
+    restartTimer();
     setTab('approach');
   };
 
@@ -150,9 +183,7 @@ export function ProblemPage() {
           </div>
         </div>
         {!shown && (
-          <span className="tag mono" title="Time on this attempt">
-            ⏱ {formatDuration(elapsed)}
-          </span>
+          <TimerBar timer={timer} budgetSec={BUDGET_SEC[v.difficulty]} stored={v.progress?.time ?? null} />
         )}
       </div>
 

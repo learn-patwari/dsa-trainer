@@ -72,6 +72,7 @@ function answers(slug: string): AttemptSubmission {
     space: p.space[0],
     edgeCasesHandled: p.edgeCases.map((_, i) => i),
     hintsUsed: 0,
+    activeSec: 20,
     elapsedSec: 30,
   };
 }
