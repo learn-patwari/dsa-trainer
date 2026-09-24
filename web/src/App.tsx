@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { api } from './api.ts';
 import { ErrorBox, Loading } from './components.tsx';
+import { ChallengePage } from './pages/ChallengePage.tsx';
 import { Dashboard } from './pages/Dashboard.tsx';
+import { FinderPage } from './pages/FinderPage.tsx';
 import { LeetCodePage } from './pages/LeetCodePage.tsx';
 import { PatternPage } from './pages/PatternPage.tsx';
 import { PatternsPage } from './pages/PatternsPage.tsx';
@@ -29,6 +31,8 @@ export function App() {
           </NavLink>
           <NavLink to="/patterns">Patterns</NavLink>
           <NavLink to="/blind">Blind practice</NavLink>
+          <NavLink to="/challenge">Challenge</NavLink>
+          <NavLink to="/finder">Pattern finder</NavLink>
           <NavLink to="/leetcode">LeetCode</NavLink>
         </nav>
       </header>
@@ -38,6 +42,8 @@ export function App() {
         <Route path="/patterns/:id" element={<PatternPage />} />
         <Route path="/problems/:slug" element={<ProblemPage />} />
         <Route path="/blind" element={<BlindRedirect />} />
+        <Route path="/challenge" element={<ChallengePage />} />
+        <Route path="/finder" element={<FinderPage />} />
         <Route path="/leetcode" element={<LeetCodePage />} />
         <Route
           path="*"

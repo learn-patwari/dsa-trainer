@@ -7,8 +7,8 @@ import type {
   Tier,
 } from './types.ts';
 
-/** Points per question. The pattern question is only asked in blind mode. */
-export const POINTS = { pattern: 3, insight: 3, time: 2, space: 1, edgeCases: 1 } as const;
+/** Points per question. Pattern is blind mode only; brute is asked when the problem has one. */
+export const POINTS = { pattern: 3, brute: 1, insight: 3, time: 2, space: 1, edgeCases: 1 } as const;
 /** Partial credit for picking a pattern listed in `alsoAccept`. */
 export const ALT_PATTERN_POINTS = 2;
 export const HINT_PENALTY = 1;
@@ -55,6 +55,11 @@ export function scoreAttempt(
       chosen: chosen ? patternName(chosen) : null,
       correct: patternName(problem.pattern) + alts,
     });
+  }
+
+  if (problem.brute) {
+    // Striver's ladder: name the slow solution before the fast one.
+    breakdown.push(choice('brute', 'Brute force', POINTS.brute, sub.brute, problem.brute.time[0], problem.brute.text));
   }
 
   breakdown.push(

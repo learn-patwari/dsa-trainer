@@ -1,4 +1,4 @@
-import type { Difficulty, LeetCodeImport, LeetCodeProblem, LeetCodeTagCount } from '../shared/types.ts';
+import type { Difficulty, LeetCodeImport, LeetCodeProblem, LeetCodeSolution, LeetCodeTagCount } from '../shared/types.ts';
 import { readCachedProblem, writeCachedProblem } from './store.ts';
 
 /**
@@ -88,11 +88,12 @@ const QUESTION_QUERY = `query question($slug: String!) {
     hints
     exampleTestcaseList
     metaData
+    similarQuestions
   }
 }`;
 
 /** Bump when a new field is needed, so older cached copies are refetched. */
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 3;
 
 interface RawQuestion {
   questionFrontendId: string;
@@ -106,6 +107,7 @@ interface RawQuestion {
   hints: string[];
   exampleTestcaseList: string[] | null;
   metaData: string | null;
+  similarQuestions: string | null;
 }
 
 const ENTITIES: Record<string, string> = {
@@ -175,6 +177,7 @@ async function fetchProblem(slug: string): Promise<LeetCodeProblem> {
     javaSnippet: q.codeSnippets?.find((s) => s.langSlug === 'java')?.code ?? null,
     exampleTestcases: q.exampleTestcaseList ?? [],
     metaData: q.metaData ?? null,
+    similarQuestions: q.similarQuestions ?? null,
     exampleOutputs: extractExampleOutputs(q.content),
     fetchedAt: new Date().toISOString(),
     cacheVersion: CACHE_VERSION,
@@ -195,7 +198,7 @@ const PROFILE_QUERY = `query profile($username: String!, $limit: Int!) {
       fundamental { tagName tagSlug problemsSolved }
     }
   }
-  recentAcSubmissionList(username: $username, limit: $limit) { titleSlug }
+  recentAcSubmissionList(username: $username, limit: $limit) { titleSlug timestamp }
 }`;
 
 type TagTier = { tagName: string; tagSlug: string; problemsSolved: number }[];
@@ -205,7 +208,7 @@ interface RawProfile {
     submitStatsGlobal: { acSubmissionNum: { difficulty: string; count: number }[] };
     tagProblemCounts: { advanced: TagTier; intermediate: TagTier; fundamental: TagTier };
   };
-  recentAcSubmissionList: { titleSlug: string }[] | null;
+  recentAcSubmissionList: { titleSlug: string; timestamp: string }[] | null;
 }
 
 export const USERNAME_RE = /^[A-Za-z0-9_.-]{1,50}$/;
@@ -224,14 +227,25 @@ export async function importPublicProfile(username: string): Promise<LeetCodeImp
     tagName: t.tagName,
     solved: t.problemsSolved,
   }));
+  const recent = res.data?.recentAcSubmissionList ?? [];
+  const solvedAt: Record<string, number> = {};
+  for (const s of recent) {
+    const ts = Number(s.timestamp);
+    // Keep the most recent accepted time per problem.
+    if (Number.isFinite(ts) && ts > (solvedAt[s.titleSlug] ?? 0)) solvedAt[s.titleSlug] = ts;
+  }
+  const now = new Date().toISOString();
   return {
     username: user.username,
-    importedAt: new Date().toISOString(),
+    importedAt: now,
+    syncedAt: now,
+    syncCount: 1,
     source: 'public',
     fullList: false,
     solvedCounts: { all: counts.All ?? 0, easy: counts.Easy ?? 0, medium: counts.Medium ?? 0, hard: counts.Hard ?? 0 },
     tagCounts,
-    solvedSlugs: [...new Set((res.data?.recentAcSubmissionList ?? []).map((s) => s.titleSlug))],
+    solvedSlugs: [...new Set(recent.map((s) => s.titleSlug))],
+    solvedAt,
   };
 }
 
@@ -260,5 +274,89 @@ export async function importWithSession(creds: SessionCredentials): Promise<Leet
     fullList: true,
     solvedCounts: { all: all.num_solved, easy: all.ac_easy, medium: all.ac_medium, hard: all.ac_hard },
     solvedSlugs: all.stat_status_pairs.filter((p) => p.status === 'ac').map((p) => p.stat.question__title_slug),
+  };
+}
+
+/** The whole problem list in one request: slug, title, difficulty and the premium flag. */
+export async function fetchCatalog(): Promise<{ slug: string; id: number; title: string; difficulty: Difficulty; paidOnly: boolean }[]> {
+  const all = (await request('/api/problems/all/', { method: 'GET' })) as {
+    stat_status_pairs?: {
+      stat: { question__title: string; question__title_slug: string; frontend_question_id: number };
+      difficulty: { level: number };
+      paid_only: boolean;
+    }[];
+  };
+  const pairs = all?.stat_status_pairs;
+  if (!Array.isArray(pairs)) throw new LeetCodeError("LeetCode's problem list came back in an unexpected shape.");
+  const levels: Record<number, Difficulty> = { 1: 'Easy', 2: 'Medium', 3: 'Hard' };
+  return pairs.map((p) => ({
+    slug: p.stat.question__title_slug,
+    id: p.stat.frontend_question_id,
+    title: p.stat.question__title,
+    difficulty: levels[p.difficulty.level] ?? 'Medium',
+    paidOnly: p.paid_only,
+  }));
+}
+
+// ---------------------------------------------------------------- your submissions
+
+const SUBMISSIONS_QUERY = `query submissions($slug: String!, $offset: Int!, $limit: Int!) {
+  questionSubmissionList(questionSlug: $slug, offset: $offset, limit: $limit) {
+    submissions { id statusDisplay lang timestamp runtime memory }
+  }
+}`;
+
+const SUBMISSION_CODE_QUERY = `query detail($id: Int!) {
+  submissionDetails(submissionId: $id) { code timestamp statusDisplay runtime memoryDisplay lang { name } }
+}`;
+
+interface RawSubmission {
+  id: string;
+  statusDisplay: string;
+  lang: string;
+  timestamp: string;
+  runtime: string | null;
+  memory: string | null;
+}
+
+/**
+ * Your own accepted submission for a problem: when it was accepted and the code you wrote.
+ * Requires LEETCODE_SESSION; LeetCode exposes nothing of this publicly.
+ */
+export async function fetchMySolution(slug: string, creds: SessionCredentials): Promise<LeetCodeSolution | null> {
+  const list = await graphql<{ questionSubmissionList: { submissions: RawSubmission[] | null } | null }>(
+    SUBMISSIONS_QUERY,
+    { slug, offset: 0, limit: 20 },
+    creds,
+  );
+  const subs = list.data?.questionSubmissionList?.submissions;
+  if (subs == null) {
+    throw new LeetCodeError('LeetCode did not accept LEETCODE_SESSION (it may have expired). Refresh the cookie in .env and restart.', 401);
+  }
+  const accepted = subs.filter((s) => s.statusDisplay === 'Accepted');
+  if (accepted.length === 0) return null;
+  const best = accepted.reduce((a, b) => (Number(b.timestamp) > Number(a.timestamp) ? b : a));
+
+  let code: string | null = null;
+  let memory: string | null = best.memory;
+  try {
+    const detail = await graphql<{ submissionDetails: { code: string; memoryDisplay: string | null } | null }>(
+      SUBMISSION_CODE_QUERY,
+      { id: Number(best.id) },
+      creds,
+    );
+    code = detail.data?.submissionDetails?.code ?? null;
+    memory = detail.data?.submissionDetails?.memoryDisplay ?? memory;
+  } catch {
+    // The list already tells us when it was solved; the code is a bonus.
+  }
+  return {
+    submissionId: Number(best.id),
+    lang: best.lang,
+    solvedAt: Number(best.timestamp),
+    code,
+    runtime: best.runtime,
+    memory,
+    fetchedAt: new Date().toISOString(),
   };
 }

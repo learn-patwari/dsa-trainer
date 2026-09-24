@@ -5,8 +5,8 @@ import { PATTERN_IDS } from '../shared/types.ts';
 import meta from './fixtures/leetcode-meta.json';
 
 describe('curated problem bank', () => {
-  it('has ~150 unique problems', () => {
-    expect(PROBLEMS.length).toBe(151);
+  it('has ~200 unique problems', () => {
+    expect(PROBLEMS.length).toBe(197);
     expect(new Set(PROBLEMS.map((p) => p.slug)).size).toBe(PROBLEMS.length);
     expect(new Set(PROBLEMS.map((p) => p.id)).size).toBe(PROBLEMS.length);
   });
@@ -30,7 +30,7 @@ describe('curated problem bank', () => {
   it('covers every pattern with a lesson and at least 4 problems', () => {
     expect(PATTERNS.map((p) => p.id)).toEqual([...PATTERN_IDS]);
     for (const id of PATTERN_IDS) {
-      expect(PROBLEMS.filter((p) => p.pattern === id).length, id).toBeGreaterThanOrEqual(4);
+      expect(PROBLEMS.filter((p) => p.pattern === id).length, id).toBeGreaterThanOrEqual(6);
     }
   });
 
@@ -61,14 +61,24 @@ describe('curated problem bank', () => {
     expect(new Set(p.alsoAccept ?? []).size).toBe((p.alsoAccept ?? []).length);
   });
 
-  it("doesn't let 'pick the longest (or shortest) option' game the key-insight question", () => {
-    const rate = (pick: (lens: number[]) => number) =>
+  it.each(PROBLEMS.map((p) => [p.slug, p] as const))('%s names a brute force to improve on', (_slug, p) => {
+    expect(p.brute, `${p.slug} has no brute-force step`).toBeDefined();
+    expect(p.brute!.text.trim().length).toBeGreaterThan(15);
+    expect(p.brute!.time).toHaveLength(4);
+    expect(p.brute!.time.every((o) => o.trim().length > 0)).toBe(true);
+    expect(new Set(p.brute!.time.map((o) => o.trim())).size).toBe(4);
+  });
+
+  it("doesn't let 'pick the longest (or shortest) option' game the multiple-choice questions", () => {
+    const rate = (options: (p: (typeof PROBLEMS)[number]) => readonly string[], pick: (lens: number[]) => number) =>
       PROBLEMS.filter((p) => {
-        const lens = p.insight.options.map((o) => o.length);
+        const lens = options(p).map((o) => o.length);
         return lens[0] === pick(lens);
       }).length / PROBLEMS.length;
     // Unbiased options would sit near 25%; keep both heuristics far from reliable.
-    expect(rate((l) => Math.max(...l))).toBeLessThan(0.4);
-    expect(rate((l) => Math.min(...l))).toBeLessThan(0.4);
+    for (const options of [(p: (typeof PROBLEMS)[number]) => p.insight.options, (p: (typeof PROBLEMS)[number]) => p.brute!.time]) {
+      expect(rate(options, (l) => Math.max(...l))).toBeLessThan(0.4);
+      expect(rate(options, (l) => Math.min(...l))).toBeLessThan(0.4);
+    }
   });
 });

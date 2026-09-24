@@ -3,6 +3,7 @@ import type { CuratedProblem } from '../types.ts';
 export const dp1dProblems: CuratedProblem[] = [
   {
     slug: 'climbing-stairs', id: 70, title: 'Climbing Stairs', difficulty: 'Easy', pattern: 'dp-1d',
+    brute: { text: 'Recurse over both step sizes without memoizing.', time: ['O(2ⁿ)', 'O(n)', 'O(n²)', 'O(n log n)'] },
     insight: {
       q: 'Which recurrence counts the ways to reach step n?',
       options: [
@@ -20,6 +21,7 @@ export const dp1dProblems: CuratedProblem[] = [
   },
   {
     slug: 'house-robber', id: 198, title: 'House Robber', difficulty: 'Medium', pattern: 'dp-1d',
+    brute: { text: 'Try every subset of non-adjacent houses.', time: ['O(2ⁿ)', 'O(n²)', 'O(n)', 'O(n log n)'] },
     insight: {
       q: 'What is the recurrence for the best loot from the first i houses?',
       options: [
@@ -37,6 +39,7 @@ export const dp1dProblems: CuratedProblem[] = [
   },
   {
     slug: 'house-robber-ii', id: 213, title: 'House Robber II', difficulty: 'Medium', pattern: 'dp-1d',
+    brute: { text: 'Try every subset of non-adjacent houses, respecting the circle.', time: ['O(2ⁿ)', 'O(n²)', 'O(n)', 'O(n log n)'] },
     insight: {
       q: 'The houses form a circle. How do you reuse the linear House Robber solution?',
       options: [
@@ -54,6 +57,7 @@ export const dp1dProblems: CuratedProblem[] = [
   },
   {
     slug: 'decode-ways', id: 91, title: 'Decode Ways', difficulty: 'Medium', pattern: 'dp-1d',
+    brute: { text: 'Recurse over one-digit and two-digit splits without memoizing.', time: ['O(2ⁿ)', 'O(n)', 'O(n²)', 'O(n log n)'] },
     insight: {
       q: 'What is the recurrence for the number of decodings of the first i characters?',
       options: [
@@ -72,6 +76,7 @@ export const dp1dProblems: CuratedProblem[] = [
   },
   {
     slug: 'coin-change', id: 322, title: 'Coin Change', difficulty: 'Medium', pattern: 'dp-1d',
+    brute: { text: 'Recurse over every coin at every amount without memoizing.', time: ['O(nᴬ)', 'O(n · A)', 'O(A²)', 'O(A log n)'] },
     insight: {
       q: 'What recurrence gives the fewest coins for amount a?',
       options: [
@@ -91,6 +96,7 @@ export const dp1dProblems: CuratedProblem[] = [
   {
     slug: 'maximum-product-subarray', id: 152, title: 'Maximum Product Subarray', difficulty: 'Medium', pattern: 'dp-1d',
     alsoAccept: ['greedy'],
+    brute: { text: 'Multiply out every subarray.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(2ⁿ)'] },
     insight: {
       q: "Why isn't a Kadane-style running maximum enough, and what fixes it?",
       options: [
@@ -108,6 +114,7 @@ export const dp1dProblems: CuratedProblem[] = [
   },
   {
     slug: 'word-break', id: 139, title: 'Word Break', difficulty: 'Medium', pattern: 'dp-1d',
+    brute: { text: 'Recurse over every split point without memoizing.', time: ['O(2ⁿ)', 'O(n · L²)', 'O(n²)', 'O(n log n)'] },
     insight: {
       q: 'What does dp[i] mean, and how is it computed?',
       options: [
@@ -128,6 +135,7 @@ export const dp1dProblems: CuratedProblem[] = [
   {
     slug: 'longest-increasing-subsequence', id: 300, title: 'Longest Increasing Subsequence', difficulty: 'Medium', pattern: 'dp-1d',
     alsoAccept: ['binary-search'],
+    brute: { text: 'Try every subsequence and check whether it increases.', time: ['O(2ⁿ · n)', 'O(n²)', 'O(n log n)', 'O(n)'] },
     insight: {
       q: 'How do you get to O(n log n)?',
       options: [
@@ -147,6 +155,7 @@ export const dp1dProblems: CuratedProblem[] = [
   {
     slug: 'partition-equal-subset-sum', id: 416, title: 'Partition Equal Subset Sum', difficulty: 'Medium', pattern: 'dp-1d',
     alsoAccept: ['dp-2d'],
+    brute: { text: 'Try every subset and compare its sum with half the total.', time: ['O(2ⁿ)', 'O(n · S)', 'O(n²)', 'O(S log n)'] },
     insight: {
       q: 'How do you decide whether the array splits into two halves with equal sums?',
       options: [
@@ -168,6 +177,7 @@ export const dp1dProblems: CuratedProblem[] = [
 export const dp2dProblems: CuratedProblem[] = [
   {
     slug: 'unique-paths', id: 62, title: 'Unique Paths', difficulty: 'Medium', pattern: 'dp-2d',
+    brute: { text: 'Recurse over both moves from every cell without memoizing.', time: ['O(2^(m+n))', 'O(m · n)', 'O(m + n)', 'O((m · n)²)'] },
     insight: {
       q: 'Which recurrence counts the paths to cell (r, c)?',
       options: [
@@ -186,6 +196,7 @@ export const dp2dProblems: CuratedProblem[] = [
   },
   {
     slug: 'longest-common-subsequence', id: 1143, title: 'Longest Common Subsequence', difficulty: 'Medium', pattern: 'dp-2d',
+    brute: { text: 'Generate every subsequence of one string and test it against the other.', time: ['O(2ᵐ · n)', 'O(m · n)', 'O(m + n)', 'O(m² · n²)'] },
     insight: {
       q: 'What is the recurrence for dp[i][j] = LCS of text1[0..i) and text2[0..j)?',
       options: [
@@ -206,6 +217,7 @@ export const dp2dProblems: CuratedProblem[] = [
   {
     slug: 'longest-palindromic-substring', id: 5, title: 'Longest Palindromic Substring', difficulty: 'Medium', pattern: 'dp-2d',
     alsoAccept: ['two-pointers'],
+    brute: { text: 'Check every substring character by character for being a palindrome.', time: ['O(n³)', 'O(n²)', 'O(n)', 'O(2ⁿ)'] },
     insight: {
       q: 'What is the simplest approach with O(n²) time and O(1) space?',
       options: [
@@ -224,6 +236,7 @@ export const dp2dProblems: CuratedProblem[] = [
   {
     slug: 'palindromic-substrings', id: 647, title: 'Palindromic Substrings', difficulty: 'Medium', pattern: 'dp-2d',
     alsoAccept: ['two-pointers'],
+    brute: { text: 'Check every substring character by character for being a palindrome.', time: ['O(n³)', 'O(n²)', 'O(n)', 'O(2ⁿ)'] },
     insight: {
       q: 'How do you count all palindromic substrings in O(n²) time?',
       options: [
@@ -242,6 +255,7 @@ export const dp2dProblems: CuratedProblem[] = [
   {
     slug: 'coin-change-ii', id: 518, title: 'Coin Change II', difficulty: 'Medium', pattern: 'dp-2d',
     alsoAccept: ['dp-1d'],
+    brute: { text: 'Recurse over every coin choice, counting the ways, without memoizing.', time: ['O(nᴬ)', 'O(n · A)', 'O(A²)', 'O(A log n)'] },
     insight: {
       q: 'How do you count COMBINATIONS (not orderings) of coins that make the amount?',
       options: [
@@ -261,6 +275,7 @@ export const dp2dProblems: CuratedProblem[] = [
   {
     slug: 'target-sum', id: 494, title: 'Target Sum', difficulty: 'Medium', pattern: 'dp-2d',
     alsoAccept: ['dp-1d', 'backtracking'],
+    brute: { text: 'Try both signs for every number.', time: ['O(2ⁿ)', 'O(n · S)', 'O(n²)', 'O(S log n)'] },
     insight: {
       q: 'How does this sign-assignment problem become subset sum?',
       options: [
@@ -280,6 +295,7 @@ export const dp2dProblems: CuratedProblem[] = [
   {
     slug: 'best-time-to-buy-and-sell-stock-with-cooldown', id: 309, title: 'Best Time to Buy and Sell Stock with Cooldown', difficulty: 'Medium', pattern: 'dp-2d',
     alsoAccept: ['dp-1d'],
+    brute: { text: 'Recurse over buy, sell and rest at every day without memoizing.', time: ['O(2ⁿ)', 'O(n)', 'O(n²)', 'O(n log n)'] },
     insight: {
       q: 'Which states capture the cooldown rule?',
       options: [
@@ -299,6 +315,7 @@ export const dp2dProblems: CuratedProblem[] = [
   },
   {
     slug: 'edit-distance', id: 72, title: 'Edit Distance', difficulty: 'Medium', pattern: 'dp-2d',
+    brute: { text: 'Recurse over insert, delete and replace at every position, without memoizing.', time: ['O(3^(m+n))', 'O(m · n)', 'O(m + n)', 'O(m² · n²)'] },
     insight: {
       q: 'What is the recurrence for dp[i][j] = edits to turn word1[0..i) into word2[0..j)?',
       options: [
@@ -319,6 +336,7 @@ export const dp2dProblems: CuratedProblem[] = [
   {
     slug: 'longest-increasing-path-in-a-matrix', id: 329, title: 'Longest Increasing Path in a Matrix', difficulty: 'Hard', pattern: 'dp-2d',
     alsoAccept: ['graph-traversal', 'topological-sort'],
+    brute: { text: 'DFS every increasing path from every cell without memoizing.', time: ['O(4^(m·n))', 'O(m · n)', 'O((m · n)²)', 'O(m · n · log(m · n))'] },
     insight: {
       q: 'Why can you memoize a DFS here without a visited set?',
       options: [
@@ -340,6 +358,7 @@ export const dp2dProblems: CuratedProblem[] = [
 export const trieProblems: CuratedProblem[] = [
   {
     slug: 'implement-trie-prefix-tree', id: 208, title: 'Implement Trie (Prefix Tree)', difficulty: 'Medium', pattern: 'trie',
+    brute: { text: 'Keep the words in a list and scan it on every search.', time: ['O(N · L) per search', 'O(L) per search', 'O(log N) per search', 'O(N) per insert'] },
     insight: {
       q: 'What must each node store to support both search and startsWith?',
       options: [
@@ -359,6 +378,7 @@ export const trieProblems: CuratedProblem[] = [
   {
     slug: 'design-add-and-search-words-data-structure', id: 211, title: 'Design Add and Search Words Data Structure', difficulty: 'Medium', pattern: 'trie',
     alsoAccept: ['backtracking'],
+    brute: { text: 'Compare the query with every stored word, position by position.', time: ['O(W · L) per search', 'O(26^d · L) per search', 'O(L) per search', 'O(W log L) per search'] },
     insight: {
       q: "How do you support '.' (matches any letter) in search?",
       options: [
@@ -378,6 +398,7 @@ export const trieProblems: CuratedProblem[] = [
   {
     slug: 'replace-words', id: 648, title: 'Replace Words', difficulty: 'Medium', pattern: 'trie',
     alsoAccept: ['hashing'],
+    brute: { text: 'For every word in the sentence, test each root with startsWith.', time: ['O(N · R)', 'O(N + R)', 'O(R log R)', 'O(N²)'] },
     insight: {
       q: "How do you find each word's shortest root efficiently?",
       options: [
@@ -397,6 +418,7 @@ export const trieProblems: CuratedProblem[] = [
   {
     slug: 'word-search-ii', id: 212, title: 'Word Search II', difficulty: 'Hard', pattern: 'trie',
     alsoAccept: ['backtracking'],
+    brute: { text: 'Run the single-word board search once per word.', time: ['O(W · m · n · 3^L)', 'O(m · n · 3^L)', 'O(W · L)', 'O(m · n · W)'] },
     insight: {
       q: 'How do you search the board for many words at once?',
       options: [
@@ -419,6 +441,7 @@ export const trieProblems: CuratedProblem[] = [
 export const bitProblems: CuratedProblem[] = [
   {
     slug: 'single-number', id: 136, title: 'Single Number', difficulty: 'Easy', pattern: 'bit-manipulation',
+    brute: { text: 'Count the values in a hash map and find the one occurring once.', time: ['O(n)', 'O(n²)', 'O(n log n)', 'O(1)'] },
     insight: {
       q: 'How do you find the single element in O(n) time and O(1) space?',
       options: [
@@ -436,6 +459,7 @@ export const bitProblems: CuratedProblem[] = [
   },
   {
     slug: 'number-of-1-bits', id: 191, title: 'Number of 1 Bits', difficulty: 'Easy', pattern: 'bit-manipulation',
+    brute: { text: 'Test all 32 bit positions, including the zero ones.', time: ['O(32)', 'O(k)', 'O(n)', 'O(√n)'] },
     insight: {
       q: 'What is an efficient way to count the set bits?',
       options: [
@@ -455,6 +479,7 @@ export const bitProblems: CuratedProblem[] = [
   {
     slug: 'counting-bits', id: 338, title: 'Counting Bits', difficulty: 'Easy', pattern: 'bit-manipulation',
     alsoAccept: ['dp-1d'],
+    brute: { text: 'Count the bits of every number from scratch.', time: ['O(n log n)', 'O(n)', 'O(n²)', 'O(log n)'] },
     insight: {
       q: 'How do you get the bit counts of 0..n in O(n)?',
       options: [
@@ -473,6 +498,7 @@ export const bitProblems: CuratedProblem[] = [
   {
     slug: 'missing-number', id: 268, title: 'Missing Number', difficulty: 'Easy', pattern: 'bit-manipulation',
     alsoAccept: ['hashing'],
+    brute: { text: 'For each value 0..n, scan the array looking for it.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(1)'] },
     insight: {
       q: 'How do you find the missing number in O(n) time and O(1) space?',
       options: [
@@ -490,6 +516,7 @@ export const bitProblems: CuratedProblem[] = [
   },
   {
     slug: 'sum-of-two-integers', id: 371, title: 'Sum of Two Integers', difficulty: 'Medium', pattern: 'bit-manipulation',
+    brute: { text: 'Increment one value one step at a time, b times.', time: ['O(b)', 'O(1)', 'O(log b)', 'O(32)'] },
     insight: {
       q: 'How do you add two integers without + or −?',
       options: [

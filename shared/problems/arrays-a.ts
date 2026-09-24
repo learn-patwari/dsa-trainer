@@ -5,6 +5,7 @@ import type { CuratedProblem } from '../types.ts';
 export const hashingProblems: CuratedProblem[] = [
   {
     slug: 'contains-duplicate', id: 217, title: 'Contains Duplicate', difficulty: 'Easy', pattern: 'hashing',
+    brute: { text: 'Compare every pair of elements with two nested loops.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(2ⁿ)'] },
     insight: {
       q: 'What is the fastest way to find out whether any value repeats?',
       options: [
@@ -23,6 +24,7 @@ export const hashingProblems: CuratedProblem[] = [
   },
   {
     slug: 'valid-anagram', id: 242, title: 'Valid Anagram', difficulty: 'Easy', pattern: 'hashing',
+    brute: { text: 'For each letter of s, scan t for an unused match and cross it off.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n!)'] },
     insight: {
       q: 'How do you check that two strings are anagrams in linear time?',
       options: [
@@ -42,6 +44,7 @@ export const hashingProblems: CuratedProblem[] = [
   },
   {
     slug: 'two-sum', id: 1, title: 'Two Sum', difficulty: 'Easy', pattern: 'hashing',
+    brute: { text: 'Try every pair of indices and test their sum.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'What lets you find the pair in a single pass?',
       options: [
@@ -60,6 +63,7 @@ export const hashingProblems: CuratedProblem[] = [
   },
   {
     slug: 'group-anagrams', id: 49, title: 'Group Anagrams', difficulty: 'Medium', pattern: 'hashing',
+    brute: { text: 'Compare each word with every other word to test whether they are anagrams.', time: ['O(n² · k)', 'O(n · k)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'Which key groups anagrams together?',
       options: [
@@ -79,6 +83,7 @@ export const hashingProblems: CuratedProblem[] = [
   },
   {
     slug: 'valid-sudoku', id: 36, title: 'Valid Sudoku', difficulty: 'Medium', pattern: 'hashing',
+    brute: { text: 'For each filled cell, scan its row, its column and its box for a repeat.', time: ['O(n³)', 'O(n²)', 'O(n⁴)', 'O(n)'] },
     insight: {
       q: 'How do you validate the filled cells in one pass?',
       options: [
@@ -99,6 +104,7 @@ export const hashingProblems: CuratedProblem[] = [
   {
     slug: 'longest-consecutive-sequence', id: 128, title: 'Longest Consecutive Sequence', difficulty: 'Medium', pattern: 'hashing',
     alsoAccept: ['union-find'],
+    brute: { text: 'Sort the values, then walk through counting consecutive runs.', time: ['O(n log n)', 'O(n)', 'O(n²)', 'O(n³)'] },
     insight: {
       q: 'How can you find the longest run in O(n) without sorting?',
       options: [
@@ -117,6 +123,7 @@ export const hashingProblems: CuratedProblem[] = [
   },
   {
     slug: 'insert-delete-getrandom-o1', id: 380, title: 'Insert Delete GetRandom O(1)', difficulty: 'Medium', pattern: 'hashing',
+    brute: { text: 'Keep a plain list and scan it on every insert and remove.', time: ['O(n) per operation', 'O(1) per operation', 'O(log n) per operation', 'O(n²) per operation'] },
     insight: {
       q: 'How do you make remove() O(1) while getRandom() stays uniform?',
       options: [
@@ -138,6 +145,7 @@ export const hashingProblems: CuratedProblem[] = [
 export const twoPointerProblems: CuratedProblem[] = [
   {
     slug: 'valid-palindrome', id: 125, title: 'Valid Palindrome', difficulty: 'Easy', pattern: 'two-pointers',
+    brute: { text: 'Copy the alphanumerics into a new string, reverse it and compare.', time: ['O(n)', 'O(n²)', 'O(n log n)', 'O(1)'] },
     insight: {
       q: 'How do you check it without building a cleaned copy of the string?',
       options: [
@@ -156,6 +164,7 @@ export const twoPointerProblems: CuratedProblem[] = [
   },
   {
     slug: 'move-zeroes', id: 283, title: 'Move Zeroes', difficulty: 'Easy', pattern: 'two-pointers',
+    brute: { text: 'Find a zero, shift everything after it one place left, repeat.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'How do you move the zeroes to the end in place while keeping the other elements in order?',
       options: [
@@ -174,6 +183,7 @@ export const twoPointerProblems: CuratedProblem[] = [
   },
   {
     slug: 'two-sum-ii-input-array-is-sorted', id: 167, title: 'Two Sum II - Input Array Is Sorted', difficulty: 'Medium', pattern: 'two-pointers',
+    brute: { text: 'Try every pair of indices, ignoring the fact that it is sorted.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(log n)'] },
     insight: {
       q: 'The array is sorted. How do you find the pair with O(1) extra space?',
       options: [
@@ -192,6 +202,7 @@ export const twoPointerProblems: CuratedProblem[] = [
   },
   {
     slug: '3sum', id: 15, title: '3Sum', difficulty: 'Medium', pattern: 'two-pointers',
+    brute: { text: 'Three nested loops, then filter out the duplicate triplets.', time: ['O(n³)', 'O(n²)', 'O(n log n)', 'O(n⁴)'] },
     insight: {
       q: 'How do you find all unique triplets efficiently?',
       options: [
@@ -210,6 +221,7 @@ export const twoPointerProblems: CuratedProblem[] = [
   },
   {
     slug: 'container-with-most-water', id: 11, title: 'Container With Most Water', difficulty: 'Medium', pattern: 'two-pointers',
+    brute: { text: 'Compute the area for every pair of lines.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'With pointers at both ends, which pointer should move?',
       options: [
@@ -228,6 +240,7 @@ export const twoPointerProblems: CuratedProblem[] = [
   },
   {
     slug: 'sort-colors', id: 75, title: 'Sort Colors', difficulty: 'Medium', pattern: 'two-pointers',
+    brute: { text: 'Hand the array to a general-purpose sort.', time: ['O(n log n)', 'O(n)', 'O(n²)', 'O(1)'] },
     insight: {
       q: 'How do you sort the 0s, 1s and 2s in a single pass, in place?',
       options: [
@@ -247,6 +260,7 @@ export const twoPointerProblems: CuratedProblem[] = [
   {
     slug: 'trapping-rain-water', id: 42, title: 'Trapping Rain Water', difficulty: 'Hard', pattern: 'two-pointers',
     alsoAccept: ['monotonic-stack', 'prefix-sum'],
+    brute: { text: 'For each bar, scan left and right for the tallest wall on each side.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'What decides how much water sits above bar i?',
       options: [
@@ -268,6 +282,7 @@ export const twoPointerProblems: CuratedProblem[] = [
 export const slidingWindowProblems: CuratedProblem[] = [
   {
     slug: 'maximum-average-subarray-i', id: 643, title: 'Maximum Average Subarray I', difficulty: 'Easy', pattern: 'sliding-window',
+    brute: { text: 'Add up each window of length k from scratch.', time: ['O(n · k)', 'O(n)', 'O(n log n)', 'O(n²· k)'] },
     insight: {
       q: 'How do you get every window sum of length k efficiently?',
       options: [
@@ -286,6 +301,7 @@ export const slidingWindowProblems: CuratedProblem[] = [
   },
   {
     slug: 'longest-substring-without-repeating-characters', id: 3, title: 'Longest Substring Without Repeating Characters', difficulty: 'Medium', pattern: 'sliding-window',
+    brute: { text: 'Check every substring for repeated characters.', time: ['O(n³)', 'O(n²)', 'O(n)', 'O(n log n)'] },
     insight: {
       q: 'When the character at right is already in the window, what should happen?',
       options: [
@@ -305,6 +321,7 @@ export const slidingWindowProblems: CuratedProblem[] = [
   },
   {
     slug: 'minimum-size-subarray-sum', id: 209, title: 'Minimum Size Subarray Sum', difficulty: 'Medium', pattern: 'sliding-window',
+    brute: { text: 'Grow every start position, tracking the running sum.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'All values are positive. How do you find the shortest subarray with sum ≥ target?',
       options: [
@@ -323,6 +340,7 @@ export const slidingWindowProblems: CuratedProblem[] = [
   },
   {
     slug: 'longest-repeating-character-replacement', id: 424, title: 'Longest Repeating Character Replacement', difficulty: 'Medium', pattern: 'sliding-window',
+    brute: { text: 'For every substring keep letter counts and test the k limit.', time: ['O(n²)', 'O(n)', 'O(n³)', 'O(2ⁿ)'] },
     insight: {
       q: 'You may replace at most k characters. When is a window valid?',
       options: [
@@ -342,6 +360,7 @@ export const slidingWindowProblems: CuratedProblem[] = [
   },
   {
     slug: 'permutation-in-string', id: 567, title: 'Permutation in String', difficulty: 'Medium', pattern: 'sliding-window',
+    brute: { text: 'Sort each window of length |s1| and compare it with sorted s1.', time: ['O(n · m log m)', 'O(n · m)', 'O(n)', 'O(m!)'] },
     insight: {
       q: 'How do you test whether some window of s2 is a permutation of s1?',
       options: [
@@ -361,6 +380,7 @@ export const slidingWindowProblems: CuratedProblem[] = [
   },
   {
     slug: 'minimum-window-substring', id: 76, title: 'Minimum Window Substring', difficulty: 'Hard', pattern: 'sliding-window',
+    brute: { text: 'Expand every start position and test each window against t.', time: ['O(m²)', 'O(m)', 'O(m log m)', 'O(m³)'] },
     insight: {
       q: 'How does the window know it contains all of t, including duplicates?',
       options: [
@@ -381,6 +401,7 @@ export const slidingWindowProblems: CuratedProblem[] = [
   {
     slug: 'sliding-window-maximum', id: 239, title: 'Sliding Window Maximum', difficulty: 'Hard', pattern: 'sliding-window',
     alsoAccept: ['monotonic-stack', 'heap'],
+    brute: { text: 'Scan each window of k elements for its maximum.', time: ['O(n · k)', 'O(n)', 'O(n log k)', 'O(n² · k)'] },
     insight: {
       q: "How do you get each window's maximum in O(1) amortized time?",
       options: [

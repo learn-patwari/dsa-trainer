@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import { patternName } from '../../../shared/patterns/index.ts';
 import type { AttemptResult } from '../../../shared/types.ts';
 import { formatDuration, RatingDelta, ScoreRing } from '../components.tsx';
+import { studyLinks } from '../links.ts';
 
 const ICON = { correct: '✓', partial: '~', wrong: '✗', skipped: '–' } as const;
 
@@ -81,6 +82,17 @@ export function ResultCard({ result: r, nextHref, nextLabel, onRetake }: Props) 
           Reference approach
         </div>
         <div className="small">{r.approach}</div>
+      </div>
+
+      <div>
+        <div className="small muted" style={{ marginBottom: '0.35rem' }}>Read more</div>
+        <div className="row small" style={{ flexWrap: 'wrap' }}>
+          {studyLinks(r.slug, r.title).map((l) => (
+            <a key={l.label} className="btn btn-sm btn-ghost" href={l.href} target="_blank" rel="noreferrer" title={l.note}>
+              {l.label} ↗
+            </a>
+          ))}
+        </div>
       </div>
 
       <div className="row">

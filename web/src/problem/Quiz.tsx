@@ -16,12 +16,16 @@ export function Quiz({ quiz, mode, submitting, onSubmit }: Props) {
   const [pattern, setPattern] = useState<PatternId | null>(null);
   // In blind mode you commit to a pattern before seeing the other questions, whose wording can give it away.
   const [locked, setLocked] = useState(!quiz.askPattern);
+  const [brute, setBrute] = useState<string | null>(null);
   const [insight, setInsight] = useState<string | null>(null);
   const [time, setTime] = useState<string | null>(null);
   const [space, setSpace] = useState<string | null>(null);
   const [edges, setEdges] = useState<Set<number>>(new Set());
 
-  const unanswered = [quiz.askPattern && !pattern, !insight, !time, !space].filter(Boolean).length;
+  const unanswered = [quiz.askPattern && !pattern, quiz.brute && !brute, !insight, !time, !space].filter(Boolean).length;
+  // Question numbers shift depending on which questions this problem asks.
+  let step = quiz.askPattern ? 1 : 0;
+  const n = () => `${++step}. `;
 
   const toggleEdge = (i: number) =>
     setEdges((prev) => {
@@ -75,7 +79,7 @@ export function Quiz({ quiz, mode, submitting, onSubmit }: Props) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit({ mode, pattern, insight, time, space, edgeCasesHandled: [...edges] });
+        onSubmit({ mode, pattern, brute, insight, time, space, edgeCasesHandled: [...edges] });
       }}
     >
       {quiz.askPattern && (
@@ -89,10 +93,30 @@ export function Quiz({ quiz, mode, submitting, onSubmit }: Props) {
         </div>
       )}
 
+      {quiz.brute && (
+        <div className="q">
+          <div className="q-title">
+            <span>{n()}What does the obvious brute force cost?</span>
+            <span className="q-points">{POINTS.brute} pt</span>
+          </div>
+          <p className="small muted">
+            Start where an interview starts: the straightforward solution and its time complexity. You'll see the reference one
+            after you submit.
+          </p>
+          <div className="segmented" role="radiogroup" aria-label="Brute-force time complexity">
+            {quiz.brute.options.map((o) => (
+              <button type="button" key={o} role="radio" aria-checked={brute === o} className={brute === o ? 'selected' : ''} onClick={() => setBrute(o)}>
+                {o}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <fieldset className="q" style={{ border: 'none', margin: 0 }}>
         <legend className="q-title" style={{ width: '100%', padding: 0 }}>
           <span>
-            {quiz.askPattern ? '2. ' : '1. '}
+            {n()}
             {quiz.insight.q}
           </span>
           <span className="q-points">{POINTS.insight} pts</span>
@@ -109,7 +133,7 @@ export function Quiz({ quiz, mode, submitting, onSubmit }: Props) {
 
       <div className="q">
         <div className="q-title">
-          <span>{quiz.askPattern ? '3. ' : '2. '}Complexity of the best approach</span>
+          <span>{n()}Complexity of the best approach</span>
           <span className="q-points">
             {POINTS.time} + {POINTS.space} pts
           </span>
@@ -140,7 +164,7 @@ export function Quiz({ quiz, mode, submitting, onSubmit }: Props) {
 
       <div className="q">
         <div className="q-title">
-          <span>{quiz.askPattern ? '4. ' : '3. '}Does your approach handle these?</span>
+          <span>{n()}Does your approach handle these?</span>
           <span className="q-points">{POINTS.edgeCases} pt</span>
         </div>
         <p className="small muted">Self-check: tick only the cases your approach handles correctly.</p>

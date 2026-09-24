@@ -5,8 +5,8 @@ import type { LeetCodeProblem } from '../shared/types.ts';
 function problem(over: Partial<LeetCodeProblem>): LeetCodeProblem {
   return {
     slug: 'x', id: 1, title: 'X', difficulty: 'Easy', paidOnly: false, contentHtml: null, hints: [],
-    topicTags: [], javaSnippet: null, exampleTestcases: ['[1,2]\n3'], metaData: null, exampleOutputs: ['[0,1]'],
-    fetchedAt: '', ...over,
+    topicTags: [], javaSnippet: null, exampleTestcases: ['[1,2]\n3'], metaData: null, similarQuestions: null,
+    exampleOutputs: ['[0,1]'], fetchedAt: '', ...over,
   };
 }
 

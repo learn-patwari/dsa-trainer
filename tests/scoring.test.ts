@@ -11,6 +11,7 @@ function perfect(mode: AttemptSubmission['mode'], p = twoSum): AttemptSubmission
   return {
     mode,
     pattern: p.pattern,
+    brute: p.brute?.time[0] ?? null,
     insight: p.insight.options[0],
     time: p.time[0],
     space: p.space[0],
@@ -23,15 +24,15 @@ function perfect(mode: AttemptSubmission['mode'], p = twoSum): AttemptSubmission
 describe('scoreAttempt', () => {
   it('awards full marks in blind mode (pattern question included)', () => {
     const r = scoreAttempt(twoSum, perfect('blind'), patternName);
-    expect(r.maxScore).toBe(10);
-    expect(r.score).toBe(10);
+    expect(r.maxScore).toBe(11);
+    expect(r.score).toBe(11);
     expect(r.percent).toBe(100);
-    expect(r.breakdown.map((q) => q.key)).toEqual(['pattern', 'insight', 'time', 'space', 'edgeCases']);
+    expect(r.breakdown.map((q) => q.key)).toEqual(['pattern', 'brute', 'insight', 'time', 'space', 'edgeCases']);
   });
 
   it('skips the pattern question in pattern mode', () => {
     const r = scoreAttempt(twoSum, perfect('pattern'), patternName);
-    expect(r.maxScore).toBe(7);
+    expect(r.maxScore).toBe(8);
     expect(r.breakdown.some((q) => q.key === 'pattern')).toBe(false);
     expect(r.percent).toBe(100);
   });
@@ -53,7 +54,7 @@ describe('scoreAttempt', () => {
     expect(byKey.insight).toMatchObject({ verdict: 'wrong', earned: 0 });
     expect(byKey.time).toMatchObject({ verdict: 'skipped', earned: 0 });
     expect(byKey.space).toMatchObject({ verdict: 'wrong', earned: 0 });
-    expect(r.score).toBe(1); // only the edge-case self-check
+    expect(r.score).toBe(2); // only the brute force and the edge-case self-check
   });
 
   it('prorates the edge-case self-check and ignores bogus indexes', () => {
@@ -65,10 +66,10 @@ describe('scoreAttempt', () => {
   });
 
   it('subtracts hint penalties without going below zero', () => {
-    expect(scoreAttempt(twoSum, { ...perfect('blind'), hintsUsed: 2 }, patternName)).toMatchObject({ score: 8, hintPenalty: 2 });
+    expect(scoreAttempt(twoSum, { ...perfect('blind'), hintsUsed: 2 }, patternName)).toMatchObject({ score: 9, hintPenalty: 2 });
     const none = scoreAttempt(
       twoSum,
-      { mode: 'blind', pattern: null, insight: null, time: null, space: null, edgeCasesHandled: [], hintsUsed: 5, elapsedSec: 0 },
+      { mode: 'blind', pattern: null, brute: null, insight: null, time: null, space: null, edgeCasesHandled: [], hintsUsed: 5, elapsedSec: 0 },
       patternName,
     );
     expect(none.score).toBe(0);

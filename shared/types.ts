@@ -60,6 +60,8 @@ export interface CuratedProblem {
   /** Other patterns that also lead to an optimal solution (partial credit). */
   alsoAccept?: PatternId[];
   insight: { q: string; options: Four; why: string };
+  /** Striver's ladder: the obvious slow solution the optimal one improves on. */
+  brute?: { text: string; time: Four };
   /** What the variables in the complexity options mean, when it isn't obvious. */
   vars?: string;
   time: Four;
@@ -73,6 +75,8 @@ export type PracticeMode = 'pattern' | 'blind';
 
 export interface QuizView {
   askPattern: boolean;
+  /** Present when the problem has a brute-force reference; asked before the optimal approach. */
+  brute: { options: string[] } | null;
   insight: { q: string; options: string[] };
   vars: string | null;
   time: string[];
@@ -83,6 +87,7 @@ export interface QuizView {
 export interface AttemptSubmission {
   mode: PracticeMode;
   pattern: PatternId | null;
+  brute: string | null;
   insight: string | null;
   time: string | null;
   space: string | null;
@@ -91,7 +96,7 @@ export interface AttemptSubmission {
   elapsedSec: number;
 }
 
-export type QuestionKey = 'pattern' | 'insight' | 'time' | 'space' | 'edgeCases';
+export type QuestionKey = 'pattern' | 'brute' | 'insight' | 'time' | 'space' | 'edgeCases';
 export type Verdict = 'correct' | 'partial' | 'wrong' | 'skipped';
 
 export interface QuestionResult {
@@ -133,6 +138,19 @@ export interface ProblemProgress {
   notes?: string;
   /** Summary of the last compile & run, for the "code verified" badge. */
   lastRun?: { at: string; compiled: boolean; passed: number; checked: number; total: number };
+  /** Your accepted LeetCode submission for this problem, fetched with the session cookie. */
+  leetcodeSolution?: LeetCodeSolution;
+}
+
+export interface LeetCodeSolution {
+  submissionId: number;
+  lang: string;
+  /** Unix seconds when LeetCode accepted it. */
+  solvedAt: number;
+  code: string | null;
+  runtime: string | null;
+  memory: string | null;
+  fetchedAt: string;
 }
 
 export interface LeetCodeTagCount {
@@ -150,6 +168,11 @@ export interface LeetCodeImport {
   solvedCounts: { all: number; easy: number; medium: number; hard: number };
   tagCounts: LeetCodeTagCount[];
   solvedSlugs: string[];
+  /** Accepted-at times (unix seconds) for the solves LeetCode reports publicly. */
+  solvedAt?: Record<string, number>;
+  /** Set on every sync; importedAt stays the first import. */
+  syncedAt?: string;
+  syncCount?: number;
 }
 
 export interface Progress {
@@ -159,6 +182,37 @@ export interface Progress {
   history: AttemptResult[];
   problems: Record<string, ProblemProgress>;
   leetcode?: LeetCodeImport;
+  /** Challenge mode: pattern recognition over any LeetCode problem. */
+  challenge?: ChallengeStats & { perPattern: Partial<Record<PatternId, { asked: number; correct: number }>> };
+  plan?: { size: number; weeks: number; startedAt: string };
+}
+
+export interface StudyPlan {
+  size: number;
+  weeks: number;
+  startedAt: string;
+  /** Problems attempted since the plan started. */
+  done: number;
+  daysElapsed: number;
+  daysTotal: number;
+  /** How many to attempt today to stay on schedule. */
+  todayTarget: number;
+  doneToday: number;
+  /** Negative when you're ahead. */
+  behindBy: number;
+}
+
+export interface StreakInfo {
+  current: number;
+  best: number;
+  activeToday: boolean;
+}
+
+export interface DifficultyProgress {
+  difficulty: Difficulty;
+  total: number;
+  attempted: number;
+  lcSolved: number;
 }
 
 /** Problem statement and extras fetched live from LeetCode. */
@@ -175,6 +229,8 @@ export interface LeetCodeProblem {
   exampleTestcases: string[];
   /** LeetCode's signature description (JSON): method name, parameter types, return type. */
   metaData: string | null;
+  /** LeetCode's own "similar questions" (JSON string), used to suggest more of the same pattern. */
+  similarQuestions: string | null;
   /** Expected outputs scraped from the statement, aligned with exampleTestcases. */
   exampleOutputs: string[];
   fetchedAt: string;
@@ -240,6 +296,77 @@ export interface PatternSummary {
   lcSolvedInSet: number;
   /** Rough count of LeetCode problems solved under this pattern's tags, or null if unknown. */
   lcTagSolved: number | null;
+  /** Rating settled here AND at least LC_SOLVES_REQUIRED of its problems actually solved on LeetCode. */
+  complete: boolean;
+}
+
+export interface PatternGuess {
+  pattern: PatternId;
+  name: string;
+  score: number;
+  /** Share of the total evidence, 0-100. */
+  confidence: number;
+  why: string[];
+}
+
+export interface SimilarProblem {
+  slug: string;
+  title: string;
+  difficulty: Difficulty;
+  curated: boolean;
+  lcSolved: boolean;
+  attempted: boolean;
+}
+
+export interface LookupResult {
+  slug: string;
+  id: number | null;
+  title: string;
+  difficulty: Difficulty;
+  topicTags: { name: string; slug: string }[];
+  /** The hand-assigned pattern, when the problem is in the curated bank. */
+  curated: { pattern: PatternId; name: string } | null;
+  guesses: PatternGuess[];
+  similar: SimilarProblem[];
+  lcSolved: boolean;
+}
+
+export interface ChallengeQuestion {
+  slug: string;
+  title: string;
+  difficulty: Difficulty;
+  curated: boolean;
+  contentHtml: string | null;
+  /** Asked count and current streak, so the UI can show progress. */
+  stats: ChallengeStats;
+}
+
+export interface ChallengeStats {
+  asked: number;
+  correct: number;
+  streak: number;
+  bestStreak: number;
+}
+
+export interface ChallengeAnswer {
+  correct: boolean;
+  chosen: PatternId | null;
+  accepted: { pattern: PatternId; name: string }[];
+  why: string[];
+  curated: boolean;
+  stats: ChallengeStats;
+  /** Where to read more about the right answer. */
+  lessonPattern: PatternId | null;
+}
+
+export interface RevisitItem {
+  slug: string;
+  title: string;
+  difficulty: Difficulty;
+  pattern: PatternId;
+  patternName: string;
+  solvedAt: number;
+  days: number;
 }
 
 export interface Recommendation {
@@ -261,6 +388,12 @@ export interface DashboardState {
   recent: AttemptResult[];
   leetcode: LeetCodeImport | null;
   sessionConfigured: boolean;
+  /** Solved on LeetCode long enough ago to be worth another go. */
+  revisit: RevisitItem[];
+  challenge: ChallengeStats;
+  plan: StudyPlan | null;
+  streak: StreakInfo;
+  difficulty: DifficultyProgress[];
 }
 
 export interface ProblemRow {
@@ -291,6 +424,10 @@ export interface ProblemView {
   pattern: { id: PatternId; name: string } | null;
   quiz: QuizView;
   lcSolved: boolean;
+  /** When LeetCode accepted your solution (unix seconds), when that is known. */
+  lcSolvedAt: number | null;
+  /** True when LEETCODE_SESSION is set, so your own submission can be fetched. */
+  sessionConfigured: boolean;
   progress: ProblemProgress | null;
   nextInPattern: string | null;
 }

@@ -3,6 +3,7 @@ import type { CuratedProblem } from '../types.ts';
 export const stackProblems: CuratedProblem[] = [
   {
     slug: 'valid-parentheses', id: 20, title: 'Valid Parentheses', difficulty: 'Easy', pattern: 'stack',
+    brute: { text: 'Repeatedly delete an adjacent matching pair until nothing changes.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(2ⁿ)'] },
     insight: {
       q: 'What makes a closing bracket valid?',
       options: [
@@ -21,6 +22,7 @@ export const stackProblems: CuratedProblem[] = [
   },
   {
     slug: 'min-stack', id: 155, title: 'Min Stack', difficulty: 'Medium', pattern: 'stack',
+    brute: { text: 'Scan the whole stack whenever getMin() is called.', time: ['O(n) per getMin', 'O(1) per getMin', 'O(log n) per getMin', 'O(n log n) per getMin'] },
     insight: {
       q: 'How can getMin() stay O(1) even after pops?',
       options: [
@@ -39,6 +41,7 @@ export const stackProblems: CuratedProblem[] = [
   },
   {
     slug: 'evaluate-reverse-polish-notation', id: 150, title: 'Evaluate Reverse Polish Notation', difficulty: 'Medium', pattern: 'stack',
+    brute: { text: 'Find an operator with two numbers before it, fold it, and repeat over the array.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(2ⁿ)'] },
     insight: {
       q: 'How do you evaluate the tokens?',
       options: [
@@ -57,6 +60,7 @@ export const stackProblems: CuratedProblem[] = [
   },
   {
     slug: 'decode-string', id: 394, title: 'Decode String', difficulty: 'Medium', pattern: 'stack',
+    brute: { text: 'Find the innermost k[...] with a regex, expand it, and start again.', time: ['O(n · d)', 'O(n)', 'O(2ⁿ)', 'O(n log n)'] },
     insight: {
       q: 'How do you handle nested patterns like 3[a2[c]]?',
       options: [
@@ -76,6 +80,7 @@ export const stackProblems: CuratedProblem[] = [
   },
   {
     slug: 'asteroid-collision', id: 735, title: 'Asteroid Collision', difficulty: 'Medium', pattern: 'stack',
+    brute: { text: 'Rescan the array for a colliding neighbour after every explosion.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(2ⁿ)'] },
     insight: {
       q: 'When do two asteroids collide?',
       options: [
@@ -97,6 +102,7 @@ export const stackProblems: CuratedProblem[] = [
 export const monotonicStackProblems: CuratedProblem[] = [
   {
     slug: 'next-greater-element-i', id: 496, title: 'Next Greater Element I', difficulty: 'Easy', pattern: 'monotonic-stack',
+    brute: { text: 'For each queried value, scan rightwards through nums2.', time: ['O(m · n)', 'O(m + n)', 'O(n log n)', 'O(n²)'] },
     insight: {
       q: 'How do you get every next-greater answer for nums2 in one pass?',
       options: [
@@ -116,6 +122,7 @@ export const monotonicStackProblems: CuratedProblem[] = [
   },
   {
     slug: 'daily-temperatures', id: 739, title: 'Daily Temperatures', difficulty: 'Medium', pattern: 'monotonic-stack',
+    brute: { text: 'For each day, scan forward until a warmer day appears.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'How do you find, for each day, how long until a warmer day?',
       options: [
@@ -134,6 +141,7 @@ export const monotonicStackProblems: CuratedProblem[] = [
   },
   {
     slug: 'online-stock-span', id: 901, title: 'Online Stock Span', difficulty: 'Medium', pattern: 'monotonic-stack',
+    brute: { text: 'Keep every price and scan backwards on each call.', time: ['O(n) per call', 'O(1) per call', 'O(log n) per call', 'O(n²) per call'] },
     insight: {
       q: 'How do you make next(price) fast when spans can be long?',
       options: [
@@ -152,6 +160,7 @@ export const monotonicStackProblems: CuratedProblem[] = [
   {
     slug: 'car-fleet', id: 853, title: 'Car Fleet', difficulty: 'Medium', pattern: 'monotonic-stack',
     alsoAccept: ['greedy'],
+    brute: { text: 'Simulate every car moving forward in small time steps.', time: ['O(n · target)', 'O(n log n)', 'O(n)', 'O(n²)'] },
     insight: {
       q: 'How do you count the fleets that arrive?',
       options: [
@@ -171,6 +180,7 @@ export const monotonicStackProblems: CuratedProblem[] = [
   {
     slug: 'remove-k-digits', id: 402, title: 'Remove K Digits', difficulty: 'Medium', pattern: 'monotonic-stack',
     alsoAccept: ['greedy'],
+    brute: { text: 'Try every choice of k digits to delete and keep the smallest result.', time: ['O(nᵏ)', 'O(n · k)', 'O(n log n)', 'O(n²)'] },
     insight: {
       q: 'Which digits should go to make the number as small as possible?',
       options: [
@@ -189,6 +199,7 @@ export const monotonicStackProblems: CuratedProblem[] = [
   },
   {
     slug: 'largest-rectangle-in-histogram', id: 84, title: 'Largest Rectangle in Histogram', difficulty: 'Hard', pattern: 'monotonic-stack',
+    brute: { text: 'For every pair of bars take the minimum height times the width.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'What limits the widest rectangle that uses bar i as its height?',
       options: [
@@ -210,6 +221,7 @@ export const monotonicStackProblems: CuratedProblem[] = [
 export const linkedListProblems: CuratedProblem[] = [
   {
     slug: 'reverse-linked-list', id: 206, title: 'Reverse Linked List', difficulty: 'Easy', pattern: 'linked-list',
+    brute: { text: 'Copy the values into an array and rebuild the list backwards.', time: ['O(n)', 'O(n²)', 'O(n log n)', 'O(1)'] },
     insight: {
       q: 'What must happen at each step of an iterative, in-place reversal?',
       options: [
@@ -227,6 +239,7 @@ export const linkedListProblems: CuratedProblem[] = [
   },
   {
     slug: 'merge-two-sorted-lists', id: 21, title: 'Merge Two Sorted Lists', difficulty: 'Easy', pattern: 'linked-list',
+    brute: { text: 'Collect every node, sort them all, then relink.', time: ['O((m + n) log(m + n))', 'O(m + n)', 'O(m · n)', 'O(m log n)'] },
     insight: {
       q: 'What removes the special case of picking the merged head?',
       options: [
@@ -247,6 +260,7 @@ export const linkedListProblems: CuratedProblem[] = [
   {
     slug: 'remove-nth-node-from-end-of-list', id: 19, title: 'Remove Nth Node From End of List', difficulty: 'Medium', pattern: 'linked-list',
     alsoAccept: ['two-pointers', 'fast-slow'],
+    brute: { text: 'Walk once to count the nodes, then again to reach the right one.', time: ['O(n)', 'O(n²)', 'O(log n)', 'O(1)'] },
     insight: {
       q: 'How do you find the nth node from the end in one pass?',
       options: [
@@ -266,6 +280,7 @@ export const linkedListProblems: CuratedProblem[] = [
   {
     slug: 'reorder-list', id: 143, title: 'Reorder List', difficulty: 'Medium', pattern: 'linked-list',
     alsoAccept: ['fast-slow'],
+    brute: { text: 'Walk to the tail for each move and splice that node into place.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'How do you reorder L0 → Ln → L1 → Ln−1 → … in place?',
       options: [
@@ -285,6 +300,7 @@ export const linkedListProblems: CuratedProblem[] = [
   {
     slug: 'copy-list-with-random-pointer', id: 138, title: 'Copy List with Random Pointer', difficulty: 'Medium', pattern: 'linked-list',
     alsoAccept: ['hashing'],
+    brute: { text: 'For each random pointer, walk the list to find the node\'s index.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: "How do you wire each copy's random pointer correctly?",
       options: [
@@ -305,6 +321,7 @@ export const linkedListProblems: CuratedProblem[] = [
   {
     slug: 'lru-cache', id: 146, title: 'LRU Cache', difficulty: 'Medium', pattern: 'linked-list',
     alsoAccept: ['hashing'],
+    brute: { text: 'Keep entries in a list and scan it for the least recently used one.', time: ['O(n) per operation', 'O(1) per operation', 'O(log n) per operation', 'O(n log n) per operation'] },
     insight: {
       q: 'Which structure gives O(1) get and put with LRU eviction?',
       options: [
@@ -324,6 +341,7 @@ export const linkedListProblems: CuratedProblem[] = [
   },
   {
     slug: 'reverse-nodes-in-k-group', id: 25, title: 'Reverse Nodes in k-Group', difficulty: 'Hard', pattern: 'linked-list',
+    brute: { text: 'Copy the values into an array, reverse each block of k, write them back.', time: ['O(n)', 'O(n · k)', 'O(n²)', 'O(n log k)'] },
     insight: {
       q: 'How do you reverse each group of k nodes in place?',
       options: [
@@ -345,6 +363,7 @@ export const linkedListProblems: CuratedProblem[] = [
 export const fastSlowProblems: CuratedProblem[] = [
   {
     slug: 'linked-list-cycle', id: 141, title: 'Linked List Cycle', difficulty: 'Easy', pattern: 'fast-slow',
+    brute: { text: 'Remember every visited node in a hash set.', time: ['O(n)', 'O(n²)', 'O(n log n)', 'O(1)'] },
     insight: {
       q: 'How do you detect a cycle with O(1) extra memory?',
       options: [
@@ -363,6 +382,7 @@ export const fastSlowProblems: CuratedProblem[] = [
   },
   {
     slug: 'middle-of-the-linked-list', id: 876, title: 'Middle of the Linked List', difficulty: 'Easy', pattern: 'fast-slow',
+    brute: { text: 'Count the nodes, then walk half of them again.', time: ['O(n)', 'O(n²)', 'O(log n)', 'O(1)'] },
     insight: {
       q: 'How do you find the middle in a single pass?',
       options: [
@@ -381,6 +401,7 @@ export const fastSlowProblems: CuratedProblem[] = [
   {
     slug: 'happy-number', id: 202, title: 'Happy Number', difficulty: 'Easy', pattern: 'fast-slow',
     alsoAccept: ['hashing'],
+    brute: { text: 'Keep every value seen in a set until 1 or a repeat turns up.', time: ['O(log n)', 'O(n)', 'O(n log n)', 'O(1)'] },
     insight: {
       q: "How do you know when to stop if the number isn't happy?",
       options: [
@@ -400,6 +421,7 @@ export const fastSlowProblems: CuratedProblem[] = [
   },
   {
     slug: 'linked-list-cycle-ii', id: 142, title: 'Linked List Cycle II', difficulty: 'Medium', pattern: 'fast-slow',
+    brute: { text: 'Store visited nodes in a set; the first repeat is the entrance.', time: ['O(n)', 'O(n²)', 'O(n log n)', 'O(1)'] },
     insight: {
       q: 'After slow and fast meet, how do you find where the cycle begins?',
       options: [
@@ -419,6 +441,7 @@ export const fastSlowProblems: CuratedProblem[] = [
   {
     slug: 'find-the-duplicate-number', id: 287, title: 'Find the Duplicate Number', difficulty: 'Medium', pattern: 'fast-slow',
     alsoAccept: ['binary-search'],
+    brute: { text: 'Compare every pair of values.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'How do you find the duplicate without modifying the array, using O(1) extra space?',
       options: [

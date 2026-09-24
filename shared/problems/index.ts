@@ -2,6 +2,8 @@ import { PATTERN_IDS, type CuratedProblem, type PatternId } from '../types.ts';
 import { hashingProblems, slidingWindowProblems, twoPointerProblems } from './arrays-a.ts';
 import { binarySearchProblems, prefixSumProblems } from './arrays-b.ts';
 import { bitProblems, dp1dProblems, dp2dProblems, trieProblems } from './dp.ts';
+import { extraArrayProblems, extraStackListProblems, extraTreeHeapProblems } from './extra-a.ts';
+import { extraDpProblems, extraGraphProblems, extraTechniqueProblems } from './extra-b.ts';
 import { graphTraversalProblems, shortestPathProblems, topoSortProblems, unionFindProblems } from './graphs.ts';
 import { fastSlowProblems, linkedListProblems, monotonicStackProblems, stackProblems } from './lists.ts';
 import { backtrackingProblems, greedyProblems, intervalProblems } from './techniques.ts';
@@ -31,6 +33,13 @@ const all: CuratedProblem[] = [
   ...dp2dProblems,
   ...trieProblems,
   ...bitProblems,
+  // Second pass: two more problems for every pattern.
+  ...extraArrayProblems,
+  ...extraStackListProblems,
+  ...extraTreeHeapProblems,
+  ...extraTechniqueProblems,
+  ...extraGraphProblems,
+  ...extraDpProblems,
 ];
 
 const DIFFICULTY_ORDER = { Easy: 0, Medium: 1, Hard: 2 } as const;

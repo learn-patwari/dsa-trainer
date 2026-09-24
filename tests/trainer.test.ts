@@ -3,13 +3,24 @@ import { getProblem, problemsForPattern } from '../shared/problems/index.ts';
 import { START_RATING } from '../shared/scoring.ts';
 import type { AttemptSubmission, LeetCodeImport } from '../shared/types.ts';
 import { emptyProgress } from '../server/store.ts';
-import { dashboard, pickBlind, problemView, recommendations, recordAttempt, saveWork, validateSubmission } from '../server/trainer.ts';
+import {
+  dashboard,
+  patternSummary,
+  pickBlind,
+  problemView,
+  recommendations,
+  recordAttempt,
+  revisitList,
+  saveWork,
+  validateSubmission,
+} from '../server/trainer.ts';
 
 function answers(slug: string, mode: AttemptSubmission['mode'] = 'pattern'): AttemptSubmission {
   const p = getProblem(slug)!;
   return {
     mode,
     pattern: p.pattern,
+    brute: p.brute?.time[0] ?? null,
     insight: p.insight.options[0],
     time: p.time[0],
     space: p.space[0],
@@ -109,6 +120,36 @@ describe('recommendations', () => {
   });
 });
 
+describe('revisit and pattern completion', () => {
+  const daysAgo = (d: number) => Math.floor(Date.now() / 1000) - d * 86_400;
+
+  function withImport(solved: Record<string, number>) {
+    const p = emptyProgress();
+    p.leetcode = {
+      username: 'me', importedAt: new Date().toISOString(), source: 'public', fullList: false,
+      solvedCounts: { all: 3, easy: 3, medium: 0, hard: 0 }, tagCounts: [],
+      solvedSlugs: Object.keys(solved), solvedAt: solved,
+    };
+    return p;
+  }
+
+  it('lists only solves older than two months, oldest first', () => {
+    const p = withImport({ 'two-sum': daysAgo(3), 'valid-anagram': daysAgo(70), 'contains-duplicate': daysAgo(400) });
+    expect(revisitList(p).map((r) => r.slug)).toEqual(['contains-duplicate', 'valid-anagram']);
+    expect(revisitList(p)[0]).toMatchObject({ patternName: 'Hash Map / Set', days: 400 });
+  });
+
+  it('needs two real LeetCode solves before a pattern counts as complete', () => {
+    const p = withImport({ 'two-sum': daysAgo(10) });
+    for (const slug of ['contains-duplicate', 'valid-anagram', 'two-sum']) recordAttempt(p, slug, answers(slug));
+    expect(patternSummary(p, 'hashing')).toMatchObject({ ratedAttempts: 3, lcSolvedInSet: 1, complete: false });
+    expect(recommendations(p)[0]!.reason).toMatch(/solve 1 more of these on LeetCode/);
+
+    p.leetcode!.solvedSlugs.push('valid-anagram');
+    expect(patternSummary(p, 'hashing').complete).toBe(true);
+  });
+});
+
 describe('pickBlind', () => {
   it('never picks an attempted or excluded problem while others remain', () => {
     const p = emptyProgress();
@@ -136,6 +177,6 @@ describe('dashboard', () => {
     expect(d.overall).toBe(1400);
     expect(d.overallTier).toBe('Solid');
     expect(d.patterns).toHaveLength(23);
-    expect(d.totalProblems).toBe(151);
+    expect(d.totalProblems).toBe(197);
   });
 });

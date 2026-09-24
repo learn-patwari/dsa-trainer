@@ -2,15 +2,29 @@ import { useCallback, useEffect, useState } from 'react';
 import type {
   AttemptResult,
   AttemptSubmission,
+  ChallengeAnswer,
+  ChallengeQuestion,
   DashboardState,
+  Difficulty,
+  LookupResult,
   JavaStatus,
   LeetCodeImport,
   LeetCodeProblem,
+  LeetCodeSolution,
   PatternDetail,
   PracticeMode,
   ProblemView,
   RunResult,
+  StudyPlan,
 } from '../../shared/types.ts';
+
+export interface CatalogMatch {
+  slug: string;
+  id: number;
+  title: string;
+  difficulty: Difficulty;
+  paidOnly: boolean;
+}
 
 async function call<T>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
   const res = await fetch(`/api${path}`, {
@@ -33,12 +47,25 @@ export const api = {
     call<AttemptResult>(`/problems/${encodeURIComponent(slug)}/attempts`, { method: 'POST', body: sub }),
   saveWork: (slug: string, work: { code?: string; notes?: string }) =>
     call<{ ok: true }>(`/problems/${encodeURIComponent(slug)}/work`, { method: 'PUT', body: work }),
+  lookup: (q: string) => call<{ result?: LookupResult; matches?: CatalogMatch[] }>(`/lookup?q=${encodeURIComponent(q)}`),
+  challengeNext: (exclude?: string) =>
+    call<ChallengeQuestion>(`/challenge/next${exclude ? `?exclude=${encodeURIComponent(exclude)}` : ''}`),
+  challengeAnswer: (slug: string, pattern: string | null) =>
+    call<ChallengeAnswer>('/challenge/answer', { method: 'POST', body: { slug, pattern } }),
   javaStatus: () => call<JavaStatus>('/java/status'),
   run: (slug: string, code: string) => call<RunResult>(`/problems/${encodeURIComponent(slug)}/run`, { method: 'POST', body: { code } }),
   blind: (exclude?: string) => call<{ slug: string }>(`/practice/blind${exclude ? `?exclude=${encodeURIComponent(exclude)}` : ''}`),
   importProfile: (body: { username?: string; useSession?: boolean }) =>
     call<LeetCodeImport>('/leetcode/import', { method: 'POST', body }),
+  syncProfile: () => call<LeetCodeImport>('/leetcode/sync', { method: 'POST', body: {} }),
+  fetchSolution: (slug: string) =>
+    call<{ solution: LeetCodeSolution | null; message: string | null }>(`/problems/${encodeURIComponent(slug)}/leetcode-solution`, {
+      method: 'POST',
+      body: {},
+    }),
   removeImport: () => call<{ ok: true }>('/leetcode/import', { method: 'DELETE', body: {} }),
+  setPlan: (size: number, weeks: number) => call<StudyPlan>('/plan', { method: 'POST', body: { size, weeks } }),
+  clearPlan: () => call<{ ok: true }>('/plan', { method: 'DELETE', body: {} }),
   reset: () => call<{ ok: true }>('/reset', { method: 'POST', body: { confirm: 'RESET' } }),
 };
 

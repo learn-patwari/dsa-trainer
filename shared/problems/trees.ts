@@ -7,6 +7,7 @@ export const treeDfsProblems: CuratedProblem[] = [
   {
     slug: 'invert-binary-tree', id: 226, title: 'Invert Binary Tree', difficulty: 'Easy', pattern: 'tree-dfs',
     alsoAccept: ['tree-bfs'],
+    brute: { text: 'Collect the levels, reverse each one, and rebuild the tree.', time: ['O(n)', 'O(n²)', 'O(n log n)', 'O(1)'] },
     insight: {
       q: 'What does inverting the tree require at each node?',
       options: [
@@ -26,6 +27,7 @@ export const treeDfsProblems: CuratedProblem[] = [
   {
     slug: 'maximum-depth-of-binary-tree', id: 104, title: 'Maximum Depth of Binary Tree', difficulty: 'Easy', pattern: 'tree-dfs',
     alsoAccept: ['tree-bfs'],
+    brute: { text: 'Enumerate every root-to-leaf path and take the longest.', time: ['O(n)', 'O(n²)', 'O(2ⁿ)', 'O(n log n)'] },
     insight: {
       q: 'How is the depth defined recursively?',
       options: [
@@ -44,6 +46,7 @@ export const treeDfsProblems: CuratedProblem[] = [
   },
   {
     slug: 'diameter-of-binary-tree', id: 543, title: 'Diameter of Binary Tree', difficulty: 'Easy', pattern: 'tree-dfs',
+    brute: { text: 'Recompute the height from every node separately.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(2ⁿ)'] },
     insight: {
       q: 'How do you get the diameter in a single traversal?',
       options: [
@@ -63,6 +66,7 @@ export const treeDfsProblems: CuratedProblem[] = [
   },
   {
     slug: 'validate-binary-search-tree', id: 98, title: 'Validate Binary Search Tree', difficulty: 'Medium', pattern: 'tree-dfs',
+    brute: { text: 'For every node, scan its whole left and right subtree for a violation.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(2ⁿ)'] },
     insight: {
       q: 'What must every node satisfy in a valid BST?',
       options: [
@@ -82,6 +86,7 @@ export const treeDfsProblems: CuratedProblem[] = [
   },
   {
     slug: 'kth-smallest-element-in-a-bst', id: 230, title: 'Kth Smallest Element in a BST', difficulty: 'Medium', pattern: 'tree-dfs',
+    brute: { text: 'Collect every value in order, then index into the list.', time: ['O(n)', 'O(h + k)', 'O(n log n)', 'O(k log n)'] },
     insight: {
       q: 'How do you find the kth smallest value?',
       options: [
@@ -102,6 +107,7 @@ export const treeDfsProblems: CuratedProblem[] = [
   {
     slug: 'lowest-common-ancestor-of-a-binary-search-tree', id: 235, title: 'Lowest Common Ancestor of a Binary Search Tree', difficulty: 'Medium', pattern: 'tree-dfs',
     alsoAccept: ['binary-search'],
+    brute: { text: 'Search the whole tree for both nodes, then compare their paths.', time: ['O(n)', 'O(h)', 'O(log n)', 'O(n²)'] },
     insight: {
       q: 'How does the BST property locate the lowest common ancestor?',
       options: [
@@ -120,6 +126,7 @@ export const treeDfsProblems: CuratedProblem[] = [
   },
   {
     slug: 'construct-binary-tree-from-preorder-and-inorder-traversal', id: 105, title: 'Construct Binary Tree from Preorder and Inorder Traversal', difficulty: 'Medium', pattern: 'tree-dfs',
+    brute: { text: 'Scan the inorder array for the root at every recursion step.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(2ⁿ)'] },
     insight: {
       q: 'How do the two traversals pin down the tree?',
       options: [
@@ -139,6 +146,7 @@ export const treeDfsProblems: CuratedProblem[] = [
   },
   {
     slug: 'lowest-common-ancestor-of-a-binary-tree', id: 236, title: 'Lowest Common Ancestor of a Binary Tree', difficulty: 'Medium', pattern: 'tree-dfs',
+    brute: { text: 'Find the path to each node, then walk the two paths together.', time: ['O(n)', 'O(h)', 'O(n log n)', 'O(n²)'] },
     insight: {
       q: 'What should the recursive function return to find the LCA in one pass?',
       options: [
@@ -158,6 +166,7 @@ export const treeDfsProblems: CuratedProblem[] = [
   },
   {
     slug: 'binary-tree-maximum-path-sum', id: 124, title: 'Binary Tree Maximum Path Sum', difficulty: 'Hard', pattern: 'tree-dfs',
+    brute: { text: 'From every node, explore all the downward paths on both sides.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(2ⁿ)'] },
     insight: {
       q: 'What should dfs(node) return, and what should it record on the side?',
       options: [
@@ -178,6 +187,7 @@ export const treeDfsProblems: CuratedProblem[] = [
   {
     slug: 'serialize-and-deserialize-binary-tree', id: 297, title: 'Serialize and Deserialize Binary Tree', difficulty: 'Hard', pattern: 'tree-dfs',
     alsoAccept: ['tree-bfs'],
+    brute: { text: 'Store every root-to-leaf path and rebuild the tree from them.', time: ['O(n · h)', 'O(n)', 'O(n²)', 'O(2ⁿ)'] },
     insight: {
       q: 'What makes a single traversal enough to rebuild the tree?',
       options: [
@@ -200,6 +210,7 @@ export const treeDfsProblems: CuratedProblem[] = [
 export const treeBfsProblems: CuratedProblem[] = [
   {
     slug: 'average-of-levels-in-binary-tree', id: 637, title: 'Average of Levels in Binary Tree', difficulty: 'Easy', pattern: 'tree-bfs',
+    brute: { text: 'For each depth, walk the whole tree collecting the nodes at it.', time: ['O(n · h)', 'O(n)', 'O(n²)', 'O(n log n)'] },
     insight: {
       q: 'How do you compute one average per level?',
       options: [
@@ -219,6 +230,7 @@ export const treeBfsProblems: CuratedProblem[] = [
   },
   {
     slug: 'binary-tree-level-order-traversal', id: 102, title: 'Binary Tree Level Order Traversal', difficulty: 'Medium', pattern: 'tree-bfs',
+    brute: { text: 'For each depth, traverse the tree collecting just that level.', time: ['O(n · h)', 'O(n)', 'O(n²)', 'O(n log n)'] },
     insight: {
       q: 'How do you separate one level from the next?',
       options: [
@@ -239,6 +251,7 @@ export const treeBfsProblems: CuratedProblem[] = [
   {
     slug: 'binary-tree-right-side-view', id: 199, title: 'Binary Tree Right Side View', difficulty: 'Medium', pattern: 'tree-bfs',
     alsoAccept: ['tree-dfs'],
+    brute: { text: 'Collect every level, then keep the last node of each.', time: ['O(n)', 'O(n²)', 'O(n log n)', 'O(h)'] },
     insight: {
       q: 'Which nodes are visible from the right side?',
       options: [
@@ -258,6 +271,7 @@ export const treeBfsProblems: CuratedProblem[] = [
   },
   {
     slug: 'binary-tree-zigzag-level-order-traversal', id: 103, title: 'Binary Tree Zigzag Level Order Traversal', difficulty: 'Medium', pattern: 'tree-bfs',
+    brute: { text: 'Collect the levels first, then reverse every other list.', time: ['O(n)', 'O(n²)', 'O(n log n)', 'O(h)'] },
     insight: {
       q: 'How do you alternate the direction of each level?',
       options: [
@@ -277,6 +291,7 @@ export const treeBfsProblems: CuratedProblem[] = [
   },
   {
     slug: 'maximum-width-of-binary-tree', id: 662, title: 'Maximum Width of Binary Tree', difficulty: 'Medium', pattern: 'tree-bfs',
+    brute: { text: 'Pad the tree out as a complete array and measure each level.', time: ['O(2^h)', 'O(n)', 'O(n²)', 'O(n log n)'] },
     insight: {
       q: 'How do you measure the width of a level, counting the null gaps between nodes?',
       options: [
@@ -299,6 +314,7 @@ export const treeBfsProblems: CuratedProblem[] = [
 export const heapProblems: CuratedProblem[] = [
   {
     slug: 'kth-largest-element-in-a-stream', id: 703, title: 'Kth Largest Element in a Stream', difficulty: 'Easy', pattern: 'heap',
+    brute: { text: 'Keep every value and sort on each add() to find the kth largest.', time: ['O(n log n) per add', 'O(log k) per add', 'O(n) per add', 'O(k log n) per add'] },
     insight: {
       q: 'How should add() return the kth largest quickly?',
       options: [
@@ -317,6 +333,7 @@ export const heapProblems: CuratedProblem[] = [
   },
   {
     slug: 'k-closest-points-to-origin', id: 973, title: 'K Closest Points to Origin', difficulty: 'Medium', pattern: 'heap',
+    brute: { text: 'Sort all the points by distance and take the first k.', time: ['O(n log n)', 'O(n log k)', 'O(n)', 'O(n · k)'] },
     insight: {
       q: 'How do you keep only the k closest points efficiently?',
       options: [
@@ -336,6 +353,7 @@ export const heapProblems: CuratedProblem[] = [
   },
   {
     slug: 'kth-largest-element-in-an-array', id: 215, title: 'Kth Largest Element in an Array', difficulty: 'Medium', pattern: 'heap',
+    brute: { text: 'Sort the array and read the kth value from the end.', time: ['O(n log n)', 'O(n log k)', 'O(n)', 'O(k log n)'] },
     insight: {
       q: 'How do you find the kth largest without sorting everything?',
       options: [
@@ -356,6 +374,7 @@ export const heapProblems: CuratedProblem[] = [
   {
     slug: 'top-k-frequent-elements', id: 347, title: 'Top K Frequent Elements', difficulty: 'Medium', pattern: 'heap',
     alsoAccept: ['hashing'],
+    brute: { text: 'Count the values, sort them all by frequency, take the first k.', time: ['O(n log n)', 'O(n log k)', 'O(n)', 'O(k log n)'] },
     insight: {
       q: 'After counting frequencies, how do you pick the k most frequent faster than a full sort?',
       options: [
@@ -376,6 +395,7 @@ export const heapProblems: CuratedProblem[] = [
   {
     slug: 'task-scheduler', id: 621, title: 'Task Scheduler', difficulty: 'Medium', pattern: 'heap',
     alsoAccept: ['greedy'],
+    brute: { text: 'Simulate the timeline second by second, picking an available task each time.', time: ['O(T · n)', 'O(T)', 'O(T log T)', 'O(T²)'] },
     insight: {
       q: 'What determines the minimum number of intervals?',
       options: [
@@ -396,6 +416,7 @@ export const heapProblems: CuratedProblem[] = [
   {
     slug: 'merge-k-sorted-lists', id: 23, title: 'Merge k Sorted Lists', difficulty: 'Hard', pattern: 'heap',
     alsoAccept: ['linked-list'],
+    brute: { text: 'Merge the lists one at a time, left to right.', time: ['O(N · k)', 'O(N log k)', 'O(N)', 'O(k log N)'] },
     insight: {
       q: 'How do you keep picking the smallest node among k lists efficiently?',
       options: [
@@ -415,6 +436,7 @@ export const heapProblems: CuratedProblem[] = [
   },
   {
     slug: 'find-median-from-data-stream', id: 295, title: 'Find Median from Data Stream', difficulty: 'Hard', pattern: 'heap',
+    brute: { text: 'Keep every number in a list and sort it on each findMedian().', time: ['O(n log n) per query', 'O(log n) per add', 'O(n) per query', 'O(1) per query'] },
     insight: {
       q: 'How do you get the median in O(1) while numbers keep arriving?',
       options: [

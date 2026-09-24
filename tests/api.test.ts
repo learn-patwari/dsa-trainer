@@ -51,7 +51,11 @@ const leetcode = vi.fn(async (url: string | URL | Request, init?: RequestInit): 
             advanced: [],
           },
         },
-        recentAcSubmissionList: [{ titleSlug: 'two-sum' }, { titleSlug: 'two-sum' }, { titleSlug: 'valid-anagram' }],
+        recentAcSubmissionList: [
+          { titleSlug: 'two-sum', timestamp: String(Math.floor(Date.now() / 1000) - 5 * 86400) },
+          { titleSlug: 'two-sum', timestamp: String(Math.floor(Date.now() / 1000) - 400 * 86400) },
+          { titleSlug: 'valid-anagram', timestamp: String(Math.floor(Date.now() / 1000) - 200 * 86400) },
+        ],
       },
     });
   }
@@ -83,7 +87,7 @@ describe('API', () => {
     const res = await api('/state');
     expect(res.status).toBe(200);
     const state = await res.json();
-    expect(state).toMatchObject({ overall: null, totalProblems: 151, attemptedProblems: 0, sessionConfigured: false });
+    expect(state).toMatchObject({ overall: null, totalProblems: 197, attemptedProblems: 0, sessionConfigured: false });
     expect(state.upNext[0].slug).toBe('contains-duplicate');
   });
 
@@ -97,13 +101,13 @@ describe('API', () => {
     const res = await api('/problems/two-sum/attempts', {
       method: 'POST',
       body: JSON.stringify({
-        mode: 'blind', pattern: 'hashing', insight: p.insight.options[0], time: p.time[0], space: p.space[1],
+        mode: 'blind', pattern: 'hashing', brute: p.brute!.time[0], insight: p.insight.options[0], time: p.time[0], space: p.space[1],
         edgeCasesHandled: [0, 1, 2], hintsUsed: 0, elapsedSec: 42,
       }),
     });
     expect(res.status).toBe(200);
     const result = await res.json();
-    expect(result).toMatchObject({ rated: true, maxScore: 10, score: 9, percent: 90, pattern: 'hashing' });
+    expect(result).toMatchObject({ rated: true, maxScore: 11, score: 10, percent: 91, pattern: 'hashing' });
     expect(result.ratingAfter).toBeGreaterThan(result.ratingBefore);
     expect(result.approach).toContain('HashMap');
 
@@ -166,6 +170,30 @@ class Solution {
     expect(detail.summary.lcTagSolved).toBe(2);
   });
 
+  it('syncs an existing import and keeps the original import date', async () => {
+    const before = await (await api('/leetcode/import', { method: 'POST', body: JSON.stringify({ username: 'someone' }) })).json();
+    const res = await api('/leetcode/sync', { method: 'POST', body: JSON.stringify({}) });
+    expect(res.status).toBe(200);
+    const after = await res.json();
+    expect(after).toMatchObject({ username: 'someone', importedAt: before.importedAt, syncCount: 2 });
+    expect(new Date(after.syncedAt).getTime()).toBeGreaterThanOrEqual(new Date(before.syncedAt).getTime());
+    // The recent list carries accepted-at times, which drive the revisit list.
+    expect(after.solvedAt['valid-anagram']).toBeGreaterThan(0);
+    const state = await (await api('/state')).json();
+    expect(state.revisit.map((r: { slug: string }) => r.slug)).toContain('valid-anagram'); // solved ~200 days ago
+    expect(state.revisit.map((r: { slug: string }) => r.slug)).not.toContain('two-sum'); // most recent solve is 5 days old
+  });
+
+  it('refuses to sync or fetch a solution without the prerequisites', async () => {
+    await api('/leetcode/import', { method: 'DELETE', body: JSON.stringify({}) });
+    const sync = await api('/leetcode/sync', { method: 'POST', body: JSON.stringify({}) });
+    expect(sync.status).toBe(400);
+    expect((await sync.json()).error).toMatch(/Import your LeetCode profile first/);
+    const sol = await api('/problems/two-sum/leetcode-solution', { method: 'POST', body: JSON.stringify({}) });
+    expect(sol.status).toBe(400);
+    expect((await sol.json()).error).toMatch(/LEETCODE_SESSION/);
+  });
+
   it('explains unknown users and a missing session cookie', async () => {
     const ghost = await api('/leetcode/import', { method: 'POST', body: JSON.stringify({ username: 'ghost' }) });
     expect(ghost.status).toBe(404);
@@ -207,6 +235,24 @@ class Solution {
     } finally {
       ui.close();
     }
+  });
+
+  it('starts, reports and stops a study plan', async () => {
+    expect((await api('/plan', { method: 'POST', body: JSON.stringify({ size: 0, weeks: 8 }) })).status).toBe(400);
+    expect((await api('/plan', { method: 'POST', body: JSON.stringify({ size: 60, weeks: 99 }) })).status).toBe(400);
+
+    const plan = await (await api('/plan', { method: 'POST', body: JSON.stringify({ size: 60, weeks: 6 }) })).json();
+    expect(plan).toMatchObject({ size: 60, weeks: 6, daysElapsed: 1, daysTotal: 42 });
+    expect(plan.todayTarget).toBeGreaterThan(0);
+
+    const state = await (await api('/state')).json();
+    expect(state.plan).toMatchObject({ size: 60, weeks: 6 });
+    expect(state.streak).toMatchObject({ current: 1, activeToday: true });
+    expect(state.difficulty.map((d: { difficulty: string }) => d.difficulty)).toEqual(['Easy', 'Medium', 'Hard']);
+    expect(state.difficulty.reduce((n: number, d: { total: number }) => n + d.total, 0)).toBe(197);
+
+    expect((await api('/plan', { method: 'DELETE', body: JSON.stringify({}) })).status).toBe(200);
+    expect((await (await api('/state')).json()).plan).toBeNull();
   });
 
   it('resets progress only with explicit confirmation', async () => {

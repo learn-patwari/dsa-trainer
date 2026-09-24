@@ -3,6 +3,7 @@ import type { CuratedProblem } from '../types.ts';
 export const prefixSumProblems: CuratedProblem[] = [
   {
     slug: 'find-pivot-index', id: 724, title: 'Find Pivot Index', difficulty: 'Easy', pattern: 'prefix-sum',
+    brute: { text: 'For each index, add up the values on each side separately.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'How do you check each index as the pivot in O(1)?',
       options: [
@@ -21,6 +22,7 @@ export const prefixSumProblems: CuratedProblem[] = [
   },
   {
     slug: 'range-sum-query-immutable', id: 303, title: 'Range Sum Query - Immutable', difficulty: 'Easy', pattern: 'prefix-sum',
+    brute: { text: 'Add up the requested range on every query.', time: ['O(n) per query', 'O(1) per query', 'O(log n) per query', 'O(n²) per query'] },
     insight: {
       q: 'Many sumRange queries will be asked. What should the constructor do?',
       options: [
@@ -40,6 +42,7 @@ export const prefixSumProblems: CuratedProblem[] = [
   },
   {
     slug: 'product-of-array-except-self', id: 238, title: 'Product of Array Except Self', difficulty: 'Medium', pattern: 'prefix-sum',
+    brute: { text: 'For each index, multiply the other n − 1 values.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'How do you compute every product without division in O(n)?',
       options: [
@@ -59,6 +62,7 @@ export const prefixSumProblems: CuratedProblem[] = [
   {
     slug: 'subarray-sum-equals-k', id: 560, title: 'Subarray Sum Equals K', difficulty: 'Medium', pattern: 'prefix-sum',
     alsoAccept: ['hashing'],
+    brute: { text: 'Extend every start position, keeping the running sum.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'Values can be negative. How do you count the subarrays summing to k in one pass?',
       options: [
@@ -78,6 +82,7 @@ export const prefixSumProblems: CuratedProblem[] = [
   {
     slug: 'contiguous-array', id: 525, title: 'Contiguous Array', difficulty: 'Medium', pattern: 'prefix-sum',
     alsoAccept: ['hashing'],
+    brute: { text: 'Count zeros and ones in every subarray.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'How do you find the longest subarray with equal numbers of 0s and 1s?',
       options: [
@@ -96,6 +101,7 @@ export const prefixSumProblems: CuratedProblem[] = [
   },
   {
     slug: 'range-sum-query-2d-immutable', id: 304, title: 'Range Sum Query 2D - Immutable', difficulty: 'Medium', pattern: 'prefix-sum',
+    brute: { text: 'Add the rectangle up cell by cell on every query.', time: ['O(m · n) per query', 'O(1) per query', 'O(m + n) per query', 'O(log(m · n)) per query'] },
     insight: {
       q: 'How do you answer every rectangle-sum query in O(1)?',
       options: [
@@ -118,6 +124,7 @@ export const prefixSumProblems: CuratedProblem[] = [
 export const binarySearchProblems: CuratedProblem[] = [
   {
     slug: 'binary-search', id: 704, title: 'Binary Search', difficulty: 'Easy', pattern: 'binary-search',
+    brute: { text: 'Scan the array from left to right until the target shows up.', time: ['O(n)', 'O(log n)', 'O(n log n)', 'O(1)'] },
     insight: {
       q: 'Which loop keeps binary search correct?',
       options: [
@@ -136,6 +143,7 @@ export const binarySearchProblems: CuratedProblem[] = [
   },
   {
     slug: 'search-a-2d-matrix', id: 74, title: 'Search a 2D Matrix', difficulty: 'Medium', pattern: 'binary-search',
+    brute: { text: 'Look at every cell of the matrix.', time: ['O(m · n)', 'O(log(m · n))', 'O(m + n)', 'O(m log n)'] },
     insight: {
       q: 'Each row is sorted and starts after the previous row ends. How do you search in O(log(m·n))?',
       options: [
@@ -155,6 +163,7 @@ export const binarySearchProblems: CuratedProblem[] = [
   },
   {
     slug: 'find-first-and-last-position-of-element-in-sorted-array', id: 34, title: 'Find First and Last Position of Element in Sorted Array', difficulty: 'Medium', pattern: 'binary-search',
+    brute: { text: 'Scan once from the left and once from the right.', time: ['O(n)', 'O(log n)', 'O(n log n)', 'O(n²)'] },
     insight: {
       q: "How do you find both ends of the target's range in O(log n)?",
       options: [
@@ -173,6 +182,7 @@ export const binarySearchProblems: CuratedProblem[] = [
   },
   {
     slug: 'koko-eating-bananas', id: 875, title: 'Koko Eating Bananas', difficulty: 'Medium', pattern: 'binary-search',
+    brute: { text: 'Try every speed from 1 upward until one finishes in time.', time: ['O(n · M)', 'O(n log M)', 'O(n)', 'O(M log n)'] },
     insight: {
       q: 'What do you binary-search over?',
       options: [
@@ -192,6 +202,7 @@ export const binarySearchProblems: CuratedProblem[] = [
   },
   {
     slug: 'find-minimum-in-rotated-sorted-array', id: 153, title: 'Find Minimum in Rotated Sorted Array', difficulty: 'Medium', pattern: 'binary-search',
+    brute: { text: 'Scan the whole array for the smallest value.', time: ['O(n)', 'O(log n)', 'O(n log n)', 'O(1)'] },
     insight: {
       q: 'How do you tell which half contains the minimum?',
       options: [
@@ -210,6 +221,7 @@ export const binarySearchProblems: CuratedProblem[] = [
   },
   {
     slug: 'search-in-rotated-sorted-array', id: 33, title: 'Search in Rotated Sorted Array', difficulty: 'Medium', pattern: 'binary-search',
+    brute: { text: 'Scan every element looking for the target.', time: ['O(n)', 'O(log n)', 'O(n log n)', 'O(n²)'] },
     insight: {
       q: 'In a rotated sorted array, how do you decide which half to keep?',
       options: [
@@ -229,6 +241,7 @@ export const binarySearchProblems: CuratedProblem[] = [
   {
     slug: 'time-based-key-value-store', id: 981, title: 'Time Based Key-Value Store', difficulty: 'Medium', pattern: 'binary-search',
     alsoAccept: ['hashing'],
+    brute: { text: 'Scan the key\'s whole history for the latest timestamp at or before t.', time: ['O(n) per get', 'O(log n) per get', 'O(1) per get', 'O(n log n) per get'] },
     insight: {
       q: 'Timestamps for each key arrive in increasing order. How should get(key, t) work?',
       options: [
@@ -248,6 +261,7 @@ export const binarySearchProblems: CuratedProblem[] = [
   },
   {
     slug: 'median-of-two-sorted-arrays', id: 4, title: 'Median of Two Sorted Arrays', difficulty: 'Hard', pattern: 'binary-search',
+    brute: { text: 'Merge both arrays into one and take the middle.', time: ['O(m + n)', 'O(log(m + n))', 'O(log(min(m, n)))', 'O((m + n) log(m + n))'] },
     insight: {
       q: 'How do you find the median in O(log(min(m, n)))?',
       options: [

@@ -77,6 +77,11 @@ export async function writeCachedProblem(problem: LeetCodeProblem): Promise<void
   await atomicWrite(cachePath(problem.slug), JSON.stringify(problem));
 }
 
+/** Writes any other cache file (currently the problem catalog) under data/cache. */
+export async function writeCacheFile(file: string, contents: string): Promise<void> {
+  await atomicWrite(file, contents);
+}
+
 function cachePath(slug: string): string {
   if (!SLUG_RE.test(slug)) throw new Error(`Invalid slug: ${slug}`);
   return join(PROBLEM_CACHE_DIR, `${slug}.json`);

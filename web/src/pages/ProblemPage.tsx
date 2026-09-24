@@ -6,11 +6,24 @@ import { DifficultyTag, ErrorBox, formatDuration, Loading } from '../components.
 import { Quiz } from '../problem/Quiz.tsx';
 import { ResultCard } from '../problem/ResultCard.tsx';
 import { Statement } from '../problem/Statement.tsx';
+import { MySolution } from '../problem/MySolution.tsx';
 import { NotesEditor } from '../problem/Workbench.tsx';
+
+/** "3 months ago", for a unix timestamp in seconds. */
+function describeAge(unixSeconds: number): string {
+  const days = Math.floor((Date.now() / 1000 - unixSeconds) / 86_400);
+  if (days < 1) return 'today';
+  if (days < 30) return `${days} day${days === 1 ? '' : 's'} ago`;
+  const months = Math.round(days / 30);
+  return months < 12 ? `${months} month${months === 1 ? '' : 's'} ago` : `${Math.floor(months / 12)}y ago`;
+}
 
 const JavaEditor = lazy(() => import('../problem/JavaEditor.tsx'));
 
-type Tab = 'approach' | 'java' | 'notes';
+type Tab = 'approach' | 'java' | 'notes' | 'solution';
+
+/** A LeetCode solve older than this is worth redoing (matches the server). */
+const REVISIT_AFTER_DAYS = 60;
 
 export function ProblemPage() {
   const { slug = '' } = useParams();
@@ -52,6 +65,8 @@ export function ProblemPage() {
   const shown = result ?? (retakes === 0 ? (v.progress?.lastResult ?? null) : null);
   const attemptedBefore = (v.progress?.attempts ?? 0) > 0;
   const elapsed = Math.max(0, Math.round((now - startedAt.current) / 1000));
+  const solveAgeDays = v.lcSolvedAt != null ? Math.floor((Date.now() / 1000 - v.lcSolvedAt) / 86_400) : null;
+  const staleSolve = solveAgeDays != null && solveAgeDays >= REVISIT_AFTER_DAYS;
 
   const submit = async (answers: Omit<AttemptSubmission, 'hintsUsed' | 'elapsedSec'>) => {
     setSubmitting(true);
@@ -105,7 +120,23 @@ export function ProblemPage() {
           <div className="row small">
             <DifficultyTag difficulty={v.difficulty} />
             {v.pattern ? <span className="tag tag-accent">{v.pattern.name}</span> : <span className="tag">Pattern hidden</span>}
-            {v.lcSolved && <span className="tag tag-good">Solved on LeetCode</span>}
+            {v.lcSolved && (
+              <span className="tag tag-good">
+                Solved on LeetCode{v.lcSolvedAt != null && ` · ${describeAge(v.lcSolvedAt)}`}
+              </span>
+            )}
+            {staleSolve && (
+              <button
+                className="btn btn-sm"
+                onClick={() => {
+                  retake();
+                  setTab('approach');
+                }}
+                title={`You solved this ${describeAge(v.lcSolvedAt!)}; try the approach check again from scratch`}
+              >
+                Retry
+              </button>
+            )}
             {v.progress?.lastRun && v.progress.lastRun.checked > 0 && v.progress.lastRun.passed === v.progress.lastRun.checked && (
               <span className="tag tag-good" title={`All ${v.progress.lastRun.checked} example tests passed`}>
                 Code verified
@@ -141,11 +172,13 @@ export function ProblemPage() {
 
         <section className="card sticky-col">
           <div className="tabs" role="tablist">
-            {(['approach', 'java', 'notes'] as const).map((t) => (
-              <button key={t} role="tab" aria-selected={tab === t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
-                {{ approach: 'Approach check', java: 'Java', notes: 'Notes' }[t]}
-              </button>
-            ))}
+            {(['approach', 'java', 'notes', 'solution'] as const)
+              .filter((t) => t !== 'solution' || v.lcSolved || v.progress?.leetcodeSolution)
+              .map((t) => (
+                <button key={t} role="tab" aria-selected={tab === t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
+                  {{ approach: 'Approach check', java: 'Java', notes: 'Notes', solution: 'My LeetCode solution' }[t]}
+                </button>
+              ))}
           </div>
 
           <div hidden={tab !== 'approach'}>
@@ -179,6 +212,18 @@ export function ProblemPage() {
           <div hidden={tab !== 'notes'}>
             <NotesEditor key={slug} savedNotes={v.progress?.notes ?? null} save={(notes) => api.saveWork(slug, { notes })} />
           </div>
+          {(v.lcSolved || v.progress?.leetcodeSolution) && (
+            <div hidden={tab !== 'solution'}>
+              <MySolution
+                key={slug}
+                slug={slug}
+                saved={v.progress?.leetcodeSolution ?? null}
+                sessionConfigured={v.sessionConfigured}
+                solvedAt={v.lcSolvedAt}
+                onFetched={view.reload}
+              />
+            </div>
+          )}
         </section>
       </div>
     </main>

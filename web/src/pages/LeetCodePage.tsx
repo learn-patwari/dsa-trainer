@@ -6,7 +6,7 @@ import { ErrorBox, Loading, Rating, timeAgo } from '../components.tsx';
 export function LeetCodePage() {
   const { data, error, reload } = useLoad(api.state, []);
   const [username, setUsername] = useState('');
-  const [busy, setBusy] = useState<null | 'public' | 'session' | 'remove' | 'reset'>(null);
+  const [busy, setBusy] = useState<null | 'public' | 'session' | 'sync' | 'remove' | 'reset'>(null);
   const [message, setMessage] = useState<{ kind: 'good' | 'bad'; text: string } | null>(null);
   const [resetText, setResetText] = useState('');
 
@@ -36,6 +36,12 @@ export function LeetCodePage() {
     run('session', async () => {
       const r = await api.importProfile({ useSession: true });
       return `Imported the full solved list for ${r.username}: ${r.solvedSlugs.length} problems.`;
+    });
+
+  const sync = () =>
+    run('sync', async () => {
+      const r = await api.syncProfile();
+      return `Synced ${r.username}: ${r.solvedCounts.all} solved, ${r.solvedSlugs.length} known problems.`;
     });
 
   const curatedSolved = data.patterns.reduce((s, p) => s + p.lcSolvedInSet, 0);
@@ -122,11 +128,18 @@ export function LeetCodePage() {
               <h2 style={{ margin: 0 }}>{lc.username}</h2>
               <span className="small muted">
                 {lc.fullList ? 'Full solved list' : 'Public profile'} · imported {timeAgo(lc.importedAt)}
+                {lc.syncedAt && lc.syncedAt !== lc.importedAt && ` · synced ${timeAgo(lc.syncedAt)}`}
+                {lc.syncCount && lc.syncCount > 1 ? ` · ${lc.syncCount} syncs` : ''}
               </span>
             </div>
-            <button className="btn btn-sm btn-danger" disabled={busy != null} onClick={() => run('remove', async () => (await api.removeImport(), 'Import removed.'))}>
-              Remove import
-            </button>
+            <div className="row">
+              <button className="btn btn-sm btn-primary" disabled={busy != null} onClick={sync}>
+                {busy === 'sync' ? 'Syncing…' : 'Sync now'}
+              </button>
+              <button className="btn btn-sm btn-danger" disabled={busy != null} onClick={() => run('remove', async () => (await api.removeImport(), 'Import removed.'))}>
+                Remove import
+              </button>
+            </div>
           </div>
           <div className="grid grid-stats" style={{ margin: '1rem 0' }}>
             <Stat label="Solved on LeetCode" value={lc.solvedCounts.all} />
@@ -145,7 +158,7 @@ export function LeetCodePage() {
                 <tr>
                   <th>Pattern</th>
                   <th>Solved on LeetCode (by topic)</th>
-                  <th>Curated solved there</th>
+                  <th>Solves in this pattern</th>
                   <th>Your rating here</th>
                 </tr>
               </thead>
@@ -165,8 +178,15 @@ export function LeetCodePage() {
                         </span>
                       )}
                     </td>
-                    <td className="mono">
-                      {p.lcSolvedInSet}/{p.total}
+                    <td>
+                      <span className="mono">
+                        {Math.min(p.lcSolvedInSet, 2)}/2
+                      </span>{' '}
+                      {p.lcSolvedInSet >= 2 ? (
+                        <span className="tag tag-good">met</span>
+                      ) : (
+                        <span className="tiny muted">of {p.total} problems</span>
+                      )}
                     </td>
                     <td>
                       <Rating rating={p.rating} tier={p.tier} />

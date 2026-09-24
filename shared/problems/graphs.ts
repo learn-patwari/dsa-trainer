@@ -8,6 +8,7 @@ const VE_SPACE = ['O(V + E)', 'O(1)', 'O(V²)', 'O(V · E)'] as const;
 export const graphTraversalProblems: CuratedProblem[] = [
   {
     slug: 'flood-fill', id: 733, title: 'Flood Fill', difficulty: 'Easy', pattern: 'graph-traversal',
+    brute: { text: 'Sweep the whole image recolouring neighbours until a pass changes nothing.', time: ['O((m · n)²)', 'O(m · n)', 'O(m + n)', 'O(m · n · log(m · n))'] },
     insight: {
       q: 'Which pixels should change color?',
       options: [
@@ -28,6 +29,7 @@ export const graphTraversalProblems: CuratedProblem[] = [
   {
     slug: 'number-of-islands', id: 200, title: 'Number of Islands', difficulty: 'Medium', pattern: 'graph-traversal',
     alsoAccept: ['union-find'],
+    brute: { text: 'Check every pair of land cells for adjacency and merge their groups.', time: ['O((m · n)²)', 'O(m · n)', 'O(m + n)', 'O(m · n · log(m · n))'] },
     insight: {
       q: 'How do you count the islands?',
       options: [
@@ -46,6 +48,7 @@ export const graphTraversalProblems: CuratedProblem[] = [
   },
   {
     slug: 'max-area-of-island', id: 695, title: 'Max Area of Island', difficulty: 'Medium', pattern: 'graph-traversal',
+    brute: { text: 'Recompute an island\'s area starting from every land cell it contains.', time: ['O((m · n)²)', 'O(m · n)', 'O(m + n)', 'O(m · n · log(m · n))'] },
     insight: {
       q: "How do you compute each island's area?",
       options: [
@@ -65,6 +68,7 @@ export const graphTraversalProblems: CuratedProblem[] = [
   {
     slug: 'clone-graph', id: 133, title: 'Clone Graph', difficulty: 'Medium', pattern: 'graph-traversal',
     alsoAccept: ['hashing'],
+    brute: { text: 'For each node copied, search the copies made so far by value.', time: ['O(V²)', 'O(V + E)', 'O(V log V)', 'O(V · E)'] },
     insight: {
       q: 'How do you copy a graph that may contain cycles?',
       options: [
@@ -84,6 +88,7 @@ export const graphTraversalProblems: CuratedProblem[] = [
   },
   {
     slug: 'rotting-oranges', id: 994, title: 'Rotting Oranges', difficulty: 'Medium', pattern: 'graph-traversal',
+    brute: { text: 'Sweep the grid each minute rotting neighbours until nothing changes.', time: ['O((m · n)²)', 'O(m · n)', 'O(m + n)', 'O(m · n · log(m · n))'] },
     insight: {
       q: 'How do you compute the minutes until every orange rots?',
       options: [
@@ -104,6 +109,7 @@ export const graphTraversalProblems: CuratedProblem[] = [
   {
     slug: '01-matrix', id: 542, title: '01 Matrix', difficulty: 'Medium', pattern: 'graph-traversal',
     alsoAccept: ['dp-2d'],
+    brute: { text: 'Run a separate BFS from every 1 cell to its nearest 0.', time: ['O((m · n)²)', 'O(m · n)', 'O(m + n)', 'O(m · n · log(m · n))'] },
     insight: {
       q: "How do you get every cell's distance to its nearest 0 efficiently?",
       options: [
@@ -122,6 +128,7 @@ export const graphTraversalProblems: CuratedProblem[] = [
   },
   {
     slug: 'pacific-atlantic-water-flow', id: 417, title: 'Pacific Atlantic Water Flow', difficulty: 'Medium', pattern: 'graph-traversal',
+    brute: { text: 'Run a search from every cell downhill toward both oceans.', time: ['O((m · n)²)', 'O(m · n)', 'O(m + n)', 'O(m · n · log(m · n))'] },
     insight: {
       q: 'How do you find the cells that can reach both oceans efficiently?',
       options: [
@@ -141,6 +148,7 @@ export const graphTraversalProblems: CuratedProblem[] = [
   },
   {
     slug: 'word-ladder', id: 127, title: 'Word Ladder', difficulty: 'Hard', pattern: 'graph-traversal',
+    brute: { text: 'DFS through every transformation sequence and keep the shortest.', time: ['O(N!)', 'O(N · L²)', 'O(N²)', 'O(26^L)'] },
     insight: {
       q: 'Why is this a BFS problem, and how do you find neighbors quickly?',
       options: [
@@ -164,12 +172,13 @@ export const topoSortProblems: CuratedProblem[] = [
   {
     slug: 'course-schedule', id: 207, title: 'Course Schedule', difficulty: 'Medium', pattern: 'topological-sort',
     alsoAccept: ['graph-traversal'],
+    brute: { text: 'From every course, walk all the paths looking for a repeat.', time: ['O(V · (V + E))', 'O(V + E)', 'O(V²)', 'O(2ⱽ)'] },
     insight: {
       q: 'When can all the courses be finished?',
       options: [
-        'Exactly when there\'s no cycle; Kahn\'s algorithm processes all n courses',
-        'When every course has at most one prerequisite',
-        'When there are fewer prerequisite pairs than courses',
+        'Exactly when the graph has no cycle, which Kahn\'s detects',
+        'When every course has at most one prerequisite of its own',
+        'When there are fewer prerequisite pairs than there are courses',
         'When no course lists itself as its own prerequisite',
       ],
       why: "In a cycle every course waits for another, so none can start. Kahn's algorithm repeatedly takes courses with no remaining prerequisites; processing all n means no cycle. DFS with three colors (unvisited / visiting / done) detects the same thing.",
@@ -183,6 +192,7 @@ export const topoSortProblems: CuratedProblem[] = [
   },
   {
     slug: 'course-schedule-ii', id: 210, title: 'Course Schedule II', difficulty: 'Medium', pattern: 'topological-sort',
+    brute: { text: 'Try orders until one satisfies every prerequisite.', time: ['O(V! · E)', 'O(V + E)', 'O(V²)', 'O(2ⱽ)'] },
     insight: {
       q: 'How do you return a valid order of courses?',
       options: [
@@ -202,6 +212,7 @@ export const topoSortProblems: CuratedProblem[] = [
   {
     slug: 'find-eventual-safe-states', id: 802, title: 'Find Eventual Safe States', difficulty: 'Medium', pattern: 'topological-sort',
     alsoAccept: ['graph-traversal'],
+    brute: { text: 'From every node, explore all paths checking none of them loops.', time: ['O(V · (V + E))', 'O(V + E)', 'O(V²)', 'O(2ⱽ)'] },
     insight: {
       q: 'How do you find every node that can never reach a cycle?',
       options: [
@@ -222,6 +233,7 @@ export const topoSortProblems: CuratedProblem[] = [
   {
     slug: 'minimum-height-trees', id: 310, title: 'Minimum Height Trees', difficulty: 'Medium', pattern: 'topological-sort',
     alsoAccept: ['graph-traversal'],
+    brute: { text: 'Run a BFS from every node and keep the smallest height.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'Which nodes give minimum-height trees?',
       options: [
@@ -242,6 +254,7 @@ export const topoSortProblems: CuratedProblem[] = [
   {
     slug: 'parallel-courses-iii', id: 2050, title: 'Parallel Courses III', difficulty: 'Hard', pattern: 'topological-sort',
     alsoAccept: ['dp-1d'],
+    brute: { text: 'Recurse from each course over its prerequisites without memoizing.', time: ['O(2ⁿ)', 'O(n + E)', 'O(n²)', 'O(n · E)'] },
     insight: {
       q: 'How do you compute the minimum total time?',
       options: [
@@ -265,6 +278,7 @@ export const unionFindProblems: CuratedProblem[] = [
   {
     slug: 'number-of-provinces', id: 547, title: 'Number of Provinces', difficulty: 'Medium', pattern: 'union-find',
     alsoAccept: ['graph-traversal'],
+    brute: { text: 'From each city, walk everything it reaches and compare the reached sets.', time: ['O(n³)', 'O(n²)', 'O(n)', 'O(n² log n)'] },
     insight: {
       q: 'How do you count provinces from the adjacency matrix?',
       options: [
@@ -283,6 +297,7 @@ export const unionFindProblems: CuratedProblem[] = [
   },
   {
     slug: 'redundant-connection', id: 684, title: 'Redundant Connection', difficulty: 'Medium', pattern: 'union-find',
+    brute: { text: 'Remove each edge in turn and test whether what remains is a tree.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'How do you find the edge that creates the cycle?',
       options: [
@@ -302,6 +317,7 @@ export const unionFindProblems: CuratedProblem[] = [
   {
     slug: 'accounts-merge', id: 721, title: 'Accounts Merge', difficulty: 'Medium', pattern: 'union-find',
     alsoAccept: ['graph-traversal'],
+    brute: { text: 'Compare every pair of accounts and merge those sharing an email, repeatedly.', time: ['O(N² · L)', 'O(N log N · L)', 'O(N · L)', 'O(N³)'] },
     insight: {
       q: 'How do you merge accounts that share any email?',
       options: [
@@ -322,6 +338,7 @@ export const unionFindProblems: CuratedProblem[] = [
   {
     slug: 'number-of-operations-to-make-network-connected', id: 1319, title: 'Number of Operations to Make Network Connected', difficulty: 'Medium', pattern: 'union-find',
     alsoAccept: ['graph-traversal'],
+    brute: { text: 'Remove each cable in turn and test connectivity by traversal.', time: ['O(E · (n + E))', 'O(n + E · α(n))', 'O(n²)', 'O(E log E)'] },
     insight: {
       q: 'What is the minimum number of cable moves?',
       options: [
@@ -341,6 +358,7 @@ export const unionFindProblems: CuratedProblem[] = [
   {
     slug: 'min-cost-to-connect-all-points', id: 1584, title: 'Min Cost to Connect All Points', difficulty: 'Medium', pattern: 'union-find',
     alsoAccept: ['heap', 'greedy'],
+    brute: { text: 'Try every spanning tree and keep the cheapest.', time: ['O(nⁿ⁻²)', 'O(n² log n)', 'O(n³)', 'O(n log n)'] },
     insight: {
       q: 'How do you connect all points at minimum total cost?',
       options: [
@@ -363,6 +381,7 @@ export const unionFindProblems: CuratedProblem[] = [
 export const shortestPathProblems: CuratedProblem[] = [
   {
     slug: 'network-delay-time', id: 743, title: 'Network Delay Time', difficulty: 'Medium', pattern: 'shortest-path',
+    brute: { text: 'Relax every edge V − 1 times (Bellman-Ford).', time: ['O(V · E)', 'O(E log V)', 'O(V + E)', 'O(V³)'] },
     insight: {
       q: 'How long until every node has received the signal?',
       options: [
@@ -381,6 +400,7 @@ export const shortestPathProblems: CuratedProblem[] = [
   },
   {
     slug: 'path-with-maximum-probability', id: 1514, title: 'Path with Maximum Probability', difficulty: 'Medium', pattern: 'shortest-path',
+    brute: { text: 'Enumerate every path from start to end and keep the best product.', time: ['O(V!)', 'O(E log V)', 'O(V · E)', 'O(V + E)'] },
     insight: {
       q: "How do you adapt Dijkstra when a path's value is the product of its probabilities?",
       options: [
@@ -400,6 +420,7 @@ export const shortestPathProblems: CuratedProblem[] = [
   {
     slug: 'path-with-minimum-effort', id: 1631, title: 'Path With Minimum Effort', difficulty: 'Medium', pattern: 'shortest-path',
     alsoAccept: ['binary-search', 'union-find'],
+    brute: { text: 'Try every route through the grid and keep the smallest maximum step.', time: ['O(4^(m·n))', 'O(m · n · log(m · n))', 'O((m · n)²)', 'O(m · n)'] },
     insight: {
       q: "A path's effort is its largest single step. How do you minimize it?",
       options: [
@@ -420,11 +441,12 @@ export const shortestPathProblems: CuratedProblem[] = [
   {
     slug: 'cheapest-flights-within-k-stops', id: 787, title: 'Cheapest Flights Within K Stops', difficulty: 'Medium', pattern: 'shortest-path',
     alsoAccept: ['graph-traversal', 'dp-2d'],
+    brute: { text: 'Enumerate every route that uses at most k stops.', time: ['O(nᵏ)', 'O(k · E)', 'O(E log n)', 'O(n + E)'] },
     insight: {
       q: "Why doesn't plain Dijkstra work, and what does?",
       options: [
-        'k + 1 Bellman-Ford rounds, each relaxing from a copy of last round\'s prices',
-        'Plain Dijkstra works as long as you stop after popping k cities',
+        'k + 1 Bellman-Ford rounds, relaxing from last round\'s copy',
+        'Plain Dijkstra works if you stop after popping k cities',
         'A BFS counting stops, ignoring the prices of the flights',
         'Sort the flights by price and take the cheapest k + 1 of them',
       ],
@@ -440,6 +462,7 @@ export const shortestPathProblems: CuratedProblem[] = [
   {
     slug: 'swim-in-rising-water', id: 778, title: 'Swim in Rising Water', difficulty: 'Hard', pattern: 'shortest-path',
     alsoAccept: ['binary-search', 'union-find', 'heap'],
+    brute: { text: 'Try each time t in turn and flood-fill to see whether the corner is reachable.', time: ['O(n⁴)', 'O(n² log n)', 'O(n²)', 'O(2ⁿ)'] },
     insight: {
       q: 'What is the least time at which you can reach the bottom-right cell?',
       options: [

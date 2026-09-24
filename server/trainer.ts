@@ -2,11 +2,15 @@ import { randomInt } from 'node:crypto';
 import { getPattern, isPatternId, patternName, PATTERNS } from '../shared/patterns/index.ts';
 import { getProblem, PROBLEMS, problemsForPattern } from '../shared/problems/index.ts';
 import { scoreAttempt, START_RATING, tierFor, updateRating } from '../shared/scoring.ts';
+import { challengeStats } from './challenge.ts';
+import { sessionFromEnv } from './leetcode.ts';
+import { difficultyProgress, streak, studyPlan } from './plan.ts';
 import type {
   AttemptResult,
   AttemptSubmission,
   CuratedProblem,
   DashboardState,
+  LeetCodeSolution,
   PatternDetail,
   PatternId,
   PatternSummary,
@@ -14,12 +18,17 @@ import type {
   ProblemView,
   Progress,
   Recommendation,
+  RevisitItem,
   RunResult,
 } from '../shared/types.ts';
 
 const HISTORY_LIMIT = 1000;
 /** Fewer LeetCode solves than this under a pattern's topic tags counts as "avoided". */
 const AVOIDED_BELOW = 5;
+/** Problems in a pattern you must actually solve on LeetCode before it counts as done. */
+export const LC_SOLVES_REQUIRED = 2;
+/** A LeetCode solve older than this is worth revisiting. */
+export const REVISIT_AFTER_DAYS = 60;
 
 export class HttpError extends Error {
   constructor(
@@ -58,6 +67,28 @@ function lcSolvedSet(p: Progress): Set<string> {
   return new Set(p.leetcode?.solvedSlugs ?? []);
 }
 
+/** When LeetCode accepted your solution: from a fetched submission, else from the import. */
+export function lcSolvedAt(p: Progress, slug: string): number | null {
+  return p.problems[slug]?.leetcodeSolution?.solvedAt ?? p.leetcode?.solvedAt?.[slug] ?? null;
+}
+
+function daysSince(unixSeconds: number): number {
+  return Math.floor((Date.now() / 1000 - unixSeconds) / 86_400);
+}
+
+/** Problems solved on LeetCode long enough ago that the approach is probably cold. */
+export function revisitList(p: Progress, limit = 6): RevisitItem[] {
+  const items: RevisitItem[] = [];
+  for (const q of PROBLEMS) {
+    const at = lcSolvedAt(p, q.slug);
+    if (at == null) continue;
+    const days = daysSince(at);
+    if (days < REVISIT_AFTER_DAYS) continue;
+    items.push({ slug: q.slug, title: q.title, difficulty: q.difficulty, pattern: q.pattern, patternName: patternName(q.pattern), solvedAt: at, days });
+  }
+  return items.sort((a, b) => b.days - a.days).slice(0, limit);
+}
+
 // ---------------------------------------------------------------- problem page
 
 export function problemView(p: Progress, slug: string, mode: PracticeMode): ProblemView {
@@ -75,6 +106,7 @@ export function problemView(p: Progress, slug: string, mode: PracticeMode): Prob
     pattern: reveal ? { id: problem.pattern, name: patternName(problem.pattern) } : null,
     quiz: {
       askPattern: mode === 'blind',
+      brute: problem.brute ? { options: shuffled(problem.brute.time) } : null,
       insight: { q: problem.insight.q, options: shuffled(problem.insight.options) },
       vars: problem.vars ?? null,
       time: shuffled(problem.time),
@@ -82,6 +114,8 @@ export function problemView(p: Progress, slug: string, mode: PracticeMode): Prob
       edgeCases: problem.edgeCases,
     },
     lcSolved: lcSolvedSet(p).has(slug),
+    lcSolvedAt: lcSolvedAt(p, slug),
+    sessionConfigured: sessionFromEnv() != null,
     progress,
     nextInPattern: siblings[idx + 1]?.slug ?? null,
   };
@@ -97,6 +131,7 @@ export function validateSubmission(body: unknown): AttemptSubmission {
   return {
     mode: parseMode(b.mode),
     pattern: isPatternId(b.pattern) ? b.pattern : null,
+    brute: str(b.brute),
     insight: str(b.insight),
     time: str(b.time),
     space: str(b.space),
@@ -185,6 +220,22 @@ export function recordRun(p: Progress, slug: string, code: string, result: RunRe
   };
 }
 
+/** Stores the accepted submission fetched from LeetCode for this problem. */
+export function recordSolution(p: Progress, slug: string, solution: LeetCodeSolution): void {
+  requireProblem(slug);
+  const existing = p.problems[slug];
+  p.problems[slug] = {
+    attempts: 0,
+    bestPercent: 0,
+    lastPercent: 0,
+    lastAt: '',
+    ...existing,
+    leetcodeSolution: solution,
+  };
+  // A fetched submission is proof it's solved, even if the import missed it.
+  if (p.leetcode && !p.leetcode.solvedSlugs.includes(slug)) p.leetcode.solvedSlugs.push(slug);
+}
+
 export function codeVerified(p: Progress, slug: string): boolean {
   const run = p.problems[slug]?.lastRun;
   return run != null && run.compiled && run.checked > 0 && run.passed === run.checked;
@@ -219,6 +270,10 @@ export function patternSummary(p: Progress, id: PatternId): PatternSummary {
     attempted: problems.filter((q) => attempted(p, q.slug)).length,
     lcSolvedInSet: problems.filter((q) => solvedOnLc.has(q.slug)).length,
     lcTagSolved: lcTagSolved(p, id),
+    // Without an import there's nothing to verify against, so settling here is enough.
+    complete:
+      (p.ratedAttempts[id] ?? 0) >= SETTLE_AFTER &&
+      (p.leetcode == null || problems.filter((q) => solvedOnLc.has(q.slug)).length >= LC_SOLVES_REQUIRED),
   };
 }
 
@@ -251,12 +306,19 @@ function inProgress(s: PatternSummary): boolean {
  * Patterns ordered from "most needs work" to "least": finish settling patterns you've
  * started, then low ratings, then patterns you've avoided on LeetCode.
  */
+/** The LeetCode-solves rule only applies once there's an import to check against. */
+function owesLeetCodeSolves(p: Progress, s: PatternSummary): boolean {
+  return p.leetcode != null && s.ratedAttempts >= SETTLE_AFTER && s.lcSolvedInSet < LC_SOLVES_REQUIRED;
+}
+
 function prioritizedPatterns(p: Progress): PatternSummary[] {
   const order = new Map(PATTERNS.map((pt, i) => [pt.id, i]));
   const weight = (s: PatternSummary) =>
     (s.rating ?? START_RATING) -
     (inProgress(s) ? 150 : 0) -
     (s.lcTagSolved != null && s.lcTagSolved < AVOIDED_BELOW ? 60 : 0) +
+    // Settled here but not yet proven on LeetCode: nudge it ahead of untouched patterns.
+    (owesLeetCodeSolves(p, s) ? -120 : 0) +
     (s.attempted >= s.total ? 10_000 : 0);
   return PATTERNS.map((pt) => patternSummary(p, pt.id)).sort(
     (a, b) => weight(a) - weight(b) || order.get(a.id)! - order.get(b.id)!,
@@ -272,6 +334,7 @@ function nextProblem(p: Progress, id: PatternId, exclude?: string): CuratedProbl
 
 function reasonFor(s: PatternSummary): string {
   const left = s.total - s.attempted;
+  const solvesLeft = LC_SOLVES_REQUIRED - s.lcSolvedInSet;
   if (inProgress(s)) {
     const more = SETTLE_AFTER - s.ratedAttempts;
     return `Keep going: ${more} more problem${more === 1 ? '' : 's'} to settle this rating (now ${s.rating})`;
@@ -281,13 +344,21 @@ function reasonFor(s: PatternSummary): string {
       ? `New pattern, and you've solved only ${s.lcTagSolved} related problem${s.lcTagSolved === 1 ? '' : 's'} on LeetCode`
       : 'New pattern: read the lesson, then try its first problem';
   }
+  if (s.ratedAttempts >= SETTLE_AFTER && solvesLeft > 0) {
+    return `Rating ${s.rating} (${s.tier}), but solve ${solvesLeft} more of these on LeetCode to finish the pattern`;
+  }
   return `Rating ${s.rating} (${s.tier}), ${left} problem${left === 1 ? '' : 's'} left`;
 }
 
 export function recommendations(p: Progress, limit = 3): Recommendation[] {
   const out: Recommendation[] = [];
+  const solvedOnLc = lcSolvedSet(p);
   for (const s of prioritizedPatterns(p)) {
-    const next = nextProblem(p, s.id);
+    // Short on LeetCode solves? Point at a problem you've already worked out here.
+    const owed = owesLeetCodeSolves(p, s);
+    const next = owed
+      ? (problemsForPattern(s.id).find((q) => attempted(p, q.slug) && !solvedOnLc.has(q.slug)) ?? nextProblem(p, s.id))
+      : nextProblem(p, s.id);
     if (!next) continue;
     out.push({
       slug: next.slug,
@@ -295,7 +366,9 @@ export function recommendations(p: Progress, limit = 3): Recommendation[] {
       difficulty: next.difficulty,
       pattern: s.id,
       patternName: s.name,
-      reason: reasonFor(s),
+      reason: owed
+        ? `Settled here — now solve ${LC_SOLVES_REQUIRED - s.lcSolvedInSet} more of these on LeetCode to finish the pattern`
+        : reasonFor(s),
     });
     if (out.length === limit) break;
   }
@@ -329,5 +402,10 @@ export function dashboard(p: Progress, sessionConfigured: boolean): DashboardSta
     recent: p.history.slice(-8).reverse(),
     leetcode: p.leetcode ?? null,
     sessionConfigured,
+    revisit: revisitList(p),
+    challenge: challengeStats(p),
+    plan: studyPlan(p),
+    streak: streak(p),
+    difficulty: difficultyProgress(p),
   };
 }

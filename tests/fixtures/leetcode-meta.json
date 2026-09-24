@@ -24,6 +24,14 @@
   "paidOnly": false
  },
  {
+  "slug": "isomorphic-strings",
+  "id": 205,
+  "title": "Isomorphic Strings",
+  "difficulty": "Easy",
+  "pattern": "hashing",
+  "paidOnly": false
+ },
+ {
   "slug": "group-anagrams",
   "id": 49,
   "title": "Group Anagrams",
@@ -56,6 +64,14 @@
   "paidOnly": false
  },
  {
+  "slug": "4sum-ii",
+  "id": 454,
+  "title": "4Sum II",
+  "difficulty": "Medium",
+  "pattern": "hashing",
+  "paidOnly": false
+ },
+ {
   "slug": "valid-palindrome",
   "id": 125,
   "title": "Valid Palindrome",
@@ -67,6 +83,14 @@
   "slug": "move-zeroes",
   "id": 283,
   "title": "Move Zeroes",
+  "difficulty": "Easy",
+  "pattern": "two-pointers",
+  "paidOnly": false
+ },
+ {
+  "slug": "squares-of-a-sorted-array",
+  "id": 977,
+  "title": "Squares of a Sorted Array",
   "difficulty": "Easy",
   "pattern": "two-pointers",
   "paidOnly": false
@@ -99,6 +123,14 @@
   "slug": "sort-colors",
   "id": 75,
   "title": "Sort Colors",
+  "difficulty": "Medium",
+  "pattern": "two-pointers",
+  "paidOnly": false
+ },
+ {
+  "slug": "boats-to-save-people",
+  "id": 881,
+  "title": "Boats to Save People",
   "difficulty": "Medium",
   "pattern": "two-pointers",
   "paidOnly": false
@@ -147,6 +179,22 @@
   "slug": "permutation-in-string",
   "id": 567,
   "title": "Permutation in String",
+  "difficulty": "Medium",
+  "pattern": "sliding-window",
+  "paidOnly": false
+ },
+ {
+  "slug": "max-consecutive-ones-iii",
+  "id": 1004,
+  "title": "Max Consecutive Ones III",
+  "difficulty": "Medium",
+  "pattern": "sliding-window",
+  "paidOnly": false
+ },
+ {
+  "slug": "find-all-anagrams-in-a-string",
+  "id": 438,
+  "title": "Find All Anagrams in a String",
   "difficulty": "Medium",
   "pattern": "sliding-window",
   "paidOnly": false
@@ -216,9 +264,33 @@
   "paidOnly": false
  },
  {
+  "slug": "continuous-subarray-sum",
+  "id": 523,
+  "title": "Continuous Subarray Sum",
+  "difficulty": "Medium",
+  "pattern": "prefix-sum",
+  "paidOnly": false
+ },
+ {
+  "slug": "subarray-sums-divisible-by-k",
+  "id": 974,
+  "title": "Subarray Sums Divisible by K",
+  "difficulty": "Medium",
+  "pattern": "prefix-sum",
+  "paidOnly": false
+ },
+ {
   "slug": "binary-search",
   "id": 704,
   "title": "Binary Search",
+  "difficulty": "Easy",
+  "pattern": "binary-search",
+  "paidOnly": false
+ },
+ {
+  "slug": "search-insert-position",
+  "id": 35,
+  "title": "Search Insert Position",
   "difficulty": "Easy",
   "pattern": "binary-search",
   "paidOnly": false
@@ -272,6 +344,14 @@
   "paidOnly": false
  },
  {
+  "slug": "capacity-to-ship-packages-within-d-days",
+  "id": 1011,
+  "title": "Capacity To Ship Packages Within D Days",
+  "difficulty": "Medium",
+  "pattern": "binary-search",
+  "paidOnly": false
+ },
+ {
   "slug": "median-of-two-sorted-arrays",
   "id": 4,
   "title": "Median of Two Sorted Arrays",
@@ -320,6 +400,22 @@
   "paidOnly": false
  },
  {
+  "slug": "simplify-path",
+  "id": 71,
+  "title": "Simplify Path",
+  "difficulty": "Medium",
+  "pattern": "stack",
+  "paidOnly": false
+ },
+ {
+  "slug": "basic-calculator-ii",
+  "id": 227,
+  "title": "Basic Calculator II",
+  "difficulty": "Medium",
+  "pattern": "stack",
+  "paidOnly": false
+ },
+ {
   "slug": "next-greater-element-i",
   "id": 496,
   "title": "Next Greater Element I",
@@ -355,6 +451,22 @@
   "slug": "remove-k-digits",
   "id": 402,
   "title": "Remove K Digits",
+  "difficulty": "Medium",
+  "pattern": "monotonic-stack",
+  "paidOnly": false
+ },
+ {
+  "slug": "sum-of-subarray-minimums",
+  "id": 907,
+  "title": "Sum of Subarray Minimums",
+  "difficulty": "Medium",
+  "pattern": "monotonic-stack",
+  "paidOnly": false
+ },
+ {
+  "slug": "next-greater-element-ii",
+  "id": 503,
+  "title": "Next Greater Element II",
   "difficulty": "Medium",
   "pattern": "monotonic-stack",
   "paidOnly": false
@@ -416,6 +528,22 @@
   "paidOnly": false
  },
  {
+  "slug": "add-two-numbers",
+  "id": 2,
+  "title": "Add Two Numbers",
+  "difficulty": "Medium",
+  "pattern": "linked-list",
+  "paidOnly": false
+ },
+ {
+  "slug": "swap-nodes-in-pairs",
+  "id": 24,
+  "title": "Swap Nodes in Pairs",
+  "difficulty": "Medium",
+  "pattern": "linked-list",
+  "paidOnly": false
+ },
+ {
   "slug": "reverse-nodes-in-k-group",
   "id": 25,
   "title": "Reverse Nodes in k-Group",
@@ -448,6 +576,14 @@
   "paidOnly": false
  },
  {
+  "slug": "palindrome-linked-list",
+  "id": 234,
+  "title": "Palindrome Linked List",
+  "difficulty": "Easy",
+  "pattern": "fast-slow",
+  "paidOnly": false
+ },
+ {
   "slug": "linked-list-cycle-ii",
   "id": 142,
   "title": "Linked List Cycle II",
@@ -459,6 +595,14 @@
   "slug": "find-the-duplicate-number",
   "id": 287,
   "title": "Find the Duplicate Number",
+  "difficulty": "Medium",
+  "pattern": "fast-slow",
+  "paidOnly": false
+ },
+ {
+  "slug": "circular-array-loop",
+  "id": 457,
+  "title": "Circular Array Loop",
   "difficulty": "Medium",
   "pattern": "fast-slow",
   "paidOnly": false
@@ -483,6 +627,14 @@
   "slug": "diameter-of-binary-tree",
   "id": 543,
   "title": "Diameter of Binary Tree",
+  "difficulty": "Easy",
+  "pattern": "tree-dfs",
+  "paidOnly": false
+ },
+ {
+  "slug": "subtree-of-another-tree",
+  "id": 572,
+  "title": "Subtree of Another Tree",
   "difficulty": "Easy",
   "pattern": "tree-dfs",
   "paidOnly": false
@@ -528,6 +680,14 @@
   "paidOnly": false
  },
  {
+  "slug": "path-sum-ii",
+  "id": 113,
+  "title": "Path Sum II",
+  "difficulty": "Medium",
+  "pattern": "tree-dfs",
+  "paidOnly": false
+ },
+ {
   "slug": "binary-tree-maximum-path-sum",
   "id": 124,
   "title": "Binary Tree Maximum Path Sum",
@@ -547,6 +707,14 @@
   "slug": "average-of-levels-in-binary-tree",
   "id": 637,
   "title": "Average of Levels in Binary Tree",
+  "difficulty": "Easy",
+  "pattern": "tree-bfs",
+  "paidOnly": false
+ },
+ {
+  "slug": "minimum-depth-of-binary-tree",
+  "id": 111,
+  "title": "Minimum Depth of Binary Tree",
   "difficulty": "Easy",
   "pattern": "tree-bfs",
   "paidOnly": false
@@ -584,9 +752,25 @@
   "paidOnly": false
  },
  {
+  "slug": "populating-next-right-pointers-in-each-node",
+  "id": 116,
+  "title": "Populating Next Right Pointers in Each Node",
+  "difficulty": "Medium",
+  "pattern": "tree-bfs",
+  "paidOnly": false
+ },
+ {
   "slug": "kth-largest-element-in-a-stream",
   "id": 703,
   "title": "Kth Largest Element in a Stream",
+  "difficulty": "Easy",
+  "pattern": "heap",
+  "paidOnly": false
+ },
+ {
+  "slug": "last-stone-weight",
+  "id": 1046,
+  "title": "Last Stone Weight",
   "difficulty": "Easy",
   "pattern": "heap",
   "paidOnly": false
@@ -619,6 +803,14 @@
   "slug": "task-scheduler",
   "id": 621,
   "title": "Task Scheduler",
+  "difficulty": "Medium",
+  "pattern": "heap",
+  "paidOnly": false
+ },
+ {
+  "slug": "reorganize-string",
+  "id": 767,
+  "title": "Reorganize String",
   "difficulty": "Medium",
   "pattern": "heap",
   "paidOnly": false
@@ -680,6 +872,22 @@
   "paidOnly": false
  },
  {
+  "slug": "minimum-number-of-arrows-to-burst-balloons",
+  "id": 452,
+  "title": "Minimum Number of Arrows to Burst Balloons",
+  "difficulty": "Medium",
+  "pattern": "intervals",
+  "paidOnly": false
+ },
+ {
+  "slug": "my-calendar-i",
+  "id": 729,
+  "title": "My Calendar I",
+  "difficulty": "Medium",
+  "pattern": "intervals",
+  "paidOnly": false
+ },
+ {
   "slug": "minimum-interval-to-include-each-query",
   "id": 1851,
   "title": "Minimum Interval to Include Each Query",
@@ -691,6 +899,14 @@
   "slug": "best-time-to-buy-and-sell-stock",
   "id": 121,
   "title": "Best Time to Buy and Sell Stock",
+  "difficulty": "Easy",
+  "pattern": "greedy",
+  "paidOnly": false
+ },
+ {
+  "slug": "assign-cookies",
+  "id": 455,
+  "title": "Assign Cookies",
   "difficulty": "Easy",
   "pattern": "greedy",
   "paidOnly": false
@@ -739,6 +955,14 @@
   "slug": "valid-parenthesis-string",
   "id": 678,
   "title": "Valid Parenthesis String",
+  "difficulty": "Medium",
+  "pattern": "greedy",
+  "paidOnly": false
+ },
+ {
+  "slug": "hand-of-straights",
+  "id": 846,
+  "title": "Hand of Straights",
   "difficulty": "Medium",
   "pattern": "greedy",
   "paidOnly": false
@@ -795,6 +1019,22 @@
   "slug": "palindrome-partitioning",
   "id": 131,
   "title": "Palindrome Partitioning",
+  "difficulty": "Medium",
+  "pattern": "backtracking",
+  "paidOnly": false
+ },
+ {
+  "slug": "letter-combinations-of-a-phone-number",
+  "id": 17,
+  "title": "Letter Combinations of a Phone Number",
+  "difficulty": "Medium",
+  "pattern": "backtracking",
+  "paidOnly": false
+ },
+ {
+  "slug": "combination-sum-ii",
+  "id": 40,
+  "title": "Combination Sum II",
   "difficulty": "Medium",
   "pattern": "backtracking",
   "paidOnly": false
@@ -864,6 +1104,22 @@
   "paidOnly": false
  },
  {
+  "slug": "surrounded-regions",
+  "id": 130,
+  "title": "Surrounded Regions",
+  "difficulty": "Medium",
+  "pattern": "graph-traversal",
+  "paidOnly": false
+ },
+ {
+  "slug": "shortest-path-in-binary-matrix",
+  "id": 1091,
+  "title": "Shortest Path in Binary Matrix",
+  "difficulty": "Medium",
+  "pattern": "graph-traversal",
+  "paidOnly": false
+ },
+ {
   "slug": "word-ladder",
   "id": 127,
   "title": "Word Ladder",
@@ -899,6 +1155,22 @@
   "slug": "minimum-height-trees",
   "id": 310,
   "title": "Minimum Height Trees",
+  "difficulty": "Medium",
+  "pattern": "topological-sort",
+  "paidOnly": false
+ },
+ {
+  "slug": "course-schedule-iv",
+  "id": 1462,
+  "title": "Course Schedule IV",
+  "difficulty": "Medium",
+  "pattern": "topological-sort",
+  "paidOnly": false
+ },
+ {
+  "slug": "find-all-possible-recipes-from-given-supplies",
+  "id": 2115,
+  "title": "Find All Possible Recipes from Given Supplies",
   "difficulty": "Medium",
   "pattern": "topological-sort",
   "paidOnly": false
@@ -952,6 +1224,22 @@
   "paidOnly": false
  },
  {
+  "slug": "satisfiability-of-equality-equations",
+  "id": 990,
+  "title": "Satisfiability of Equality Equations",
+  "difficulty": "Medium",
+  "pattern": "union-find",
+  "paidOnly": false
+ },
+ {
+  "slug": "most-stones-removed-with-same-row-or-column",
+  "id": 947,
+  "title": "Most Stones Removed with Same Row or Column",
+  "difficulty": "Medium",
+  "pattern": "union-find",
+  "paidOnly": false
+ },
+ {
   "slug": "network-delay-time",
   "id": 743,
   "title": "Network Delay Time",
@@ -984,6 +1272,14 @@
   "paidOnly": false
  },
  {
+  "slug": "number-of-ways-to-arrive-at-destination",
+  "id": 1976,
+  "title": "Number of Ways to Arrive at Destination",
+  "difficulty": "Medium",
+  "pattern": "shortest-path",
+  "paidOnly": false
+ },
+ {
   "slug": "swim-in-rising-water",
   "id": 778,
   "title": "Swim in Rising Water",
@@ -992,9 +1288,25 @@
   "paidOnly": false
  },
  {
+  "slug": "minimum-cost-to-make-at-least-one-valid-path-in-a-grid",
+  "id": 1368,
+  "title": "Minimum Cost to Make at Least One Valid Path in a Grid",
+  "difficulty": "Hard",
+  "pattern": "shortest-path",
+  "paidOnly": false
+ },
+ {
   "slug": "climbing-stairs",
   "id": 70,
   "title": "Climbing Stairs",
+  "difficulty": "Easy",
+  "pattern": "dp-1d",
+  "paidOnly": false
+ },
+ {
+  "slug": "min-cost-climbing-stairs",
+  "id": 746,
+  "title": "Min Cost Climbing Stairs",
   "difficulty": "Easy",
   "pattern": "dp-1d",
   "paidOnly": false
@@ -1064,6 +1376,14 @@
   "paidOnly": false
  },
  {
+  "slug": "perfect-squares",
+  "id": 279,
+  "title": "Perfect Squares",
+  "difficulty": "Medium",
+  "pattern": "dp-1d",
+  "paidOnly": false
+ },
+ {
   "slug": "unique-paths",
   "id": 62,
   "title": "Unique Paths",
@@ -1128,6 +1448,22 @@
   "paidOnly": false
  },
  {
+  "slug": "minimum-path-sum",
+  "id": 64,
+  "title": "Minimum Path Sum",
+  "difficulty": "Medium",
+  "pattern": "dp-2d",
+  "paidOnly": false
+ },
+ {
+  "slug": "interleaving-string",
+  "id": 97,
+  "title": "Interleaving String",
+  "difficulty": "Medium",
+  "pattern": "dp-2d",
+  "paidOnly": false
+ },
+ {
   "slug": "longest-increasing-path-in-a-matrix",
   "id": 329,
   "title": "Longest Increasing Path in a Matrix",
@@ -1155,6 +1491,22 @@
   "slug": "replace-words",
   "id": 648,
   "title": "Replace Words",
+  "difficulty": "Medium",
+  "pattern": "trie",
+  "paidOnly": false
+ },
+ {
+  "slug": "longest-word-in-dictionary",
+  "id": 720,
+  "title": "Longest Word in Dictionary",
+  "difficulty": "Medium",
+  "pattern": "trie",
+  "paidOnly": false
+ },
+ {
+  "slug": "map-sum-pairs",
+  "id": 677,
+  "title": "Map Sum Pairs",
   "difficulty": "Medium",
   "pattern": "trie",
   "paidOnly": false
@@ -1200,9 +1552,25 @@
   "paidOnly": false
  },
  {
+  "slug": "reverse-bits",
+  "id": 190,
+  "title": "Reverse Bits",
+  "difficulty": "Easy",
+  "pattern": "bit-manipulation",
+  "paidOnly": false
+ },
+ {
   "slug": "sum-of-two-integers",
   "id": 371,
   "title": "Sum of Two Integers",
+  "difficulty": "Medium",
+  "pattern": "bit-manipulation",
+  "paidOnly": false
+ },
+ {
+  "slug": "single-number-ii",
+  "id": 137,
+  "title": "Single Number II",
   "difficulty": "Medium",
   "pattern": "bit-manipulation",
   "paidOnly": false

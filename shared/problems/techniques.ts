@@ -3,6 +3,7 @@ import type { CuratedProblem } from '../types.ts';
 export const intervalProblems: CuratedProblem[] = [
   {
     slug: 'merge-intervals', id: 56, title: 'Merge Intervals', difficulty: 'Medium', pattern: 'intervals',
+    brute: { text: 'Repeatedly scan for any overlapping pair and merge it.', time: ['O(n³)', 'O(n²)', 'O(n log n)', 'O(n)'] },
     insight: {
       q: 'After sorting by start, when do two intervals merge?',
       options: [
@@ -22,6 +23,7 @@ export const intervalProblems: CuratedProblem[] = [
   },
   {
     slug: 'insert-interval', id: 57, title: 'Insert Interval', difficulty: 'Medium', pattern: 'intervals',
+    brute: { text: 'Append the new interval, sort everything, then merge from scratch.', time: ['O(n log n)', 'O(n)', 'O(n²)', 'O(log n)'] },
     insight: {
       q: 'The intervals are sorted and disjoint. How do you insert newInterval in one pass?',
       options: [
@@ -42,6 +44,7 @@ export const intervalProblems: CuratedProblem[] = [
   {
     slug: 'non-overlapping-intervals', id: 435, title: 'Non-overlapping Intervals', difficulty: 'Medium', pattern: 'intervals',
     alsoAccept: ['greedy'],
+    brute: { text: 'Try every subset and keep the largest non-overlapping one.', time: ['O(2ⁿ · n)', 'O(n²)', 'O(n log n)', 'O(n)'] },
     insight: {
       q: 'Which intervals should you keep to remove as few as possible?',
       options: [
@@ -60,6 +63,7 @@ export const intervalProblems: CuratedProblem[] = [
   {
     slug: 'interval-list-intersections', id: 986, title: 'Interval List Intersections', difficulty: 'Medium', pattern: 'intervals',
     alsoAccept: ['two-pointers'],
+    brute: { text: 'Compare every interval of A with every interval of B.', time: ['O(m · n)', 'O(m + n)', 'O((m + n) log(m + n))', 'O(m log n)'] },
     insight: {
       q: 'Both lists are sorted and disjoint. How do you find all intersections?',
       options: [
@@ -80,6 +84,7 @@ export const intervalProblems: CuratedProblem[] = [
   {
     slug: 'car-pooling', id: 1094, title: 'Car Pooling', difficulty: 'Medium', pattern: 'intervals',
     alsoAccept: ['prefix-sum', 'heap'],
+    brute: { text: 'For each trip, add up the passengers of every trip overlapping it.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n · L)'] },
     insight: {
       q: 'How do you check that the capacity is never exceeded?',
       options: [
@@ -100,6 +105,7 @@ export const intervalProblems: CuratedProblem[] = [
   {
     slug: 'minimum-interval-to-include-each-query', id: 1851, title: 'Minimum Interval to Include Each Query', difficulty: 'Hard', pattern: 'intervals',
     alsoAccept: ['heap'],
+    brute: { text: 'For each query, scan all intervals for the smallest one covering it.', time: ['O(n · q)', 'O(n log n + q log q)', 'O(n + q)', 'O(q log n)'] },
     insight: {
       q: 'How do you answer every query efficiently?',
       options: [
@@ -123,6 +129,7 @@ export const greedyProblems: CuratedProblem[] = [
   {
     slug: 'best-time-to-buy-and-sell-stock', id: 121, title: 'Best Time to Buy and Sell Stock', difficulty: 'Easy', pattern: 'greedy',
     alsoAccept: ['sliding-window', 'dp-1d'],
+    brute: { text: 'Try every buy day paired with every later sell day.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: 'Which single pass finds the best profit?',
       options: [
@@ -141,6 +148,7 @@ export const greedyProblems: CuratedProblem[] = [
   {
     slug: 'maximum-subarray', id: 53, title: 'Maximum Subarray', difficulty: 'Medium', pattern: 'greedy',
     alsoAccept: ['dp-1d'],
+    brute: { text: 'Walk every subarray keeping a running sum.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(n³)'] },
     insight: {
       q: "What does Kadane's algorithm decide at each element x?",
       options: [
@@ -159,6 +167,7 @@ export const greedyProblems: CuratedProblem[] = [
   {
     slug: 'jump-game', id: 55, title: 'Jump Game', difficulty: 'Medium', pattern: 'greedy',
     alsoAccept: ['dp-1d'],
+    brute: { text: 'Explore every jump sequence recursively.', time: ['O(2ⁿ)', 'O(n²)', 'O(n)', 'O(n log n)'] },
     insight: {
       q: 'How do you decide whether the last index is reachable?',
       options: [
@@ -177,6 +186,7 @@ export const greedyProblems: CuratedProblem[] = [
   {
     slug: 'jump-game-ii', id: 45, title: 'Jump Game II', difficulty: 'Medium', pattern: 'greedy',
     alsoAccept: ['dp-1d', 'graph-traversal'],
+    brute: { text: 'Recurse over every jump choice and keep the fewest.', time: ['O(2ⁿ)', 'O(n²)', 'O(n)', 'O(n log n)'] },
     insight: {
       q: 'How do you find the minimum number of jumps in one pass?',
       options: [
@@ -194,6 +204,7 @@ export const greedyProblems: CuratedProblem[] = [
   },
   {
     slug: 'gas-station', id: 134, title: 'Gas Station', difficulty: 'Medium', pattern: 'greedy',
+    brute: { text: 'Simulate the whole loop starting from each station.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(2ⁿ)'] },
     insight: {
       q: 'How do you find the valid starting station in one pass?',
       options: [
@@ -213,6 +224,7 @@ export const greedyProblems: CuratedProblem[] = [
   {
     slug: 'partition-labels', id: 763, title: 'Partition Labels', difficulty: 'Medium', pattern: 'greedy',
     alsoAccept: ['intervals', 'hashing'],
+    brute: { text: 'For each cut point, check that no letter spans it.', time: ['O(n²)', 'O(n)', 'O(n log n)', 'O(2ⁿ)'] },
     insight: {
       q: 'Where can a part end?',
       options: [
@@ -231,6 +243,7 @@ export const greedyProblems: CuratedProblem[] = [
   {
     slug: 'valid-parenthesis-string', id: 678, title: 'Valid Parenthesis String', difficulty: 'Medium', pattern: 'greedy',
     alsoAccept: ['stack', 'dp-2d'],
+    brute: { text: 'Try all three meanings of every star.', time: ['O(3ⁿ)', 'O(n²)', 'O(n)', 'O(2ⁿ)'] },
     insight: {
       q: "How do you handle '*' (which may be '(', ')' or empty) in O(n)?",
       options: [
@@ -252,6 +265,7 @@ export const backtrackingProblems: CuratedProblem[] = [
   {
     slug: 'subsets', id: 78, title: 'Subsets', difficulty: 'Medium', pattern: 'backtracking',
     alsoAccept: ['bit-manipulation'],
+    brute: { text: 'Generate every permutation and keep the distinct sets.', time: ['O(n · n!)', 'O(n · 2ⁿ)', 'O(2ⁿ)', 'O(n²)'] },
     insight: {
       q: 'How do you generate every subset exactly once?',
       options: [
@@ -269,6 +283,7 @@ export const backtrackingProblems: CuratedProblem[] = [
   },
   {
     slug: 'permutations', id: 46, title: 'Permutations', difficulty: 'Medium', pattern: 'backtracking',
+    brute: { text: 'Generate every sequence of n choices and throw away those with repeats.', time: ['O(n · nⁿ)', 'O(n · n!)', 'O(2ⁿ)', 'O(n²)'] },
     insight: {
       q: 'How do you build each permutation without repeating elements?',
       options: [
@@ -287,6 +302,7 @@ export const backtrackingProblems: CuratedProblem[] = [
   },
   {
     slug: 'combination-sum', id: 39, title: 'Combination Sum', difficulty: 'Medium', pattern: 'backtracking',
+    brute: { text: 'Generate every ordered sequence summing to the target, then deduplicate.', time: ['O(nᵀ)', 'O(n^(T/m))', 'O(n · T)', 'O(2ⁿ)'] },
     insight: {
       q: 'Candidates may be reused. How do you avoid duplicates such as [2,3] and [3,2]?',
       options: [
@@ -306,6 +322,7 @@ export const backtrackingProblems: CuratedProblem[] = [
   },
   {
     slug: 'subsets-ii', id: 90, title: 'Subsets II', difficulty: 'Medium', pattern: 'backtracking',
+    brute: { text: 'Generate all 2ⁿ subsets, sort each, and drop duplicates with a set.', time: ['O(n log n · 2ⁿ)', 'O(n · 2ⁿ)', 'O(2ⁿ)', 'O(n²)'] },
     insight: {
       q: 'The input has duplicates. How do you avoid duplicate subsets?',
       options: [
@@ -323,6 +340,7 @@ export const backtrackingProblems: CuratedProblem[] = [
   },
   {
     slug: 'generate-parentheses', id: 22, title: 'Generate Parentheses', difficulty: 'Medium', pattern: 'backtracking',
+    brute: { text: 'Generate all 2²ⁿ bracket strings and keep the valid ones.', time: ['O(2²ⁿ · n)', 'O(4ⁿ / √n)', 'O(n!)', 'O(n²)'] },
     insight: {
       q: 'Which rule keeps every partial string valid?',
       options: [
@@ -342,6 +360,7 @@ export const backtrackingProblems: CuratedProblem[] = [
   {
     slug: 'word-search', id: 79, title: 'Word Search', difficulty: 'Medium', pattern: 'backtracking',
     alsoAccept: ['graph-traversal'],
+    brute: { text: 'Try every path of the word\'s length from every cell, without pruning early.', time: ['O(m · n · 4^L)', 'O(m · n · 3^L)', 'O(m · n · L)', 'O((m · n)²)'] },
     insight: {
       q: 'How do you avoid reusing a cell within one path?',
       options: [
@@ -362,6 +381,7 @@ export const backtrackingProblems: CuratedProblem[] = [
   {
     slug: 'palindrome-partitioning', id: 131, title: 'Palindrome Partitioning', difficulty: 'Medium', pattern: 'backtracking',
     alsoAccept: ['dp-2d'],
+    brute: { text: 'Try all 2ⁿ⁻¹ cut positions and test every piece for being a palindrome.', time: ['O(n · 2ⁿ)', 'O(n²)', 'O(n!)', 'O(2ⁿ)'] },
     insight: {
       q: 'How do you enumerate all palindrome partitions?',
       options: [
@@ -381,6 +401,7 @@ export const backtrackingProblems: CuratedProblem[] = [
   },
   {
     slug: 'n-queens', id: 51, title: 'N-Queens', difficulty: 'Hard', pattern: 'backtracking',
+    brute: { text: 'Place queens anywhere and check the whole board at the end.', time: ['O(nⁿ · n²)', 'O(n!)', 'O(2ⁿ)', 'O(n³)'] },
     insight: {
       q: 'How do you check attacks in O(1) as queens are placed row by row?',
       options: [

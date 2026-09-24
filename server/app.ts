@@ -1,8 +1,14 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { isPatternId } from '../shared/patterns/index.ts';
+import { PROBLEMS } from '../shared/problems/index.ts';
+import { findBySlug, getCatalog, searchCatalog, slugFromInput } from './catalog.ts';
+import { challengeStats, gradeChallenge, pickChallenge } from './challenge.ts';
 import { compileAndRun, javaStatus } from './java-run.ts';
-import { getProblem, importPublicProfile, importWithSession, LeetCodeError, sessionFromEnv, USERNAME_RE } from './leetcode.ts';
+import { lookup } from './lookup.ts';
+import { setPlan } from './plan.ts';
+import { fetchMySolution, getProblem, importPublicProfile, importWithSession, LeetCodeError, sessionFromEnv, USERNAME_RE } from './leetcode.ts';
 import { readProgress, resetProgress, updateProgress } from './store.ts';
 import {
   dashboard,
@@ -13,6 +19,7 @@ import {
   problemView,
   recordAttempt,
   recordRun,
+  recordSolution,
   requirePatternId,
   requireProblem,
   saveWork,
@@ -83,6 +90,48 @@ export function createApp({ webDir = resolve('dist/web') } = {}) {
     res.json(result);
   });
 
+  /** Pattern finder: a slug, a LeetCode URL, or a title to search for. */
+  api.get('/lookup', async (req, res) => {
+    const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+    if (!q) throw new HttpError(400, 'Paste a LeetCode link, a slug, or part of a title.');
+    const catalog = await getCatalog();
+    const slug = slugFromInput(q) ?? (findBySlug(catalog, q.toLowerCase())?.slug ?? null);
+    if (!slug) {
+      const matches = searchCatalog(catalog, q);
+      if (matches.length === 0) throw new HttpError(404, `Nothing on LeetCode matches "${q}".`);
+      if (matches.length > 1) {
+        res.json({ matches });
+        return;
+      }
+      res.json({ result: lookup(await readProgress(), await getProblem(matches[0]!.slug)) });
+      return;
+    }
+    res.json({ result: lookup(await readProgress(), await getProblem(slug)) });
+  });
+
+  api.get('/challenge/next', async (req, res) => {
+    const exclude = typeof req.query.exclude === 'string' ? req.query.exclude : undefined;
+    const { slug, curated } = await pickChallenge(exclude);
+    const problem = await getProblem(slug);
+    const progress = await readProgress();
+    res.json({
+      slug,
+      title: problem.title,
+      difficulty: problem.difficulty,
+      curated,
+      contentHtml: problem.contentHtml,
+      stats: challengeStats(progress),
+    });
+  });
+
+  api.post('/challenge/answer', async (req, res) => {
+    const { slug, pattern } = (req.body ?? {}) as { slug?: unknown; pattern?: unknown };
+    if (typeof slug !== 'string' || !/^[a-z0-9-]+$/.test(slug)) throw new HttpError(400, 'Which problem was answered?');
+    const chosen = isPatternId(pattern) ? pattern : null;
+    const problem = await getProblem(slug);
+    res.json(await updateProgress((p) => gradeChallenge(p, problem, chosen)));
+  });
+
   api.get('/practice/blind', async (req, res) => {
     const exclude = typeof req.query.exclude === 'string' ? req.query.exclude : undefined;
     res.json({ slug: pickBlind(await readProgress(), exclude) });
@@ -107,9 +156,64 @@ export function createApp({ webDir = resolve('dist/web') } = {}) {
     res.json(result);
   });
 
+  /** Re-runs the last import the same way it was done before. */
+  api.post('/leetcode/sync', async (_req, res) => {
+    const previous = (await readProgress()).leetcode;
+    if (!previous) throw new HttpError(400, 'Import your LeetCode profile first, then you can sync it.');
+    const creds = sessionFromEnv();
+    if (previous.source === 'session' && !creds) {
+      throw new HttpError(400, 'This import used LEETCODE_SESSION, which is no longer set. Add it to .env and restart, or re-import by username.');
+    }
+    const fresh = previous.source === 'session' && creds ? await importWithSession(creds) : await importPublicProfile(previous.username);
+    const merged = await updateProgress((p) => {
+      // Keep the first import date and every solve time learned so far.
+      p.leetcode = {
+        ...fresh,
+        importedAt: previous.importedAt,
+        syncCount: (previous.syncCount ?? 1) + 1,
+        solvedAt: { ...previous.solvedAt, ...fresh.solvedAt },
+      };
+      return p.leetcode;
+    });
+    res.json(merged);
+  });
+
+  /** Your own accepted submission for a problem (needs the session cookie). */
+  api.post('/problems/:slug/leetcode-solution', async (req, res) => {
+    requireProblem(req.params.slug);
+    const creds = sessionFromEnv();
+    if (!creds) throw new HttpError(400, 'Fetching your solution needs LEETCODE_SESSION in .env (see the LeetCode page).');
+    const solution = await fetchMySolution(req.params.slug, creds);
+    if (!solution) {
+      res.json({ solution: null, message: 'LeetCode has no accepted submission from you for this problem.' });
+      return;
+    }
+    await updateProgress((p) => recordSolution(p, req.params.slug, solution));
+    res.json({ solution, message: null });
+  });
+
   api.delete('/leetcode/import', async (_req, res) => {
     await updateProgress((p) => {
       delete p.leetcode;
+    });
+    res.json({ ok: true });
+  });
+
+  /** Start (or restart) a study plan: N problems over W weeks. */
+  api.post('/plan', async (req, res) => {
+    const { size, weeks } = (req.body ?? {}) as { size?: unknown; weeks?: unknown };
+    const n = Number(size);
+    const w = Number(weeks);
+    if (!Number.isInteger(n) || n < 1 || n > PROBLEMS.length) {
+      throw new HttpError(400, `Pick between 1 and ${PROBLEMS.length} problems.`);
+    }
+    if (!Number.isInteger(w) || w < 1 || w > 52) throw new HttpError(400, 'Pick between 1 and 52 weeks.');
+    res.json(await updateProgress((p) => setPlan(p, n, w)));
+  });
+
+  api.delete('/plan', async (_req, res) => {
+    await updateProgress((p) => {
+      delete p.plan;
     });
     res.json({ ok: true });
   });

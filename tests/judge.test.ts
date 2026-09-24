@@ -4,7 +4,7 @@ import type { LeetCodeProblem } from '../shared/types.ts';
 
 const TWO_SUM: LeetCodeProblem = {
   slug: 'two-sum', id: 1, title: 'Two Sum', difficulty: 'Easy', paidOnly: false, contentHtml: null, hints: [],
-  topicTags: [], javaSnippet: null,
+  topicTags: [], javaSnippet: null, similarQuestions: null,
   exampleTestcases: ['[2,7,11,15]\n9', '[3,2,4]\n6', '[3,3]\n6'],
   exampleOutputs: ['[0,1]', '[1,2]', '[0,1]'],
   metaData: JSON.stringify({
