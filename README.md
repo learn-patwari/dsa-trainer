@@ -151,6 +151,9 @@ Press **Compile & run** (or Ctrl/Cmd+Enter) in the Java tab. Your solution is co
 LeetCode's own example tests, on your machine:
 
 - **Per test:** PASS / FAIL with expected and actual values, runtime in ms, and anything your code printed.
+- **Imports are supplied**, exactly as LeetCode supplies them — paste code that uses `HashMap` or `PriorityQueue`
+  with no import line and it just compiles. If javac still can't find a class, the name is looked up and the import
+  added for one more attempt, and the run note tells you what it added.
 - **Compile errors** are listed with the line numbers from your editor.
 - A crash in one test is reported for that test only; the rest still run. An infinite loop is stopped after 10s, and
   the heap is capped at 256 MB.
@@ -160,6 +163,11 @@ It works for all 197 problems, including linked lists, trees and design classes 
 LeetCode's `metaData` supplies each signature, so the harness converts every input line to the right Java type;
 expected values are scraped from the statement. Everything the harness needs sits next to your code in a temp folder
 that's deleted afterwards, and your code is never uploaded anywhere.
+
+The prelude covers `java.util`, `java.util.function`, `java.util.stream`, `java.math`, `java.util.concurrent`,
+`java.util.concurrent.atomic` and `java.util.regex`. It is injected on a single line above your code in the temp
+file — never in your editor — and that one line is subtracted again before errors are shown, so a reported line
+number is the line you actually wrote.
 
 Test results do **not** change your rating — that stays a measure of your approach. Problems whose code passes every
 checked test get a **code verified** badge.

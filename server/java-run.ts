@@ -7,6 +7,7 @@ import { promisify } from 'node:util';
 import type { CompileError, JavaStatus, LeetCodeProblem, RunResult, TestResult, TestVerdict } from '../shared/types.ts';
 import { compareOutputs } from './compare.ts';
 import { planHarness, solutionFileName } from './harness.ts';
+import { prepare, resolveImports } from './imports.ts';
 
 const exec = promisify(execFile);
 const COMPILE_TIMEOUT_MS = 30_000;
@@ -53,15 +54,19 @@ export async function javaStatus(): Promise<JavaStatus> {
       };
 }
 
-/** javac prints "File.java:12: error: message"; keep the line numbers from the solution file. */
-export function parseCompileErrors(output: string, solutionFile: string): CompileError[] {
+/**
+ * javac prints "File.java:12: error: message". Keeps the line numbers from the
+ * solution file, less `offset` for the import line we inject above the author's
+ * code, so the editor highlights the line they actually wrote.
+ */
+export function parseCompileErrors(output: string, solutionFile: string, offset = 0): CompileError[] {
   const errors: CompileError[] = [];
   for (const line of output.split(/\r?\n/)) {
     const m = /^(.*?):(\d+):\s*(error|warning):\s*(.*)$/.exec(line.trim());
     if (!m) continue;
     if (m[3] !== 'error') continue;
     const file = m[1]!.replace(/\\/g, '/').split('/').pop();
-    errors.push({ line: file === solutionFile ? Number(m[2]) : null, message: m[4]!.trim() });
+    errors.push({ line: file === solutionFile ? Math.max(1, Number(m[2]) - offset) : null, message: m[4]!.trim() });
   }
   return errors;
 }
@@ -110,7 +115,6 @@ export async function compileAndRun(problem: LeetCodeProblem, code: string): Pro
 
   try {
     const sources = [solutionFile];
-    await writeFile(join(dir, solutionFile), code, 'utf8');
     const casesPath = join(dir, 'cases.json');
     if (plan.supported) {
       await copyFile(J_JAVA, join(dir, 'J.java'));
@@ -124,25 +128,46 @@ export async function compileAndRun(problem: LeetCodeProblem, code: string): Pro
 
     const outDir = join(dir, 'out');
     const compileStart = Date.now();
-    let compiled = true;
-    let compilerOutput = '';
-    try {
-      const r = await exec(jdk.javac, ['-nowarn', '-encoding', 'UTF-8', '-d', outDir, ...sources], {
-        cwd: dir,
-        timeout: COMPILE_TIMEOUT_MS,
-        maxBuffer: MAX_OUTPUT,
-      });
-      compilerOutput = `${r.stdout}${r.stderr}`.trim();
-    } catch (err) {
-      const e = execError(err);
-      compiled = false;
-      compilerOutput = `${e.stdout}${e.stderr}`.trim();
-      if (e.killed) compilerOutput = `The compiler took longer than ${COMPILE_TIMEOUT_MS / 1000}s and was stopped.`;
+
+    /** Writes the solution with `extra` imports on top of the prelude, then compiles it. */
+    const attempt = async (extra: string[]) => {
+      const { source, offset, added } = prepare(code, extra);
+      await writeFile(join(dir, solutionFile), source, 'utf8');
+      try {
+        const r = await exec(jdk.javac, ['-nowarn', '-encoding', 'UTF-8', '-d', outDir, ...sources], {
+          cwd: dir,
+          timeout: COMPILE_TIMEOUT_MS,
+          maxBuffer: MAX_OUTPUT,
+        });
+        return { compiled: true, output: `${r.stdout}${r.stderr}`.trim(), offset, added };
+      } catch (err) {
+        const e = execError(err);
+        const output = e.killed
+          ? `The compiler took longer than ${COMPILE_TIMEOUT_MS / 1000}s and was stopped.`
+          : `${e.stdout}${e.stderr}`.trim();
+        return { compiled: false, output, offset, added };
+      }
+    };
+
+    let result = await attempt([]);
+    // javac names the classes it couldn't find; if we know where they live, add
+    // those imports and give it one more go.
+    if (!result.compiled) {
+      const rescue = resolveImports(result.output);
+      if (rescue) {
+        const retried = await attempt(rescue);
+        if (retried.compiled) result = retried;
+      }
     }
+
+    const { compiled, output: compilerOutput, added: addedImports } = result;
     const compileMs = Date.now() - compileStart;
-    const compileErrors = parseCompileErrors(compilerOutput, solutionFile);
+    const compileErrors = parseCompileErrors(compilerOutput, solutionFile, result.offset);
 
     const notes: string[] = [];
+    if (addedImports.length > 0) {
+      notes.push(`Added ${addedImports.join(' ')} for you \u2014 java.util and friends are always imported.`);
+    }
     if (plan.reason) notes.push(plan.reason);
     if (compiled && plan.supported && plan.needsSolutionClass && !/\bclass\s+Solution\b/.test(code)) {
       notes.push('The harness calls `new Solution()`, so keep your method inside a class named Solution.');
