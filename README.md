@@ -10,15 +10,32 @@ too, against LeetCode's own example tests, and a pattern finder will name the pa
 Requires Node.js 20+ (developed on Node 24). A JDK (17+, developed on 21) is optional: without one everything works
 except "Compile & run".
 
+**Day to day (Windows):** double-click `start.cmd`, or the **DSA Trainer** shortcut on your desktop. It installs
+dependencies on the first run, rebuilds the UI only when something it is built from has changed, starts the server on
+http://localhost:5179 and opens your browser there. Launch it again while it's running and it just reopens the tab
+instead of fighting over the port. Closing the console window stops the server.
+
+To recreate the desktop shortcut, or make one elsewhere:
+
+```powershell
+$sh = New-Object -ComObject WScript.Shell
+$s = $sh.CreateShortcut((Join-Path ([Environment]::GetFolderPath('Desktop')) 'DSA Trainer.lnk'))
+$s.TargetPath = "$PWD\start.cmd"; $s.WorkingDirectory = "$PWD"; $s.IconLocation = "$PWD\tools\icon.ico,0"
+$s.WindowStyle = 7   # 7 = start minimised, 1 = keep the console window open in front
+$s.Save()
+```
+
+**Working on the app itself:**
+
 ```bash
 cd dsa-trainer
 npm install
 npm run dev
 ```
 
-Open http://localhost:5178. The API runs on port 5179 and Vite proxies `/api` to it.
+Open http://localhost:5178. The API runs on port 5179 and Vite proxies `/api` to it, with hot reload on both sides.
 
-To run a production build on one port instead: `npm start` (serves the built UI and API on http://localhost:5179).
+`npm start` is what the launcher runs: it builds the UI and serves everything from http://localhost:5179.
 
 ## How training works
 
@@ -170,6 +187,7 @@ Interview Handbook and the System Design Primer — with a line on when each one
 
 | Command | What it does |
 |---|---|
+| `start.cmd` | Everyday launcher: build if stale, serve on 5179, open the browser (Windows) |
 | `npm run dev` | API (tsx watch) + Vite dev server |
 | `npm start` | Build the UI and serve everything on port 5179 |
 | `npm test` | Vitest: bank integrity, scoring, trainer logic, harness generation, real compile & run, HTTP API |
@@ -188,6 +206,7 @@ server/     Express API, JSON store, LeetCode client, grading + recommendations
 web/        React UI (Vite): dashboard, patterns, problem page, finder, challenge, review, guide, LeetCode import
 tests/      Vitest suites
 scripts/    content verification (LeetCode metadata, javac)
+tools/      start.ps1 (what start.cmd runs) and the shortcut icon
 ```
 
 To add a problem, append it to the matching file in `shared/problems/` with the first option of each question
