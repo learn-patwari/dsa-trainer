@@ -7,6 +7,7 @@ import { Quiz } from '../problem/Quiz.tsx';
 import { ResultCard } from '../problem/ResultCard.tsx';
 import { Statement } from '../problem/Statement.tsx';
 import { MySolution } from '../problem/MySolution.tsx';
+import { AiReview } from '../problem/AiReview.tsx';
 import { BUDGET_SEC, TimerBar } from '../problem/TimerBar.tsx';
 import { useTimer } from '../problem/useTimer.ts';
 import { NotesEditor } from '../problem/Workbench.tsx';
@@ -22,7 +23,7 @@ function describeAge(unixSeconds: number): string {
 
 const JavaEditor = lazy(() => import('../problem/JavaEditor.tsx'));
 
-type Tab = 'approach' | 'java' | 'notes' | 'solution';
+type Tab = 'approach' | 'java' | 'notes' | 'review' | 'solution';
 
 /** A LeetCode solve older than this is worth redoing (matches the server). */
 const REVISIT_AFTER_DAYS = 60;
@@ -203,11 +204,11 @@ export function ProblemPage() {
 
         <section className="card sticky-col">
           <div className="tabs" role="tablist">
-            {(['approach', 'java', 'notes', 'solution'] as const)
+            {(['approach', 'java', 'notes', 'review', 'solution'] as const)
               .filter((t) => t !== 'solution' || v.lcSolved || v.progress?.leetcodeSolution)
               .map((t) => (
                 <button key={t} role="tab" aria-selected={tab === t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
-                  {{ approach: 'Approach check', java: 'Java', notes: 'Notes', solution: 'My LeetCode solution' }[t]}
+                  {{ approach: 'Approach check', java: 'Java', notes: 'Notes', review: 'AI review', solution: 'My LeetCode solution' }[t]}
                 </button>
               ))}
           </div>
@@ -224,7 +225,14 @@ export function ProblemPage() {
                   {attemptedBefore && ' This is a practice retake; it will not change your rating.'}
                 </div>
                 {submitError && <ErrorBox message={submitError} />}
-                <Quiz key={`${slug}-${mode}-${retakes}`} quiz={v.quiz} mode={mode} submitting={submitting} onSubmit={submit} />
+                <Quiz
+                  key={`${slug}-${mode}-${retakes}`}
+                  quiz={v.quiz}
+                  mode={mode}
+                  rated={!attemptedBefore}
+                  submitting={submitting}
+                  onSubmit={submit}
+                />
               </div>
             )}
           </div>
@@ -239,6 +247,9 @@ export function ProblemPage() {
                 onRan={view.reload}
               />
             </Suspense>
+          </div>
+          <div hidden={tab !== 'review'}>
+            {tab === 'review' && <AiReview key={slug} slug={slug} hasCode={Boolean(v.progress?.code?.trim())} />}
           </div>
           <div hidden={tab !== 'notes'}>
             <NotesEditor key={slug} savedNotes={v.progress?.notes ?? null} save={(notes) => api.saveWork(slug, { notes })} />

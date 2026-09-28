@@ -7,12 +7,14 @@ interface Props {
   quiz: QuizView;
   mode: PracticeMode;
   submitting: boolean;
+  /** True when this attempt will move the pattern rating, i.e. it's your first. */
+  rated: boolean;
   onSubmit: (answers: Omit<AttemptSubmission, 'hintsUsed' | 'elapsedSec' | 'activeSec'>) => void;
 }
 
 const GROUPS = [...new Set(PATTERNS.map((p) => p.group))];
 
-export function Quiz({ quiz, mode, submitting, onSubmit }: Props) {
+export function Quiz({ quiz, mode, submitting, rated, onSubmit }: Props) {
   const [pattern, setPattern] = useState<PatternId | null>(null);
   // In blind mode you commit to a pattern before seeing the other questions, whose wording can give it away.
   const [locked, setLocked] = useState(!quiz.askPattern);
@@ -21,8 +23,12 @@ export function Quiz({ quiz, mode, submitting, onSubmit }: Props) {
   const [time, setTime] = useState<string | null>(null);
   const [space, setSpace] = useState<string | null>(null);
   const [edges, setEdges] = useState<Set<number>>(new Set());
+  const [confirming, setConfirming] = useState(false);
 
   const unanswered = [quiz.askPattern && !pattern, quiz.brute && !brute, !insight, !time, !space].filter(Boolean).length;
+  const answered = [pattern, brute, insight, time, space].filter(Boolean).length + (edges.size > 0 ? 1 : 0);
+  // An empty submit is a slip, and on a first attempt it would spend the only rated try on a zero.
+  const blank = answered === 0;
   // Question numbers shift depending on which questions this problem asks.
   let step = quiz.askPattern ? 1 : 0;
   const n = () => `${++step}. `;
@@ -79,6 +85,11 @@ export function Quiz({ quiz, mode, submitting, onSubmit }: Props) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        if (blank) return;
+        if (unanswered > 0 && rated && !confirming) {
+          setConfirming(true);
+          return;
+        }
         onSubmit({ mode, pattern, brute, insight, time, space, edgeCasesHandled: [...edges] });
       }}
     >
@@ -176,11 +187,33 @@ export function Quiz({ quiz, mode, submitting, onSubmit }: Props) {
         ))}
       </div>
 
+      {confirming && (
+        <div className="callout warn small" style={{ marginTop: '1rem' }}>
+          <strong>
+            {unanswered} question{unanswered > 1 ? 's are' : ' is'} unanswered.
+          </strong>{' '}
+          {unanswered > 1 ? 'They' : 'It'} will score 0, and this first attempt is the one that sets your rating — retakes
+          afterwards are practice only.
+          <div className="row" style={{ marginTop: '0.6rem' }}>
+            <button type="submit" className="btn btn-sm" disabled={submitting}>
+              Submit anyway
+            </button>
+            <button type="button" className="btn btn-sm btn-ghost" onClick={() => setConfirming(false)}>
+              Keep answering
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="spread" style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
         <span className="small muted">
-          {unanswered > 0 ? `${unanswered} unanswered question${unanswered > 1 ? 's' : ''} will score 0.` : 'All questions answered.'}
+          {blank
+            ? 'Answer at least one question to submit.'
+            : unanswered > 0
+              ? `${unanswered} unanswered question${unanswered > 1 ? 's' : ''} will score 0.`
+              : 'All questions answered.'}
         </span>
-        <button className="btn btn-primary" type="submit" disabled={submitting}>
+        <button className="btn btn-primary" type="submit" disabled={submitting || blank || confirming}>
           {submitting ? 'Grading…' : 'Submit approach'}
         </button>
       </div>

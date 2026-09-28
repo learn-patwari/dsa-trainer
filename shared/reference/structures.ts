@@ -1,0 +1,333 @@
+import type { Structure } from './types.ts';
+
+/**
+ * The Java data structures worth knowing cold, what each operation costs, and
+ * the handful of methods that do the work. Costs are the ones you'd state in an
+ * interview: average where the structure is hash-based, worst case otherwise.
+ */
+export const STRUCTURES: Structure[] = [
+  // ------------------------------------------------------------------ linear
+  {
+    id: 'array',
+    name: 'Array (int[], char[])',
+    group: 'Linear',
+    summary: 'Fixed-length, contiguous memory. The fastest thing you can reach for, and the default for interview inputs.',
+    useWhen: [
+      'The size is known up front, or bounded by the constraints',
+      'You need index arithmetic: two pointers, sliding window, prefix sums',
+      'You want to avoid boxing — int[] holds ints, ArrayList<Integer> holds objects',
+    ],
+    costs: [
+      { operation: 'read / write by index', cost: 'O(1)' },
+      { operation: 'search (unsorted)', cost: 'O(n)' },
+      { operation: 'search (sorted)', cost: 'O(log n)', note: 'Arrays.binarySearch' },
+      { operation: 'insert / delete in the middle', cost: 'O(n)', note: 'everything after it shifts' },
+      { operation: 'sort', cost: 'O(n log n)', note: 'primitives use dual-pivot quicksort; see the gotcha' },
+    ],
+    methods: [
+      { signature: 'Arrays.sort(a)', what: 'Sorts in place.', why: 'O(n log n), and the single most reusable line in interviews.' },
+      { signature: 'Arrays.sort(a, from, to)', what: 'Sorts a slice, `to` exclusive.' },
+      { signature: 'Arrays.fill(a, v)', what: 'Sets every element, e.g. dp arrays to -1 or Integer.MAX_VALUE.' },
+      { signature: 'Arrays.copyOf(a, len)', what: 'New array, truncated or zero-padded.' },
+      { signature: 'Arrays.copyOfRange(a, from, to)', what: 'New array from a slice, `to` exclusive.' },
+      { signature: 'Arrays.binarySearch(a, key)', what: 'Index of key, or -(insertion point) - 1.', why: 'The negative return is the insertion point — that is how you do lower-bound in one call.' },
+      { signature: 'Arrays.equals(a, b) / deepEquals', what: 'Value comparison; deep for nested arrays.', why: 'a == b compares references and is almost always a bug.' },
+      { signature: 'Arrays.toString(a) / deepToString', what: 'Printable form.', why: 'System.out.println(a) prints a hash, not the contents.' },
+      { signature: 'Arrays.stream(a).sum() / max()', what: 'Quick aggregates over int[].' },
+      { signature: 'System.arraycopy(src, sp, dst, dp, n)', what: 'Fast block copy.' },
+    ],
+    gotchas: [
+      'Arrays.sort on primitives is quicksort — O(n²) on adversarial input. On objects it is TimSort, O(n log n) guaranteed. If a problem hints at anti-quicksort input, box to Integer[] or shuffle first.',
+      'length is a field on arrays (a.length) but a method on String (s.length()) and on collections (list.size()).',
+      'int[] defaults to 0, boolean[] to false, Object[] to null — no need to fill unless you want a different default.',
+      'Arrays.asList(intArray) gives a List<int[]> of size 1, not a list of ints. Use IntStream.of(a).boxed().toList().',
+    ],
+    patterns: ['two-pointers', 'sliding-window', 'prefix-sum', 'binary-search'],
+  },
+  {
+    id: 'arraylist',
+    name: 'ArrayList<E>',
+    group: 'Linear',
+    summary: 'A growable array. The default List, and the right answer unless you specifically need something else.',
+    useWhen: ['You are collecting results of unknown length', 'You need indexed access', 'You will mostly append'],
+    costs: [
+      { operation: 'get / set by index', cost: 'O(1)' },
+      { operation: 'add at end', cost: 'O(1) amortised', note: 'doubles capacity when full, so the occasional add is O(n)' },
+      { operation: 'add / remove at index i', cost: 'O(n)', note: 'shifts the tail' },
+      { operation: 'contains / indexOf', cost: 'O(n)' },
+      { operation: 'remove from the front', cost: 'O(n)', note: 'use ArrayDeque if you do this in a loop' },
+    ],
+    methods: [
+      { signature: 'add(e) / add(i, e)', what: 'Append, or insert at an index.' },
+      { signature: 'get(i) / set(i, e)', what: 'Read or overwrite.' },
+      { signature: 'remove(int i) vs remove(Object o)', what: 'By index, or by value.', why: 'On a List<Integer>, remove(2) removes index 2; remove(Integer.valueOf(2)) removes the value 2.' },
+      { signature: 'size() / isEmpty()', what: 'How many, and whether any.' },
+      { signature: 'new ArrayList<>(other)', what: 'Copy — essential in backtracking, where you must snapshot the path.' },
+      { signature: 'Collections.sort(list) / list.sort(cmp)', what: 'In-place sort, O(n log n), stable.' },
+      { signature: 'Collections.reverse(list)', what: 'Reverses in place.' },
+      { signature: 'list.toArray(new int[0][])', what: 'To an array, for the int[][] returns LeetCode likes.' },
+      { signature: 'List.of(...)', what: 'Immutable literal list.', why: 'Throws on add — do not hand it back from a method that a caller will mutate.' },
+    ],
+    gotchas: [
+      'In backtracking you must add a copy: result.add(new ArrayList<>(path)). Adding `path` stores a reference that you then mutate to empty.',
+      'Removing while iterating with a for-each throws ConcurrentModificationException. Use an Iterator and it.remove(), or removeIf.',
+      'List<Integer> boxes every element: slower, and == between two Integers above 127 is false.',
+    ],
+  },
+  {
+    id: 'linkedlist',
+    name: 'LinkedList<E>',
+    group: 'Linear',
+    summary: 'Doubly linked. Implements both List and Deque — but as a List it is almost always the wrong choice.',
+    useWhen: ['You need a Deque that tolerates nulls (ArrayDeque does not)', 'You are demonstrating list surgery rather than using a library'],
+    costs: [
+      { operation: 'addFirst / addLast / removeFirst / removeLast', cost: 'O(1)' },
+      { operation: 'get(i)', cost: 'O(n)', note: 'walks from the nearer end — this is why it is a bad List' },
+      { operation: 'contains', cost: 'O(n)' },
+      { operation: 'remove a node you already hold', cost: 'O(1)' },
+    ],
+    methods: [
+      { signature: 'addFirst(e) / addLast(e)', what: 'Push either end.' },
+      { signature: 'pollFirst() / pollLast()', what: 'Remove and return, or null when empty.' },
+      { signature: 'peekFirst() / peekLast()', what: 'Look without removing.' },
+    ],
+    gotchas: [
+      'A for loop doing list.get(i) over a LinkedList is O(n²). Iterate with for-each instead.',
+      'For your own linked-list problems you write `class ListNode` by hand — LeetCode supplies it. This class is only for when you want a ready-made deque.',
+    ],
+    patterns: ['linked-list', 'fast-slow'],
+  },
+  {
+    id: 'arraydeque',
+    name: 'ArrayDeque<E>',
+    group: 'Linear',
+    summary: 'A circular buffer. The correct stack and the correct queue — faster than Stack and than LinkedList at both.',
+    useWhen: ['You need a stack (push/pop/peek)', 'You need a BFS queue (offer/poll)', 'You need a sliding-window maximum (store indices)'],
+    costs: [
+      { operation: 'push / pop / peek (stack end)', cost: 'O(1) amortised' },
+      { operation: 'offer / poll (queue ends)', cost: 'O(1) amortised' },
+      { operation: 'contains', cost: 'O(n)' },
+    ],
+    methods: [
+      { signature: 'push(e) / pop() / peek()', what: 'Stack: all operate on the head.', why: 'peek on an empty deque returns null; pop throws NoSuchElementException.' },
+      { signature: 'offer(e) / poll()', what: 'Queue: add at the tail, take from the head.' },
+      { signature: 'offerFirst / offerLast / pollFirst / pollLast', what: 'Explicit ends, for monotonic deques.' },
+      { signature: 'peekFirst() / peekLast()', what: 'Both ends without removing — the sliding-window-maximum pair.' },
+      { signature: 'isEmpty() / size()', what: 'Loop conditions.' },
+    ],
+    gotchas: [
+      'It rejects null. Doing BFS over a binary tree where you push null markers for levels throws NullPointerException — use LinkedList there, or track level sizes instead.',
+      'Iteration order for a deque used as a stack is head-first, i.e. most recently pushed first. Surprising if you print it to debug.',
+      'Do not use java.util.Stack: it is synchronised, extends Vector, and iterates bottom-up, which is the opposite of what you expect.',
+    ],
+    patterns: ['stack', 'monotonic-stack', 'tree-bfs', 'graph-traversal'],
+  },
+  // ------------------------------------------------------------------ hashing
+  {
+    id: 'hashmap',
+    name: 'HashMap<K, V>',
+    group: 'Hashing',
+    summary: 'Key to value in constant time. The single most useful structure in interviews.',
+    useWhen: ['Counting frequencies', 'Remembering what you have seen (complement, last index, prefix sum)', 'Grouping by a computed key, e.g. a sorted anagram signature'],
+    costs: [
+      { operation: 'get / put / remove / containsKey', cost: 'O(1) average', note: 'O(n) worst case if every key collides; O(log n) since Java 8, which treeifies long buckets' },
+      { operation: 'iterate', cost: 'O(n)' },
+      { operation: 'containsValue', cost: 'O(n)', note: 'no index on values' },
+    ],
+    methods: [
+      { signature: 'getOrDefault(k, def)', what: 'Read with a fallback.', why: 'map.put(k, map.getOrDefault(k, 0) + 1) is the counting idiom.' },
+      { signature: 'merge(k, 1, Integer::sum)', what: 'Counting in one call.', why: 'Shorter than getOrDefault, and returns the new value — handy for an early exit.' },
+      { signature: 'computeIfAbsent(k, x -> new ArrayList<>())', what: 'Build a map of lists without a null check.', why: 'The grouping idiom: map.computeIfAbsent(key, k -> new ArrayList<>()).add(v).' },
+      { signature: 'putIfAbsent(k, v)', what: 'Write only the first time — keeps the earliest index.' },
+      { signature: 'entrySet() / keySet() / values()', what: 'Iteration views.', why: 'for (Map.Entry<K,V> e : map.entrySet()) reads both without a second lookup.' },
+      { signature: 'remove(k)', what: 'Delete, returning the old value or null.' },
+    ],
+    gotchas: [
+      'A key must have consistent hashCode and equals. int[] does not — two equal arrays hash differently, so never use an array as a key. Use a String, a List, or a record.',
+      'Iteration order is unspecified and will change. If the answer depends on order, you need LinkedHashMap or a sort.',
+      'map.get on a missing key returns null, and unboxing null to int throws NullPointerException. getOrDefault avoids it.',
+    ],
+    patterns: ['hashing', 'prefix-sum', 'sliding-window'],
+  },
+  {
+    id: 'hashset',
+    name: 'HashSet<E>',
+    group: 'Hashing',
+    summary: 'Membership in constant time. A HashMap with the values thrown away.',
+    useWhen: ['Deduplicating', 'Have-I-seen-this checks: cycle detection, visited sets', 'Set intersection or difference'],
+    costs: [
+      { operation: 'add / contains / remove', cost: 'O(1) average' },
+      { operation: 'iterate', cost: 'O(n)' },
+    ],
+    methods: [
+      { signature: 'add(e)', what: 'Adds, returning false if it was already there.', why: 'if (!seen.add(x)) return true; is duplicate detection in one line.' },
+      { signature: 'contains(e) / remove(e)', what: 'Membership and deletion.' },
+      { signature: 'new HashSet<>(list)', what: 'Deduplicate a collection in one call.' },
+      { signature: 'retainAll(other) / removeAll(other)', what: 'Intersection and difference, in place.' },
+    ],
+    gotchas: [
+      'A HashSet<int[]> never dedupes — arrays use identity equality. Convert to a String key or a List<Integer>.',
+      'For a visited grid, boolean[m][n] beats a HashSet of encoded keys: no hashing, no boxing.',
+    ],
+    patterns: ['hashing', 'graph-traversal'],
+  },
+  {
+    id: 'linkedhashmap',
+    name: 'LinkedHashMap<K, V>',
+    group: 'Hashing',
+    summary: 'A HashMap that remembers insertion order — or access order, which is the whole trick behind LRU.',
+    useWhen: ['You need O(1) lookup and a predictable order', 'LRU cache', 'First non-repeating character'],
+    costs: [
+      { operation: 'get / put / remove', cost: 'O(1) average' },
+      { operation: 'iterate in order', cost: 'O(n)' },
+    ],
+    methods: [
+      { signature: 'new LinkedHashMap<>(cap, 0.75f, true)', what: 'The third argument turns on access order.', why: 'With accessOrder true, get() moves the entry to the end — the eldest is then the least recently used.' },
+      { signature: 'removeEldestEntry(eldest)', what: 'Override it to return size() > capacity and you have an LRU cache in five lines.' },
+    ],
+    gotchas: ['Interviewers often want the hand-rolled HashMap + doubly linked list version. Know both, and say which you are doing and why.'],
+  },
+  {
+    id: 'treemap',
+    name: 'TreeMap<K, V> / TreeSet<E>',
+    group: 'Sorted',
+    summary: 'A red-black tree: sorted keys, with floor/ceiling queries a hash map cannot do.',
+    useWhen: ['You need the nearest key above or below a value', 'You need keys in sorted order while still inserting', 'Interval or calendar problems, and sliding-window median'],
+    costs: [
+      { operation: 'get / put / remove / contains', cost: 'O(log n)' },
+      { operation: 'floorKey / ceilingKey / higher / lower', cost: 'O(log n)' },
+      { operation: 'firstKey / lastKey', cost: 'O(log n)' },
+      { operation: 'iterate in sorted order', cost: 'O(n)' },
+      { operation: 'subMap / headMap / tailMap', cost: 'O(log n) to make the view' },
+    ],
+    methods: [
+      { signature: 'floorKey(k) / ceilingKey(k)', what: 'Greatest key ≤ k, least key ≥ k.', why: 'This is the reason to choose TreeMap. Both return null when nothing qualifies.' },
+      { signature: 'higherKey(k) / lowerKey(k)', what: 'Strictly greater / strictly less.' },
+      { signature: 'firstEntry() / lastEntry() / pollFirstEntry()', what: 'Ends of the order, with a removing variant.' },
+      { signature: 'headMap(k, inclusive) / tailMap / subMap', what: 'A live view of a key range.' },
+      { signature: 'new TreeMap<>(Comparator.reverseOrder())', what: 'Descending order.' },
+    ],
+    gotchas: [
+      'Everything is a log factor slower than HashMap. Only pay it when you actually need order.',
+      'Keys must be Comparable or you must supply a Comparator, otherwise it throws at the first put.',
+      'TreeSet has the same methods without values: floor, ceiling, higher, lower, first, last, pollFirst.',
+    ],
+    patterns: ['intervals', 'binary-search'],
+  },
+  // ------------------------------------------------------------------ trees and heaps
+  {
+    id: 'priorityqueue',
+    name: 'PriorityQueue<E>',
+    group: 'Trees & heaps',
+    summary: 'A binary heap. Gives you the smallest element in O(1) and reorders in O(log n).',
+    useWhen: ['Top-K anything', 'Dijkstra and other "expand the closest" searches', 'Merging k sorted lists', 'Scheduling by earliest end time'],
+    costs: [
+      { operation: 'peek', cost: 'O(1)' },
+      { operation: 'offer / poll', cost: 'O(log n)' },
+      { operation: 'remove(Object)', cost: 'O(n)', note: 'it has to find it first' },
+      { operation: 'contains', cost: 'O(n)' },
+      { operation: 'build from a collection', cost: 'O(n)', note: 'heapify beats n inserts' },
+    ],
+    methods: [
+      { signature: 'new PriorityQueue<>()', what: 'Min-heap of Comparable elements.' },
+      { signature: 'new PriorityQueue<>(Comparator.reverseOrder())', what: 'Max-heap.' },
+      { signature: 'new PriorityQueue<>((a, b) -> a[1] - b[1])', what: 'Order by a field.', why: 'Prefer Integer.compare(a[1], b[1]) — subtraction overflows for large values.' },
+      { signature: 'new PriorityQueue<>(collection)', what: 'Heapify in O(n).' },
+      { signature: 'offer(e) / poll() / peek()', what: 'Add, take the best, look at the best.' },
+    ],
+    gotchas: [
+      'Iterating or printing a PriorityQueue does NOT give sorted order — only repeated poll() does.',
+      'For top-K largest, keep a min-heap of size k and poll when it overflows: O(n log k), not O(n log n).',
+      'A comparator using a - b silently breaks on values near Integer.MAX_VALUE. Use Integer.compare.',
+    ],
+    patterns: ['heap', 'shortest-path', 'greedy'],
+  },
+  {
+    id: 'binarytree',
+    name: 'Binary tree (TreeNode)',
+    group: 'Trees & heaps',
+    summary: 'Nodes with left and right. LeetCode defines the class; you write the recursion.',
+    useWhen: ['Anything phrased as "root of a binary tree"'],
+    costs: [
+      { operation: 'DFS / BFS over every node', cost: 'O(n) time, O(h) or O(w) space', note: 'h = height for the recursion stack, w = widest level for a queue' },
+      { operation: 'search in a BST', cost: 'O(h)', note: 'O(log n) balanced, O(n) degenerate' },
+    ],
+    methods: [
+      { signature: 'dfs(node) { if (node == null) return base; }', what: 'Always handle null first — it is the base case for every tree recursion.' },
+      { signature: 'int size = queue.size(); for (int i = 0; i < size; i++)', what: 'Level-order: snapshot the size before the loop so one iteration is exactly one level.' },
+      { signature: 'inorder(left); visit(); inorder(right);', what: 'In-order on a BST yields sorted values.', why: 'That single fact solves validate-BST, kth-smallest and two-sum-in-BST.' },
+    ],
+    gotchas: [
+      'Recursion depth is O(h). A 10⁵-node skewed tree overflows the stack — say so, and offer the iterative version.',
+      'Validate-BST needs a (min, max) range passed down, not just a parent comparison.',
+    ],
+    patterns: ['tree-dfs', 'tree-bfs'],
+  },
+  {
+    id: 'trie',
+    name: 'Trie (prefix tree)',
+    group: 'Trees & heaps',
+    summary: 'A tree keyed by characters: every path from the root spells a prefix. You write it by hand.',
+    useWhen: ['Prefix search, autocomplete', 'Word-search on a board with many words', 'Any problem where several strings share prefixes'],
+    costs: [
+      { operation: 'insert / search / startsWith', cost: 'O(L)', note: 'L = word length, independent of how many words are stored' },
+      { operation: 'space', cost: 'O(total characters × alphabet)', note: 'children as TrieNode[26] for lowercase, or a HashMap for a wider alphabet' },
+    ],
+    methods: [
+      { signature: 'TrieNode[] children = new TrieNode[26];', what: 'Index with c - \'a\'.' },
+      { signature: 'boolean isWord;', what: 'Marks a node as the end of a real word, not just a prefix.' },
+    ],
+    gotchas: ['Forgetting isWord makes search() and startsWith() identical, which is the classic bug.'],
+    patterns: ['trie'],
+  },
+  {
+    id: 'unionfind',
+    name: 'Union-Find (DSU)',
+    group: 'Trees & heaps',
+    summary: 'Tracks which elements are connected as edges arrive. Near-constant per operation once you add both optimisations.',
+    useWhen: ['Counting connected components', 'Detecting a cycle in an undirected graph', 'Kruskal\'s MST', 'Anything phrased as "are these two in the same group?"'],
+    costs: [
+      { operation: 'find / union', cost: 'O(α(n))', note: 'α is the inverse Ackermann function — under 5 for any n you will ever see, so say "effectively constant"' },
+      { operation: 'without path compression', cost: 'O(n)', note: 'the tree degenerates into a list' },
+    ],
+    methods: [
+      { signature: 'int find(int x) { if (p[x] != x) p[x] = find(p[x]); return p[x]; }', what: 'Find with path compression, in one line.' },
+      { signature: 'union by rank/size', what: 'Attach the smaller tree under the bigger one.', why: 'Compression alone is good; both together give you α(n).' },
+    ],
+    gotchas: ['union() should return whether anything merged — that boolean counts components and detects cycles for free.'],
+    patterns: ['union-find'],
+  },
+  // ------------------------------------------------------------------ strings
+  {
+    id: 'string',
+    name: 'String / StringBuilder',
+    group: 'Strings',
+    summary: 'String is immutable — every concatenation copies. StringBuilder is the mutable one.',
+    useWhen: ['Building output in a loop — always StringBuilder', 'Backtracking where you append and undo'],
+    costs: [
+      { operation: 'charAt / length', cost: 'O(1)' },
+      { operation: 'substring(i, j)', cost: 'O(j - i)', note: 'copies since Java 7 — a substring inside a loop is a hidden O(n²)' },
+      { operation: 's += x in a loop', cost: 'O(n²)', note: 'the reason StringBuilder exists' },
+      { operation: 'sb.append', cost: 'O(1) amortised' },
+      { operation: 'equals / compareTo', cost: 'O(n)' },
+      { operation: 'toCharArray', cost: 'O(n)' },
+    ],
+    methods: [
+      { signature: 'sb.append(x) / sb.toString()', what: 'Build, then materialise once.' },
+      { signature: 'sb.deleteCharAt(sb.length() - 1)', what: 'Undo the last append.', why: 'The backtracking idiom — append, recurse, delete.' },
+      { signature: 'sb.setLength(k)', what: 'Truncate. Cheaper than repeated deleteCharAt when unwinding several characters.' },
+      { signature: 'sb.reverse()', what: 'In place, O(n).' },
+      { signature: 's.toCharArray()', what: 'For index arithmetic and in-place two-pointer work.' },
+      { signature: 'Character.isLetterOrDigit(c) / toLowerCase(c)', what: 'The valid-palindrome pair.' },
+      { signature: 's.split("\\\\s+") / String.join(",", list)', what: 'Tokenise and re-join.' },
+      { signature: 'c - \'a\'', what: 'Char to 0-25 index, for a count array.', why: 'int[26] beats a HashMap for lowercase-only problems.' },
+    ],
+    gotchas: [
+      'Comparing strings with == compares references. Always use equals.',
+      'substring in a loop over an n-length string is O(n²). Pass indices instead.',
+      'For anagram checks, int[26] counting is O(n); sorting both strings is O(n log n). Say which you chose and why.',
+    ],
+  },
+];
+
+export const STRUCTURE_GROUPS = [...new Set(STRUCTURES.map((s) => s.group))];

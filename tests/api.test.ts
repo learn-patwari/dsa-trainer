@@ -116,6 +116,19 @@ describe('API', () => {
     expect(after.progress.attempts).toBe(1);
   });
 
+  it('refuses an attempt with nothing answered', async () => {
+    const before = await (await api('/state')).json();
+    const res = await api('/problems/contains-duplicate/attempts', {
+      method: 'POST',
+      body: JSON.stringify({ mode: 'pattern', edgeCasesHandled: [], hintsUsed: 0, elapsedSec: 3, activeSec: 3 }),
+    });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/at least one question/i);
+
+    const after = await (await api('/state')).json();
+    expect(after.attemptedProblems).toBe(before.attemptedProblems);
+  });
+
   it('saves code and notes', async () => {
     const res = await api('/problems/valid-anagram/work', { method: 'PUT', body: JSON.stringify({ code: 'int x;', notes: 'count letters' }) });
     expect(res.status).toBe(200);

@@ -5,6 +5,7 @@ import type { AttemptSubmission, LeetCodeImport } from '../shared/types.ts';
 import { emptyProgress } from '../server/store.ts';
 import {
   dashboard,
+  isBlank,
   patternSummary,
   pickBlind,
   problemView,
@@ -30,6 +31,43 @@ function answers(slug: string, mode: AttemptSubmission['mode'] = 'pattern'): Att
     elapsedSec: 30,
   };
 }
+
+describe('a blank submission', () => {
+  const nothing: AttemptSubmission = {
+    mode: 'pattern',
+    pattern: null,
+    brute: null,
+    insight: null,
+    time: null,
+    space: null,
+    edgeCasesHandled: [],
+    hintsUsed: 0,
+    elapsedSec: 5,
+    activeSec: 5,
+  };
+
+  it('is recognised as a slip', () => {
+    expect(isBlank(nothing)).toBe(true);
+    expect(isBlank({ ...nothing, edgeCasesHandled: [0] })).toBe(false);
+    expect(isBlank({ ...nothing, time: 'O(n)' })).toBe(false);
+    expect(isBlank({ ...nothing, pattern: 'hashing' })).toBe(false);
+  });
+
+  it('is refused rather than spending the one rated attempt on a zero', () => {
+    const p = emptyProgress();
+    expect(() => recordAttempt(p, 'two-sum', nothing)).toThrow(/at least one question/i);
+    expect(p.history).toEqual([]);
+    expect(p.problems['two-sum']).toBeUndefined();
+    expect(p.ratings.hashing).toBeUndefined();
+  });
+
+  it('accepts an attempt that answers only the edge-case check', () => {
+    const p = emptyProgress();
+    const r = recordAttempt(p, 'two-sum', { ...nothing, edgeCasesHandled: [0] });
+    expect(r.rated).toBe(true);
+    expect(r.percent).toBeGreaterThan(0);
+  });
+});
 
 describe('recordAttempt', () => {
   it('rates only the first attempt at a problem', () => {

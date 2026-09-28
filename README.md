@@ -16,7 +16,7 @@ problem statements and — if you ask it to — your own solved list.
 
 [Quick start](#quick-start) · [Your first session](#your-first-session) · [What's in the app](#whats-in-the-app) ·
 [How it grades you](#how-it-grades-you) · [The problem bank](#the-problem-bank) · [Compile & run](#compile--run) ·
-[The timer](#the-timer) · [Review](#review-spaced-repetition) · [Study plan](#study-plan-streak-and-difficulty) ·
+[Reference](#reference) · [AI review](#ai-code-review) · [The timer](#the-timer) · [Review](#review-spaced-repetition) · [Study plan](#study-plan-streak-and-difficulty) ·
 [Challenge & finder](#challenge-mode-and-the-pattern-finder) · [LeetCode integration](#leetcode-integration) ·
 [Your data](#your-data) · [Configuration](#configuration) · [Development](#development) ·
 [Troubleshooting](#troubleshooting)
@@ -172,6 +172,23 @@ number is the line you actually wrote.
 Test results do **not** change your rating — that stays a measure of your approach. Problems whose code passes every
 checked test get a **code verified** badge.
 
+## Reference
+
+A tab of the things the approach check assumes you already know, in four parts:
+
+- **Data structures** — every Java structure worth knowing, with a cost table per operation, the methods that
+  actually do the work (`computeIfAbsent`, `floorKey`, `merge`, `deleteCharAt`…), when to reach for it, and the
+  mistakes that cost people offers. Filterable by method name, and each card links to the patterns that use it.
+- **Java fundamentals** — the language traps that turn a correct approach into a wrong answer: int overflow in
+  `(lo + hi) / 2`, `==` on boxed Integers above 127, integer division truncating toward zero, pass-by-value in
+  backtracking, `ConcurrentModificationException`, comparator subtraction overflow.
+- **Complexity toolbox** — the routines you may cite by name with their costs (BFS `O(V + E)`, Dijkstra
+  `O(E log V)`, heap push `O(log n)`, monotonic stack `O(n)` amortised), plus how to add them up: sequential blocks,
+  nested loops, divide and conquer, amortised, output-sensitive.
+- **Maths cheat sheet** — the series and counting formulas behind the Big-O (why `1 + 2 + … + n` makes a
+  nested loop quadratic, why doubling is amortised `O(1)`), modular arithmetic for the `10^9 + 7` problems, and a
+  constraint table that reads the intended complexity off the input size.
+
 ## The timer
 
 Two clocks on one set of controls — **Pause**, **Stop**, **Restart**:
@@ -223,6 +240,30 @@ marking the ones you've already solved.
 
 Both work for any problem: the pattern comes from the curated bank when it's in there, otherwise it's inferred from
 LeetCode's topic tags and the wording of the statement.
+
+## AI code review
+
+Two ways to get your solution reviewed, sharing one prompt. The prompt bundles the **statement**, your **Java**, the
+**answers you gave in the approach check**, your **notes** and the run results — because a review of code alone
+cannot tell you whether you understood the problem. It asks for a verdict, correctness, the true complexity against
+the one you claimed, whether the code and your stated approach agree, what to fix first, and the follow-up an
+interviewer would ask next.
+
+**Without an API key.** The **AI review** tab on any problem gives you **Copy review prompt** and links to ChatGPT and
+Claude. Paste, read, done. This is the default and it costs nothing.
+
+**With a key.** Set a provider up under **Settings** and the app asks the model itself:
+
+| Provider | Base URL | Notes |
+|---|---|---|
+| OpenAI-compatible | `https://api.openai.com/v1` | Also OpenRouter (`https://openrouter.ai/api/v1`), Groq, Together, DeepSeek, LM Studio (`http://localhost:1234/v1`), vLLM |
+| Anthropic | `https://api.anthropic.com` | Claude models direct |
+| Local (Ollama) | `http://localhost:11434` | No key, nothing leaves the machine |
+
+The key is stored in `data/ai.json` (gitignored), is never returned to the browser, and is only ever sent to the base
+URL you configured. A request happens only when you press the button — never in the background, never from any
+other page — and your `LEETCODE_SESSION` cookie is never included. A hosted provider means your code leaves your
+machine under that provider's retention policy; pick Ollama if that matters.
 
 ## LeetCode integration
 
@@ -286,6 +327,8 @@ with a 10-second limit and a 256 MB heap — treat pasted code as you would any 
 ```
 shared/     types, scoring/rating, the 23 pattern lessons, the 197-problem bank
             (answer keys live here and never reach the browser)
+            reference/    structures, fundamentals, formulas, complexity toolbox
+            ai-prompt.ts  the review prompt; java-source.ts  unwraps your methods
 server/     app.ts        Express API, local-only guard
             trainer.ts    grading, ratings, recommendations, dashboard
             leetcode.ts   GraphQL + REST client, session handling
@@ -294,8 +337,10 @@ server/     app.ts        Express API, local-only guard
             java-run.ts   javac/java with timeouts; compare.ts; java/J.java
             catalog.ts, infer.ts, lookup.ts   the pattern finder
             challenge.ts, plan.ts, review.ts  challenge, study plan, spaced repetition
+            imports.ts    the Java import prelude; ai.ts  provider config + review call
 web/        React 19 + Vite: dashboard, patterns, problem page (quiz, Java editor,
-            notes, your LeetCode solution), finder, challenge, review, guide
+            notes, AI review, your LeetCode solution), finder, challenge, review,
+            reference, guide, settings
 tests/      Vitest suites, including a real javac compile-and-run
 scripts/    content verification against LeetCode
 tools/      start.ps1 (what start.cmd runs) and the shortcut icon

@@ -170,12 +170,26 @@ export function addTime(p: Progress, slug: string, body: unknown): TimeSpent {
   return time;
 }
 
+/** True when nothing at all was answered — a slip, not an attempt. */
+export function isBlank(sub: AttemptSubmission): boolean {
+  return (
+    sub.pattern == null &&
+    sub.brute == null &&
+    sub.insight == null &&
+    sub.time == null &&
+    sub.space == null &&
+    sub.edgeCasesHandled.length === 0
+  );
+}
+
 /**
  * Grades an attempt and records it. Only the FIRST attempt at a problem moves your
  * pattern rating; later attempts are practice, since you've seen the answers.
  */
 export function recordAttempt(p: Progress, slug: string, sub: AttemptSubmission): AttemptResult {
   const problem = requireProblem(slug);
+  // Recording an empty sheet would spend the one rated attempt on a zero.
+  if (isBlank(sub)) throw new HttpError(400, 'Answer at least one question before submitting.');
   const outcome = scoreAttempt(problem, sub, patternName);
   const prior = p.problems[slug];
   const rated = !attempted(p, slug);

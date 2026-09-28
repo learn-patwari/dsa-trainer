@@ -10,7 +10,9 @@ import { LeetCodePage } from './pages/LeetCodePage.tsx';
 import { PatternPage } from './pages/PatternPage.tsx';
 import { PatternsPage } from './pages/PatternsPage.tsx';
 import { ProblemPage } from './pages/ProblemPage.tsx';
+import { ReferencePage } from './pages/ReferencePage.tsx';
 import { ReviewPage } from './pages/ReviewPage.tsx';
+import { SettingsPage } from './pages/SettingsPage.tsx';
 
 export function App() {
   const { pathname } = useLocation();
@@ -33,11 +35,13 @@ export function App() {
           </NavLink>
           <NavLink to="/patterns">Patterns</NavLink>
           <NavLink to="/review">Review</NavLink>
+          <NavLink to="/reference">Reference</NavLink>
           <NavLink to="/blind">Blind practice</NavLink>
           <NavLink to="/challenge">Challenge</NavLink>
           <NavLink to="/finder">Pattern finder</NavLink>
           <NavLink to="/leetcode">LeetCode</NavLink>
           <NavLink to="/guide">Guide</NavLink>
+          <NavLink to="/settings">Settings</NavLink>
         </nav>
       </header>
       <Routes>
@@ -50,7 +54,9 @@ export function App() {
         <Route path="/finder" element={<FinderPage />} />
         <Route path="/leetcode" element={<LeetCodePage />} />
         <Route path="/review" element={<ReviewPage />} />
+        <Route path="/reference" element={<ReferencePage />} />
         <Route path="/guide" element={<GuidePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route
           path="*"
           element={

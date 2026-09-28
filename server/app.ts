@@ -1,12 +1,15 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { isPatternId } from '../shared/patterns/index.ts';
+import { isPatternId, patternName } from '../shared/patterns/index.ts';
 import { PROBLEMS } from '../shared/problems/index.ts';
 import { findBySlug, getCatalog, searchCatalog, slugFromInput } from './catalog.ts';
+import { clearConfig, readConfig, requestReview, saveConfig, view as aiView } from './ai.ts';
 import { challengeStats, gradeChallenge, pickChallenge } from './challenge.ts';
 import { compileAndRun, javaStatus } from './java-run.ts';
 import { lookup } from './lookup.ts';
+import { buildReviewPrompt, statementToText } from '../shared/ai-prompt.ts';
+import { getProblem as getCurated } from '../shared/problems/index.ts';
 import { setPlan } from './plan.ts';
 import { dueList, reviewSummary, upcomingList } from './review.ts';
 import { fetchMySolution, getProblem, importPublicProfile, importWithSession, LeetCodeError, sessionFromEnv, USERNAME_RE } from './leetcode.ts';
@@ -201,6 +204,33 @@ export function createApp({ webDir = resolve('dist/web') } = {}) {
     res.json({ ok: true });
   });
 
+  /**
+   * Everything a model needs to review one attempt. Returned as a ready-made
+   * prompt so it works with no API key at all: copy it into any chat window.
+   */
+  api.get('/problems/:slug/ai-prompt', async (req, res) => {
+    res.json({ prompt: buildReviewPrompt(await reviewContext(req.params.slug)) });
+  });
+
+  /** The same prompt, posted to whichever model you configured. */
+  api.post('/problems/:slug/ai-review', async (req, res) => {
+    const ctx = await reviewContext(req.params.slug);
+    res.json(await requestReview({ ...ctx, statementHtml: ctx.statementHtml }));
+  });
+
+  api.get('/ai/config', async (_req, res) => {
+    res.json(aiView(await readConfig()));
+  });
+
+  api.put('/ai/config', async (req, res) => {
+    res.json(await saveConfig(req.body));
+  });
+
+  api.delete('/ai/config', async (_req, res) => {
+    await clearConfig();
+    res.json(aiView(await readConfig()));
+  });
+
   /** Adds to the time banked against a problem; the body is the delta since the last call. */
   api.post('/problems/:slug/time', async (req, res) => {
     res.json(await updateProgress((p) => addTime(p, req.params.slug, req.body)));
@@ -269,4 +299,33 @@ export function createApp({ webDir = resolve('dist/web') } = {}) {
   });
 
   return app;
+}
+
+/** Gathers the problem, the candidate's work and how it went, for an AI review. */
+async function reviewContext(slug: string) {
+  const problem = requireProblem(slug);
+  const progress = (await readProgress()).problems[slug] ?? null;
+  const curated = getCurated(slug);
+  let statementHtml: string | null = null;
+  try {
+    statementHtml = (await getProblem(slug)).contentHtml;
+  } catch {
+    statementHtml = null; // offline is fine; the model still gets the code and the answers
+  }
+  const attempted = (progress?.attempts ?? 0) > 0;
+  return {
+    slug,
+    id: problem.id,
+    title: problem.title,
+    difficulty: problem.difficulty,
+    statementHtml,
+    statement: statementToText(statementHtml),
+    // Both only make sense once they've committed to an answer.
+    pattern: attempted && curated ? patternName(curated.pattern) : null,
+    referenceApproach: attempted ? (curated?.approach ?? null) : null,
+    code: progress?.code ?? null,
+    notes: progress?.notes ?? null,
+    attempt: progress?.lastResult ?? null,
+    run: null,
+  };
 }

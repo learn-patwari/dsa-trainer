@@ -202,6 +202,27 @@ textarea.input { width: 100%; resize: vertical; min-height: 12rem; font-family: 
 .check { display: flex; gap: 0.55rem; align-items: flex-start; padding: 0.3rem 0; cursor: pointer; }
 .check input { margin-top: 0.25rem; accent-color: var(--accent); }
 
+.ai-review { white-space: pre-wrap; line-height: 1.6; background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 0.9rem 1rem; }
+.ai-review strong { font-weight: 700; }
+
+/* ---------- reference ---------- */
+.split-ref { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.25rem; }
+.ref-h { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted);
+  margin: 0 0 0.4rem; font-weight: 700; }
+.ref-h + .table { margin-bottom: 1rem; }
+.ref-h:not(:first-child) { margin-top: 1rem; }
+.ref-methods { margin: 0; }
+.ref-methods > div { padding: 0.35rem 0; border-bottom: 1px solid var(--border); }
+.ref-methods > div:last-child { border-bottom: none; }
+.ref-methods dt { color: var(--accent-text); word-break: break-word; }
+.ref-methods dd { margin: 0.15rem 0 0; }
+.ref-code { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 0.75rem 0.9rem; overflow-x: auto; font-family: var(--mono); font-size: 0.82rem; line-height: 1.5; margin: 0; }
+@media (max-width: 900px) {
+  .split-ref { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* ---------- attempt timer ---------- */
 .timer { display: grid; grid-template-columns: auto auto; gap: 0.15rem 0.75rem; justify-items: end; align-items: center;
   border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.5rem 0.75rem; background: var(--surface); }

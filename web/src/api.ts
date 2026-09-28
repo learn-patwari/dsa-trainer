@@ -21,6 +21,25 @@ import type {
   TimeSpent,
 } from '../../shared/types.ts';
 
+export type Provider = 'openai' | 'anthropic' | 'ollama';
+
+export interface AiConfigView {
+  configured: boolean;
+  provider: Provider;
+  baseUrl: string;
+  model: string;
+  maxTokens: number;
+  hasKey: boolean;
+}
+
+export interface AiReviewResult {
+  review: string;
+  model: string;
+  provider: Provider;
+  promptChars: number;
+  at: string;
+}
+
 export interface ReviewQueue {
   summary: ReviewSummary;
   due: ReviewItem[];
@@ -76,6 +95,12 @@ export const api = {
   addTime: (slug: string, delta: { elapsedSec: number; activeSec: number }) =>
     call<TimeSpent>(`/problems/${encodeURIComponent(slug)}/time`, { method: 'POST', body: delta }),
   review: () => call<ReviewQueue>('/review'),
+  aiPrompt: (slug: string) => call<{ prompt: string }>(`/problems/${encodeURIComponent(slug)}/ai-prompt`),
+  aiReview: (slug: string) => call<AiReviewResult>(`/problems/${encodeURIComponent(slug)}/ai-review`, { method: 'POST', body: {} }),
+  aiConfig: () => call<AiConfigView>('/ai/config'),
+  saveAiConfig: (body: { provider: Provider; baseUrl: string; model: string; maxTokens: number; apiKey?: string }) =>
+    call<AiConfigView>('/ai/config', { method: 'PUT', body }),
+  clearAiConfig: () => call<AiConfigView>('/ai/config', { method: 'DELETE', body: {} }),
   setPlan: (size: number, weeks: number) => call<StudyPlan>('/plan', { method: 'POST', body: { size, weeks } }),
   clearPlan: () => call<{ ok: true }>('/plan', { method: 'DELETE', body: {} }),
   reset: () => call<{ ok: true }>('/reset', { method: 'POST', body: { confirm: 'RESET' } }),

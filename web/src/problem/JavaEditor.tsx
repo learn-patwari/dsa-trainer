@@ -1,6 +1,7 @@
 import { java as javaLang } from '@codemirror/lang-java';
 import CodeMirror from '@uiw/react-codemirror';
 import { useEffect, useState } from 'react';
+import { methodsForLeetCode } from '../../../shared/java-source.ts';
 import type { JavaStatus, RunResult } from '../../../shared/types.ts';
 import { api } from '../api.ts';
 import { RunResults } from './RunResults.tsx';
@@ -38,6 +39,7 @@ export default function JavaEditor({ slug, savedCode, starter, save, onRan }: Pr
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<RunResult | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
+  const [copied, setCopied] = useState<'methods' | 'all' | null>(null);
 
   // Until you type something, show LeetCode's Java stub once it arrives.
   useEffect(() => {
@@ -69,6 +71,13 @@ export default function JavaEditor({ slug, savedCode, starter, save, onRan }: Pr
     } finally {
       setRunning(false);
     }
+  };
+
+  /** Copies, and says so for a moment. */
+  const copy = (text: string, which: 'methods' | 'all') => {
+    void navigator.clipboard?.writeText(text);
+    setCopied(which);
+    setTimeout(() => setCopied(null), 1500);
   };
 
   return (
@@ -110,8 +119,15 @@ export default function JavaEditor({ slug, savedCode, starter, save, onRan }: Pr
             'Compile & run'
           )}
         </button>
-        <button className="btn btn-sm" onClick={() => navigator.clipboard?.writeText(value)}>
-          Copy code
+        <button
+          className="btn btn-sm"
+          title="Just the methods, unwrapped and re-indented — paste inside LeetCode's class Solution { }"
+          onClick={() => copy(methodsForLeetCode(value), 'methods')}
+        >
+          {copied === 'methods' ? 'Copied ✓' : 'Copy methods'}
+        </button>
+        <button className="btn btn-sm btn-ghost" title="The whole file, imports and all" onClick={() => copy(value, 'all')}>
+          {copied === 'all' ? 'Copied ✓' : 'Copy file'}
         </button>
         {starter && (
           <button
