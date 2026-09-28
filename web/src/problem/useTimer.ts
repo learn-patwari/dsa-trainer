@@ -10,7 +10,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * two is the time you thought you were working.
  *
  * Leave for longer than AWAY_LIMIT_MS and the whole thing pauses itself, so a
- * problem forgotten in a background tab doesn't bank the rest of the afternoon.
+ * problem forgotten in a background tab doesn't bank the rest of the afternoon. Come
+ * back and it picks up where it left off — only a pause you asked for waits for you.
  */
 
 /** How long the tab may sit in the background before the timer gives up on you. */
@@ -112,6 +113,11 @@ export function useTimer(autoStart = true): Timer {
     const sync = () => {
       const front = isInFront();
       setAway(!front);
+      // It paused itself while you were gone; you're back, so carry on.
+      if (front && status === 'paused' && autoPaused) {
+        start();
+        return;
+      }
       if (status !== 'running') return;
       settle();
       activeFrom.current = front ? Date.now() : null;
@@ -133,7 +139,7 @@ export function useTimer(autoStart = true): Timer {
       window.removeEventListener('focus', sync);
       window.removeEventListener('blur', sync);
     };
-  }, [status, settle, halt]);
+  }, [status, settle, halt, autoPaused, start]);
 
   // Redraw once a second while something is moving.
   useEffect(() => {

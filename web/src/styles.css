@@ -233,6 +233,12 @@ textarea.input { width: 100%; resize: vertical; min-height: 12rem; font-family: 
 .timer-active.timer-held { color: var(--warn); }
 .timer-buttons { display: flex; gap: 0.4rem; }
 .timer-note { grid-column: 1 / -1; justify-self: end; text-align: right; }
+/* Sitting at the top of the work column, it is a strip rather than a box. */
+.sticky-col > .timer { border: none; border-radius: 0; background: none; padding: 0 0 0.7rem;
+  margin: -0.25rem 0 0.2rem; border-bottom: 1px solid var(--border); grid-template-columns: auto 1fr;
+  justify-items: start; align-items: center; }
+.sticky-col > .timer .timer-clocks { align-items: flex-start; }
+.sticky-col > .timer .timer-buttons { justify-self: end; }
 @media (max-width: 560px) {
   .timer { grid-template-columns: 1fr auto; justify-items: start; }
   .timer-clocks { align-items: flex-start; }

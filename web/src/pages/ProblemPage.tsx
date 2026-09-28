@@ -108,8 +108,7 @@ export function ProblemPage() {
         elapsedSec: timer.elapsedSec,
         activeSec: timer.activeSec,
       });
-      timer.stop();
-      flush();
+      flush(); // the attempt has its own elapsed; the clock keeps running for the coding
       setResult(r);
       view.reload();
     } catch (e) {
@@ -183,9 +182,7 @@ export function ProblemPage() {
             )}
           </div>
         </div>
-        {!shown && (
-          <TimerBar timer={timer} budgetSec={BUDGET_SEC[v.difficulty]} stored={v.progress?.time ?? null} />
-        )}
+
       </div>
 
       <div className="split">
@@ -203,6 +200,7 @@ export function ProblemPage() {
         </section>
 
         <section className="card sticky-col">
+          <TimerBar timer={timer} budgetSec={BUDGET_SEC[v.difficulty]} stored={v.progress?.time ?? null} />
           <div className="tabs" role="tablist">
             {(['approach', 'java', 'notes', 'review', 'solution'] as const)
               .filter((t) => t !== 'solution' || v.lcSolved || v.progress?.leetcodeSolution)
