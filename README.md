@@ -285,6 +285,23 @@ LeetCode's GraphQL endpoint is unofficial and can change. If a fetch fails, the 
 
 ## Your data
 
+Your progress is written to disk on every single change — each answer, each save, each run, each banked minute —
+so nothing is held only in memory and a crash or a closed window costs you nothing.
+
+`data/` sits next to the code, resolved from the server source rather than the working directory. That matters: it
+means `npm start`, `npm run dev` and the desktop shortcut all read the same progress, wherever you launch them from.
+Set `DSA_DATA_DIR` to put it somewhere else.
+
+**Backups.** A copy of `progress.json` is taken every ten minutes while you work, and always immediately before
+anything that would overwrite it — including "start over" and a restore. The last 40 live in `data/backups/`,
+named for when and why they were taken. **Settings → Backups** lists them with a Restore button, and restoring copies
+your current state aside first, so that is reversible too.
+
+**Two servers at once.** If the file changes underneath a running server — a second process, a restore, your own
+editor — the next read notices and reloads it, instead of writing a stale in-memory copy back over the newer work.
+
+
+
 Everything lives in `data/` (gitignored):
 
 - `progress.json` — ratings, attempts and their history, saved code and notes, LeetCode import, challenge stats,

@@ -13,7 +13,7 @@ import { getProblem as getCurated } from '../shared/problems/index.ts';
 import { setPlan } from './plan.ts';
 import { dueList, reviewSummary, upcomingList } from './review.ts';
 import { fetchMySolution, getProblem, importPublicProfile, importWithSession, LeetCodeError, sessionFromEnv, USERNAME_RE } from './leetcode.ts';
-import { readProgress, resetProgress, updateProgress } from './store.ts';
+import { listBackups, readProgress, resetProgress, restoreBackup, updateProgress } from './store.ts';
 import {
   dashboard,
   HttpError,
@@ -265,8 +265,24 @@ export function createApp({ webDir = resolve('dist/web') } = {}) {
     if ((req.body as { confirm?: unknown } | undefined)?.confirm !== 'RESET') {
       throw new HttpError(400, 'Send {"confirm":"RESET"} to erase your progress.');
     }
-    await resetProgress();
-    res.json({ ok: true });
+    // A copy is taken first, so this is always undoable.
+    res.json({ ok: true, backup: await resetProgress() });
+  });
+
+  /** Every copy of progress.json taken before something overwrote it. */
+  api.get('/backups', async (_req, res) => {
+    res.json(await listBackups());
+  });
+
+  api.post('/backups/restore', async (req, res) => {
+    const { name } = (req.body ?? {}) as { name?: unknown };
+    if (typeof name !== 'string') throw new HttpError(400, 'Which backup should be restored?');
+    try {
+      const restored = await restoreBackup(name);
+      res.json({ ok: true, attempts: restored.history.length, problems: Object.keys(restored.problems).length });
+    } catch (err) {
+      throw new HttpError(400, `Couldn't restore that backup: ${(err as Error).message}`);
+    }
   });
 
   api.use((_req, res) => {

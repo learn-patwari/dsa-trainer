@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { BackupInfo } from '../api.ts';
 import { api, useLoad } from '../api.ts';
 import type { AiConfigView, Provider } from '../api.ts';
 import { ErrorBox, Loading } from '../components.tsx';
@@ -173,6 +174,8 @@ export function SettingsPage() {
         </div>
       </section>
 
+      <Backups />
+
       <section className="card">
         <h2 style={{ marginTop: 0 }}>What gets sent</h2>
         <p className="small" style={{ marginTop: 0 }}>
@@ -193,4 +196,73 @@ function Status({ data }: { data: AiConfigView }) {
   if (data.configured) return <span className="tag tag-good">Ready · {data.model}</span>;
   if (data.hasKey) return <span className="tag tag-warn">Key stored, model incomplete</span>;
   return <span className="tag">Not set up</span>;
+}
+
+/** Every copy of progress.json taken before something overwrote it. */
+function Backups() {
+  const { data, error, reload } = useLoad(api.backups, []);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [done, setDone] = useState<string | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
+
+  const restore = async (b: BackupInfo) => {
+    if (!confirm(`Replace your current progress with the copy from ${new Date(b.at).toLocaleString()}?\n\nWhat you have now is copied aside first, so this is reversible too.`)) return;
+    setBusy(b.name);
+    setFailed(null);
+    try {
+      const r = await api.restoreBackup(b.name);
+      setDone(`Restored ${r.attempts} attempt${r.attempts === 1 ? '' : 's'} across ${r.problems} problem${r.problems === 1 ? '' : 's'}.`);
+      reload();
+    } catch (e) {
+      setFailed((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <section className="card">
+      <h2 style={{ marginTop: 0 }}>Backups</h2>
+      <p className="small" style={{ marginTop: 0 }}>
+        A copy of your progress is taken every ten minutes while you work, and always before anything that would
+        overwrite it """ + D + """ including "start over". The last 40 are kept in <code>data/backups/</code>. Nothing here
+        leaves your machine.
+      </p>
+
+      {done && <div className="callout good small">{done}</div>}
+      {failed && <ErrorBox message={failed} />}
+      {error && <ErrorBox message={error} onRetry={reload} />}
+
+      {data && data.length === 0 && <p className="muted small" style={{ margin: 0 }}>No backups yet """ + D + """ the first one is taken the next time you answer something.</p>}
+
+      {data && data.length > 0 && (
+        <div className="table-wrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>When</th>
+                <th>Taken</th>
+                <th>Size</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((b) => (
+                <tr key={b.name}>
+                  <td className="small">{new Date(b.at).toLocaleString()}</td>
+                  <td className="small muted">{{ auto: 'routine', 'before-reset': 'before a reset', 'before-restore': 'before a restore' }[b.reason] ?? b.reason}</td>
+                  <td className="small muted mono">{(b.bytes / 1024).toFixed(1)} kB</td>
+                  <td>
+                    <button className="btn btn-sm" disabled={busy !== null} onClick={() => restore(b)}>
+                      {busy === b.name ? 'Restoring…' : 'Restore'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
 }

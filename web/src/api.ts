@@ -40,6 +40,13 @@ export interface AiReviewResult {
   at: string;
 }
 
+export interface BackupInfo {
+  name: string;
+  at: string;
+  bytes: number;
+  reason: string;
+}
+
 export interface ReviewQueue {
   summary: ReviewSummary;
   due: ReviewItem[];
@@ -103,7 +110,10 @@ export const api = {
   clearAiConfig: () => call<AiConfigView>('/ai/config', { method: 'DELETE', body: {} }),
   setPlan: (size: number, weeks: number) => call<StudyPlan>('/plan', { method: 'POST', body: { size, weeks } }),
   clearPlan: () => call<{ ok: true }>('/plan', { method: 'DELETE', body: {} }),
-  reset: () => call<{ ok: true }>('/reset', { method: 'POST', body: { confirm: 'RESET' } }),
+  reset: () => call<{ ok: true; backup: string | null }>('/reset', { method: 'POST', body: { confirm: 'RESET' } }),
+  backups: () => call<BackupInfo[]>('/backups'),
+  restoreBackup: (name: string) =>
+    call<{ ok: true; attempts: number; problems: number }>('/backups/restore', { method: 'POST', body: { name } }),
 };
 
 /** Loads data for a page; `reload` refetches without clearing what's on screen. */
