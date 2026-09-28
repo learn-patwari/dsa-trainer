@@ -29,9 +29,13 @@ interface Props {
   starter: string | null;
   save: (code: string) => Promise<unknown>;
   onRan: () => void;
+  /** Every keystroke, so the rest of the page knows what's in the editor now. */
+  onCodeChange?: (code: string) => void;
+  /** Jump to the AI review tab from the toolbar. */
+  onReview?: () => void;
 }
 
-export default function JavaEditor({ slug, savedCode, starter, save, onRan }: Props) {
+export default function JavaEditor({ slug, savedCode, starter, save, onRan, onCodeChange, onReview }: Props) {
   const [code, setCode] = useState<string | null>(savedCode);
   const [status, edit] = useAutosave(save);
   const dark = usePrefersDark();
@@ -105,6 +109,7 @@ export default function JavaEditor({ slug, savedCode, starter, save, onRan }: Pr
           onChange={(v) => {
             setCode(v);
             edit(v);
+            onCodeChange?.(v);
           }}
           aria-label="Java solution editor"
         />
@@ -139,6 +144,11 @@ export default function JavaEditor({ slug, savedCode, starter, save, onRan }: Pr
             }}
           >
             Reset to starter
+          </button>
+        )}
+        {onReview && (
+          <button className="btn btn-sm" onClick={onReview} title="Have this reviewed against the problem and the approach you claimed">
+            AI review
           </button>
         )}
         <a className="btn btn-sm btn-ghost" href={`https://leetcode.com/problems/${slug}/`} target="_blank" rel="noreferrer">

@@ -8,7 +8,16 @@ import { ErrorBox, Loading } from '../components.tsx';
  * for, or have the server send it to a model you configured. The prompt is the
  * same either way, so the no-key path isn't a lesser version.
  */
-export function AiReview({ slug, hasCode }: { slug: string; hasCode: boolean }) {
+export function AiReview({
+  slug,
+  hasCode,
+  beforeBuild,
+}: {
+  slug: string;
+  hasCode: boolean;
+  /** Flushes anything unsaved, so the prompt carries what you can see. */
+  beforeBuild?: () => Promise<void>;
+}) {
   const cfg = useLoad(api.aiConfig, []);
   const [prompt, setPrompt] = useState<string | null>(null);
   const [review, setReview] = useState<string | null>(null);
@@ -20,6 +29,7 @@ export function AiReview({ slug, hasCode }: { slug: string; hasCode: boolean }) 
     setBusy('prompt');
     setError(null);
     try {
+      await beforeBuild?.();
       const { prompt: p } = await api.aiPrompt(slug);
       setPrompt(p);
     } catch (e) {
@@ -33,6 +43,7 @@ export function AiReview({ slug, hasCode }: { slug: string; hasCode: boolean }) 
     setBusy('review');
     setError(null);
     try {
+      await beforeBuild?.();
       const r = await api.aiReview(slug);
       setReview(r.review);
     } catch (e) {
@@ -43,6 +54,7 @@ export function AiReview({ slug, hasCode }: { slug: string; hasCode: boolean }) 
   };
 
   const copy = async () => {
+    await beforeBuild?.();
     let text = prompt;
     if (!text) {
       const r = await api.aiPrompt(slug);

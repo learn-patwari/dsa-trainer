@@ -41,6 +41,8 @@ export function ProblemPage() {
   const [result, setResult] = useState<AttemptResult | null>(null);
   const [retakes, setRetakes] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  /** What's in the editor right now, which the saved copy lags by a debounce. */
+  const [liveCode, setLiveCode] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const timer = useTimer();
   const { restart: restartTimer, takeUnflushed } = timer;
@@ -51,6 +53,7 @@ export function ProblemPage() {
     setResult(null);
     setRetakes(0);
     setSubmitError(null);
+    setLiveCode(null);
     restartTimer();
   }, [slug, mode, restartTimer]);
 
@@ -243,11 +246,26 @@ export function ProblemPage() {
                 starter={lcProblem?.javaSnippet ?? null}
                 save={(code) => api.saveWork(slug, { code })}
                 onRan={view.reload}
+                onCodeChange={setLiveCode}
+                onReview={() => setTab('review')}
               />
             </Suspense>
           </div>
           <div hidden={tab !== 'review'}>
-            {tab === 'review' && <AiReview key={slug} slug={slug} hasCode={Boolean(v.progress?.code?.trim())} />}
+            {tab === 'review' && (
+              <AiReview
+                key={slug}
+                slug={slug}
+                hasCode={Boolean((liveCode ?? v.progress?.code)?.trim())}
+                // The prompt is built from the saved copy, so make sure it's current first.
+                beforeBuild={async () => {
+                  if (liveCode != null && liveCode !== v.progress?.code) {
+                    await api.saveWork(slug, { code: liveCode });
+                    view.reload();
+                  }
+                }}
+              />
+            )}
           </div>
           <div hidden={tab !== 'notes'}>
             <NotesEditor key={slug} savedNotes={v.progress?.notes ?? null} save={(notes) => api.saveWork(slug, { notes })} />
