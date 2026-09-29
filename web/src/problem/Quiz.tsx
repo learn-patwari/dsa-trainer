@@ -9,12 +9,14 @@ interface Props {
   submitting: boolean;
   /** True when this attempt will move the pattern rating, i.e. it's your first. */
   rated: boolean;
+  /** Set when the check can't be graded yet, e.g. the code hasn't been run. */
+  blocked: { reason: string; action: string; onAction: () => void } | null;
   onSubmit: (answers: Omit<AttemptSubmission, 'hintsUsed' | 'elapsedSec' | 'activeSec'>) => void;
 }
 
 const GROUPS = [...new Set(PATTERNS.map((p) => p.group))];
 
-export function Quiz({ quiz, mode, submitting, rated, onSubmit }: Props) {
+export function Quiz({ quiz, mode, submitting, rated, blocked, onSubmit }: Props) {
   const [pattern, setPattern] = useState<PatternId | null>(null);
   // In blind mode you commit to a pattern before seeing the other questions, whose wording can give it away.
   const [locked, setLocked] = useState(!quiz.askPattern);
@@ -85,7 +87,7 @@ export function Quiz({ quiz, mode, submitting, rated, onSubmit }: Props) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (blank) return;
+        if (blank || blocked) return;
         if (unanswered > 0 && rated && !confirming) {
           setConfirming(true);
           return;
@@ -205,15 +207,28 @@ export function Quiz({ quiz, mode, submitting, rated, onSubmit }: Props) {
         </div>
       )}
 
+      {blocked && (
+        <div className="callout warn small" style={{ marginTop: '1rem' }}>
+          {blocked.reason}
+          <div className="row" style={{ marginTop: '0.6rem' }}>
+            <button type="button" className="btn btn-sm" onClick={blocked.onAction}>
+              {blocked.action}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="spread" style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
         <span className="small muted">
-          {blank
+          {blocked
+            ? 'Answer these now if you like — they are graded once the code compiles.'
+            : blank
             ? 'Answer at least one question to submit.'
             : unanswered > 0
               ? `${unanswered} unanswered question${unanswered > 1 ? 's' : ''} will score 0.`
               : 'All questions answered.'}
         </span>
-        <button className="btn btn-primary" type="submit" disabled={submitting || blank || confirming}>
+        <button className="btn btn-primary" type="submit" disabled={submitting || blank || confirming || blocked !== null}>
           {submitting ? 'Grading…' : 'Submit approach'}
         </button>
       </div>

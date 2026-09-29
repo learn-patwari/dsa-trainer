@@ -91,6 +91,17 @@ describe('API', () => {
     expect(state.upNext[0].slug).toBe('contains-duplicate');
   });
 
+  /** A solution that compiles, so the approach check will accept the attempt. */
+  const WORKING_TWO_SUM = 'class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        Map<Integer, Integer> seen = new HashMap<>();\n        for (int i = 0; i < nums.length; i++) {\n            if (seen.containsKey(target - nums[i])) return new int[] { seen.get(target - nums[i]), i };\n            seen.put(nums[i], i);\n        }\n        return new int[0];\n    }\n}';
+
+  /** With a JDK present the check waits for code that compiles; write some and run it. */
+  async function makeSubmittable(slug: string, code = WORKING_TWO_SUM) {
+    if (!jdk.available) return;
+    await api(`/problems/${slug}/work`, { method: 'PUT', body: JSON.stringify({ code }) });
+    const run = await (await api(`/problems/${slug}/run`, { method: 'POST', body: JSON.stringify({ code }) })).json();
+    expect(run.compiled, run.compilerOutput).toBe(true);
+  }
+
   it('returns a quiz without the answer key, and grades an attempt', async () => {
     const view = await (await api('/problems/two-sum?mode=blind')).json();
     expect(view.pattern).toBeNull();
@@ -98,6 +109,7 @@ describe('API', () => {
 
     const { getProblem } = await import('../shared/problems/index.ts');
     const p = getProblem('two-sum')!;
+    await makeSubmittable('two-sum');
     const res = await api('/problems/two-sum/attempts', {
       method: 'POST',
       body: JSON.stringify({
@@ -115,6 +127,49 @@ describe('API', () => {
     expect(after.pattern).toEqual({ id: 'hashing', name: 'Hash Map / Set' });
     expect(after.progress.attempts).toBe(1);
   });
+
+  it.skipIf(!jdk.available)('will not grade an approach until the code compiles', async () => {
+    const answers = {
+      mode: 'pattern', pattern: 'hashing', brute: 'O(n\u00b2)', insight: 'x', time: 'O(n)', space: 'O(n)',
+      edgeCasesHandled: [0], hintsUsed: 0, elapsedSec: 30, activeSec: 30,
+    };
+    const submit = () => api('/problems/valid-palindrome/attempts', { method: 'POST', body: JSON.stringify(answers) });
+
+    // Nothing written yet.
+    let res = await submit();
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/Java tab/i);
+
+    // Written, but never run.
+    await api('/problems/valid-palindrome/work', { method: 'PUT', body: JSON.stringify({ code: 'class Solution { }' }) });
+    res = await submit();
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/Compile & run/i);
+
+    // Run, but it does not compile.
+    const broken = 'class Solution { oops }';
+    await api('/problems/valid-palindrome/run', { method: 'POST', body: JSON.stringify({ code: broken }) });
+    res = await submit();
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/compile/i);
+
+    // Compiles, so the attempt is graded. (The stubbed LeetCode hands out two-sum's
+    // signature for every slug, so the harness calls twoSum whatever the problem.)
+    const good = WORKING_TWO_SUM;
+    await api('/problems/valid-palindrome/run', { method: 'POST', body: JSON.stringify({ code: good }) });
+    expect((await (await api('/problems/valid-palindrome')).json()).codeCurrent).toBe(true);
+    res = await submit();
+    expect(res.status).toBe(200);
+
+    // Editing afterwards makes the run stale again.
+    await api('/problems/valid-palindrome/work', { method: 'PUT', body: JSON.stringify({ code: good + ' // tweak' }) });
+    const view = await (await api('/problems/valid-palindrome')).json();
+    expect(view.codeCurrent).toBe(false);
+    expect(view.requiresRun).toBe(true);
+    res = await submit();
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/edited the code/i);
+  }, 90_000);
 
   it('refuses an attempt with nothing answered', async () => {
     const before = await (await api('/state')).json();
@@ -265,13 +320,15 @@ class Solution {
 
   it('puts every attempt into the review queue', async () => {
     const queue = await (await api('/review')).json();
-    expect(queue.summary).toMatchObject({ due: 0, scheduled: 1 });
-    // The two-sum attempt above scored well, so it is scheduled rather than due.
+    // Earlier tests in this file graded attempts too, so count from the slug, not a total.
+    const twoSum = queue.upcoming.find((r: { slug: string }) => r.slug === 'two-sum');
+    expect(twoSum).toMatchObject({ slug: 'two-sum', pattern: 'hashing', of: 5 });
+    // It scored well, so it is scheduled rather than due.
     expect(queue.due).toEqual([]);
-    expect(queue.upcoming[0]).toMatchObject({ slug: 'two-sum', pattern: 'hashing', of: 5 });
+    expect(queue.summary.scheduled).toBe(queue.upcoming.length);
 
     const state = await (await api('/state')).json();
-    expect(state.review.summary.scheduled).toBe(1);
+    expect(state.review.summary.scheduled).toBe(queue.summary.scheduled);
   });
 
   it('starts, reports and stops a study plan', async () => {

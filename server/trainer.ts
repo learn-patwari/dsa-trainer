@@ -1,4 +1,4 @@
-import { randomInt } from 'node:crypto';
+import { createHash, randomInt } from 'node:crypto';
 import { getPattern, isPatternId, patternName, PATTERNS } from '../shared/patterns/index.ts';
 import { getProblem, PROBLEMS, problemsForPattern } from '../shared/problems/index.ts';
 import { scoreAttempt, START_RATING, tierFor, updateRating } from '../shared/scoring.ts';
@@ -93,7 +93,7 @@ export function revisitList(p: Progress, limit = 6): RevisitItem[] {
 
 // ---------------------------------------------------------------- problem page
 
-export function problemView(p: Progress, slug: string, mode: PracticeMode): ProblemView {
+export function problemView(p: Progress, slug: string, mode: PracticeMode, opts: { requiresRun?: boolean } = {}): ProblemView {
   const problem = requireProblem(slug);
   const progress = p.problems[slug] ?? null;
   const reveal = mode === 'pattern' || attempted(p, slug);
@@ -118,6 +118,8 @@ export function problemView(p: Progress, slug: string, mode: PracticeMode): Prob
     lcSolved: lcSolvedSet(p).has(slug),
     lcSolvedAt: lcSolvedAt(p, slug),
     sessionConfigured: sessionFromEnv() != null,
+    requiresRun: opts.requiresRun ?? false,
+    codeCurrent: codeIsCurrent(p, slug),
     progress,
     nextInPattern: siblings[idx + 1]?.slug ?? null,
   };
@@ -170,6 +172,23 @@ export function addTime(p: Progress, slug: string, body: unknown): TimeSpent {
   return time;
 }
 
+/** Identifies a piece of code, so a run can be matched to what is saved now. */
+export function hashCode(code: string): string {
+  return createHash('sha1').update(code).digest('hex').slice(0, 12);
+}
+
+/**
+ * Whether the saved code compiled and is still the code that was compiled.
+ * Runs recorded before hashes existed are taken at face value.
+ */
+export function codeIsCurrent(p: Progress, slug: string): boolean {
+  const entry = p.problems[slug];
+  const code = entry?.code;
+  const run = entry?.lastRun;
+  if (!code?.trim() || !run?.compiled) return false;
+  return run.codeHash === undefined || run.codeHash === hashCode(code);
+}
+
 /** True when nothing at all was answered — a slip, not an attempt. */
 export function isBlank(sub: AttemptSubmission): boolean {
   return (
@@ -186,10 +205,15 @@ export function isBlank(sub: AttemptSubmission): boolean {
  * Grades an attempt and records it. Only the FIRST attempt at a problem moves your
  * pattern rating; later attempts are practice, since you've seen the answers.
  */
-export function recordAttempt(p: Progress, slug: string, sub: AttemptSubmission): AttemptResult {
+export function recordAttempt(p: Progress, slug: string, sub: AttemptSubmission, opts: { requireRun?: boolean } = {}): AttemptResult {
   const problem = requireProblem(slug);
   // Recording an empty sheet would spend the one rated attempt on a zero.
   if (isBlank(sub)) throw new HttpError(400, 'Answer at least one question before submitting.');
+  // Naming an approach is cheap until you've written it. With a JDK present, the
+  // check is only graded once the code compiles — and once it is the code you ran.
+  if (opts.requireRun && !codeIsCurrent(p, slug)) {
+    throw new HttpError(400, blockedReason(p, slug));
+  }
   const outcome = scoreAttempt(problem, sub, patternName);
   const prior = p.problems[slug];
   const rated = !attempted(p, slug);
@@ -262,7 +286,17 @@ export function recordRun(p: Progress, slug: string, code: string, result: RunRe
     passed: result.passed,
     checked: result.checked,
     total: result.total,
+    codeHash: hashCode(code),
   };
+}
+
+/** Says which part of "write it, then compile it" is still outstanding. */
+export function blockedReason(p: Progress, slug: string): string {
+  const entry = p.problems[slug];
+  if (!entry?.code?.trim()) return 'Write your solution in the Java tab first — the approach check is graded against code you have actually written.';
+  if (!entry.lastRun) return 'Press Compile & run on your solution first, then submit the approach check.';
+  if (!entry.lastRun.compiled) return "Your code doesn't compile yet. Fix it, run it again, then submit the approach check.";
+  return 'You have edited the code since the last run. Press Compile & run again, then submit.';
 }
 
 /** Stores the accepted submission fetched from LeetCode for this problem. */

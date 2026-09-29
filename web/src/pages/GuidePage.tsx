@@ -34,8 +34,9 @@ export function GuidePage() {
             ask in, and it is where most people lose the round.
           </li>
           <li>
-            <strong>Now write the Java</strong> in the editor tab and press Compile &amp; run. Passing the examples
-            doesn't change your rating — it only proves the idea survived contact with a compiler.
+            <strong>Now write the Java</strong> in the editor tab and press Compile &amp; run. The check isn't graded
+            until your code compiles: naming an approach is cheap until you've written it. Passing the example tests
+            doesn't change your rating — that stays a measure of the approach — but compiling is the price of entry.
           </li>
           <li>
             <strong>Solve two of that pattern on LeetCode for real</strong>, under a clock, in the real editor. A

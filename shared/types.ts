@@ -141,7 +141,15 @@ export interface ProblemProgress {
   code?: string;
   notes?: string;
   /** Summary of the last compile & run, for the "code verified" badge. */
-  lastRun?: { at: string; compiled: boolean; passed: number; checked: number; total: number };
+  lastRun?: {
+    at: string;
+    compiled: boolean;
+    passed: number;
+    checked: number;
+    total: number;
+    /** Identifies the code that was run, so an edit afterwards makes this stale. */
+    codeHash?: string;
+  };
   /** Your accepted LeetCode submission for this problem, fetched with the session cookie. */
   leetcodeSolution?: LeetCodeSolution;
   /** When to practise this again, and how well it's sticking. */
@@ -480,6 +488,10 @@ export interface ProblemView {
   lcSolvedAt: number | null;
   /** True when LEETCODE_SESSION is set, so your own submission can be fetched. */
   sessionConfigured: boolean;
+  /** A JDK is present, so the approach check waits until you've compiled your solution. */
+  requiresRun: boolean;
+  /** Your saved code compiled, and hasn't been edited since that run. */
+  codeCurrent: boolean;
   progress: ProblemProgress | null;
   nextInPattern: string | null;
 }

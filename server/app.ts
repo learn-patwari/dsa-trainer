@@ -60,7 +60,8 @@ export function createApp({ webDir = resolve('dist/web') } = {}) {
   });
 
   api.get('/problems/:slug', async (req, res) => {
-    res.json(problemView(await readProgress(), req.params.slug, parseMode(req.query.mode)));
+    const jdk = await javaStatus();
+    res.json(problemView(await readProgress(), req.params.slug, parseMode(req.query.mode), { requiresRun: jdk.available }));
   });
 
   api.get('/problems/:slug/leetcode', async (req, res) => {
@@ -71,7 +72,9 @@ export function createApp({ webDir = resolve('dist/web') } = {}) {
   api.post('/problems/:slug/attempts', async (req, res) => {
     requireProblem(req.params.slug);
     const submission = validateSubmission(req.body);
-    res.json(await updateProgress((p) => recordAttempt(p, req.params.slug, submission)));
+    // Without a JDK there is nothing to compile with, so the check can't wait on one.
+    const jdk = await javaStatus();
+    res.json(await updateProgress((p) => recordAttempt(p, req.params.slug, submission, { requireRun: jdk.available })));
   });
 
   api.put('/problems/:slug/work', async (req, res) => {

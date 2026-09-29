@@ -147,6 +147,14 @@ topological sort, union-find, shortest path, 1-D DP, 2-D DP, trie, bit manipulat
 
 ## Compile & run
 
+Answering the approach check is free; having it **graded** is not. With a JDK installed, the check stays locked
+until your solution compiles, and until the code you have now is the code you last ran. Name the approach first if
+you like — that is the interview order — but the rating only lands once you have written the thing you described.
+
+Passing the example tests is still not required, and still doesn't move your rating: a wrong answer honestly
+attempted is worth recording. Compiling is the bar, because it is the cheapest possible proof that you wrote real
+code. Without a JDK there is nothing to compile with, so the check grades as soon as you answer.
+
 Press **Compile & run** (or Ctrl/Cmd+Enter) in the Java tab. Your solution is compiled with `javac` and run against
 LeetCode's own example tests, on your machine:
 

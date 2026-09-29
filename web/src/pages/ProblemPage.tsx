@@ -97,6 +97,25 @@ export function ProblemPage() {
 
   // Show the stored result when revisiting, unless you chose to retake.
   const shown = result ?? (retakes === 0 ? (v.progress?.lastResult ?? null) : null);
+  // Naming an approach is cheap until you have written it, so the check waits for
+  // code that compiles. Without a JDK there is nothing to wait for.
+  const unsavedEdit = liveCode != null && liveCode !== (v.progress?.code ?? '');
+  const blocked =
+    !v.requiresRun || (v.codeCurrent && !unsavedEdit)
+      ? null
+      : {
+          reason: !v.progress?.code?.trim()
+            ? 'Write your solution in the Java tab first. The approach check is graded against code you have actually written and compiled.'
+            : unsavedEdit
+              ? 'You have edited the code since the last run. Compile & run it again, then submit.'
+              : !v.progress.lastRun
+                ? 'Press Compile & run on your solution, then submit the approach check.'
+                : !v.progress.lastRun.compiled
+                  ? "Your code doesn't compile yet. Fix it, run it again, then submit."
+                  : 'You have edited the code since the last run. Compile & run it again, then submit.',
+          action: 'Go to the Java tab',
+          onAction: () => setTab('java'),
+        };
   const attemptedBefore = (v.progress?.attempts ?? 0) > 0;
   const solveAgeDays = v.lcSolvedAt != null ? Math.floor((Date.now() / 1000 - v.lcSolvedAt) / 86_400) : null;
   const staleSolve = solveAgeDays != null && solveAgeDays >= REVISIT_AFTER_DAYS;
@@ -231,6 +250,7 @@ export function ProblemPage() {
                   quiz={v.quiz}
                   mode={mode}
                   rated={!attemptedBefore}
+                  blocked={blocked}
                   submitting={submitting}
                   onSubmit={submit}
                 />
