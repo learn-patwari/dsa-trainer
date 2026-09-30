@@ -7,6 +7,7 @@ import { Quiz } from '../problem/Quiz.tsx';
 import { ResultCard } from '../problem/ResultCard.tsx';
 import { Statement } from '../problem/Statement.tsx';
 import { MySolution } from '../problem/MySolution.tsx';
+import { AnimatedHint } from '../animation/AnimatedHint.tsx';
 import { AiReview } from '../problem/AiReview.tsx';
 import { BUDGET_SEC, TimerBar } from '../problem/TimerBar.tsx';
 import { useTimer } from '../problem/useTimer.ts';
@@ -38,6 +39,8 @@ export function ProblemPage() {
 
   const [tab, setTab] = useState<Tab>('approach');
   const [hintsShown, setHintsShown] = useState(0);
+  /** The animated walkthrough counts as one hint once opened. */
+  const [animHint, setAnimHint] = useState(false);
   const [result, setResult] = useState<AttemptResult | null>(null);
   const [retakes, setRetakes] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -50,6 +53,7 @@ export function ProblemPage() {
   useEffect(() => {
     setTab('approach');
     setHintsShown(0);
+    setAnimHint(false);
     setResult(null);
     setRetakes(0);
     setSubmitError(null);
@@ -126,7 +130,7 @@ export function ProblemPage() {
     try {
       const r = await api.submit(slug, {
         ...answers,
-        hintsUsed: hintsShown,
+        hintsUsed: hintsShown + (animHint ? 1 : 0),
         elapsedSec: timer.elapsedSec,
         activeSec: timer.activeSec,
       });
@@ -219,6 +223,7 @@ export function ProblemPage() {
             onRevealHint={() => setHintsShown((h) => h + 1)}
             hintsCost={!shown}
           />
+          <AnimatedHint pattern={v.pattern?.id ?? null} revealed={animHint} costs={!shown} onReveal={() => setAnimHint(true)} />
         </section>
 
         <section className="card sticky-col">

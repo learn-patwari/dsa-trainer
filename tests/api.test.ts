@@ -126,7 +126,7 @@ describe('API', () => {
     const after = await (await api('/problems/two-sum?mode=blind')).json();
     expect(after.pattern).toEqual({ id: 'hashing', name: 'Hash Map / Set' });
     expect(after.progress.attempts).toBe(1);
-  });
+  }, 60_000); // compiles real Java first, which is slow while other suites compile too
 
   it.skipIf(!jdk.available)('will not grade an approach until the code compiles', async () => {
     const answers = {

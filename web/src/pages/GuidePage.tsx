@@ -26,7 +26,8 @@ export function GuidePage() {
         <ol className="stack" style={{ gap: '0.6rem', paddingLeft: '1.2rem', margin: 0 }}>
           <li>
             <strong>Read the lesson first</strong> — <Link to="/patterns">Patterns</Link> lists the cues that give each
-            one away. You are learning to recognise, not to memorise.
+            one away, and every lesson ends with the technique animated step by step. Watch it move before you try it.
+            You are learning to recognise, not to memorise.
           </li>
           <li>
             <strong>Attempt the approach check before you write any code.</strong> Name the brute force and its cost,

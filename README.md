@@ -15,7 +15,7 @@ problem statements and — if you ask it to — your own solved list.
 **Contents**
 
 [Quick start](#quick-start) · [Your first session](#your-first-session) · [What's in the app](#whats-in-the-app) ·
-[How it grades you](#how-it-grades-you) · [The problem bank](#the-problem-bank) · [Compile & run](#compile--run) ·
+[How it grades you](#how-it-grades-you) · [Animations](#animations) · [The problem bank](#the-problem-bank) · [Compile & run](#compile--run) ·
 [Reference](#reference) · [AI review](#ai-code-review) · [The timer](#the-timer) · [Review](#review-spaced-repetition) · [Study plan](#study-plan-streak-and-difficulty) ·
 [Challenge & finder](#challenge-mode-and-the-pattern-finder) · [LeetCode integration](#leetcode-integration) ·
 [Your data](#your-data) · [Configuration](#configuration) · [Development](#development) ·
@@ -130,6 +130,31 @@ quiz is not the same as writing the code.
 
 After every attempt the result card links to the LeetCode editorial, the community solutions, a NeetCode video search
 and takeuforward for that problem.
+
+## Animations
+
+Every one of the 23 patterns has an animation: the technique running on a small example, one step at a time, with
+a caption saying what just happened and why. Two pointers closing in on a pair, a sliding window growing and
+shrinking, a heap re-ordering itself as values arrive, Dijkstra settling nodes, a backtracking decision tree
+filling in, a linked list having its arrows flipped — including the moment the rest of the list is reachable only
+through the saved `next` pointer, which is the whole point of that pattern.
+
+**Where they appear.** At the end of every pattern lesson, free. And on every problem as an **animated hint**, which
+costs a point like the text hints do. In blind mode the animated hint stays locked until you have answered, because
+an animation titled "two pointers" would name the pattern you are meant to spot.
+
+**It shows the technique, not the answer.** Each animation runs on its own small example, not the problem you are
+looking at, so it is a hint about how the pattern moves rather than a walkthrough of your solution.
+
+**Controls.** Play and pause (Space), step back and forward (arrow keys), jump to start or end (Home / End), drag the
+scrubber, and pick a speed. Longer captions stay on screen longer, so autoplay never outruns the reading. With
+"reduce motion" set in your OS, transitions switch off and nothing plays until you ask.
+
+**They cannot be wrong.** No frame is drawn by hand. Each animation runs the real algorithm and records its state at
+every step, and a test holds every one of them to the answer that algorithm must produce — `8 + 2 = 10` found at
+indices `(1, 3)`, Dijkstra distances `A0 B3 C1 D4 E7`, eight subsets of `[1, 2, 3]`. If a generator ever draws a
+wrong step, its answer drifts and the test names the pattern. The whole player is a separate 46 kB chunk, loaded
+only when you press play.
 
 ## The problem bank
 

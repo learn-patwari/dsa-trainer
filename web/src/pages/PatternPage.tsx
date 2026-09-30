@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router';
+import { PatternAnimation } from '../animation/AnimatedHint.tsx';
 import { api, useLoad } from '../api.ts';
 import { DifficultyTag, ErrorBox, Loading, ProgressBar, Rating } from '../components.tsx';
 
@@ -81,6 +82,14 @@ export function PatternPage() {
           </pre>
         </section>
       </div>
+
+      <section className="card">
+        <h2>Watch it work</h2>
+        <p className="small muted">
+          The technique running on a small example, one step at a time. Press play, or step through with the arrow keys.
+        </p>
+        <PatternAnimation pattern={p.id} />
+      </section>
 
       <section className="card">
         <h2>Problems</h2>
