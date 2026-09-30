@@ -73,6 +73,21 @@ export interface CuratedProblem {
 
 export type PracticeMode = 'pattern' | 'blind';
 
+/** One line of a complexity argument: what the code does, and what that costs. */
+export type ComplexityStep = [what: string, cost: string];
+
+export interface ComplexityDerivation {
+  steps: ComplexityStep[];
+  /** How the steps combine, ending on the graded answer. */
+  so: string;
+}
+
+/** How a problem's time and space are counted — revealed after an attempt. */
+export interface ComplexityWalkthrough {
+  time: ComplexityDerivation;
+  space: ComplexityDerivation;
+}
+
 export interface QuizView {
   askPattern: boolean;
   /** Present when the problem has a brute-force reference; asked before the optimal approach. */
@@ -492,6 +507,8 @@ export interface ProblemView {
   requiresRun: boolean;
   /** Your saved code compiled, and hasn't been edited since that run. */
   codeCurrent: boolean;
+  /** How the complexity is counted; null until you've attempted, since it gives the answer away. */
+  complexity: ComplexityWalkthrough | null;
   progress: ProblemProgress | null;
   nextInPattern: string | null;
 }

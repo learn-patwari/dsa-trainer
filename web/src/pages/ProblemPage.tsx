@@ -240,7 +240,7 @@ export function ProblemPage() {
 
           <div hidden={tab !== 'approach'}>
             {shown ? (
-              <ResultCard result={shown} nextHref={next.href} nextLabel={next.label} onRetake={retake} />
+              <ResultCard result={shown} complexity={v.complexity} nextHref={next.href} nextLabel={next.label} onRetake={retake} />
             ) : (
               <div className="stack" style={{ gap: '0.75rem' }}>
                 <div className="callout small">

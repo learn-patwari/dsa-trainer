@@ -1,17 +1,34 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { patternName } from '../../../shared/patterns/index.ts';
-import { FORMULAS, FUNDAMENTAL_GROUPS, FUNDAMENTALS, STRUCTURE_GROUPS, STRUCTURES, TOOLBOX } from '../../../shared/reference/index.ts';
+import {
+  ASCII_ANCHORS,
+  ASCII_BLOCKS,
+  CHAR_TRICKS,
+  formatCount,
+  formatDuration,
+  FORMULAS,
+  FUNDAMENTAL_GROUPS,
+  FUNDAMENTALS,
+  GROWTH_FNS,
+  GROWTH_SIZES,
+  STRUCTURE_GROUPS,
+  STRUCTURES,
+  TOOLBOX,
+  UNICODE_NOTES,
+  verdict,
+} from '../../../shared/reference/index.ts';
 import type { Structure } from '../../../shared/reference/index.ts';
 import { isPatternId } from '../../../shared/patterns/index.ts';
 
-type Tab = 'structures' | 'java' | 'complexity' | 'maths';
+type Tab = 'structures' | 'java' | 'complexity' | 'maths' | 'ascii';
 
 const TABS: { id: Tab; label: string; blurb: string }[] = [
   { id: 'structures', label: 'Data structures', blurb: 'What Java gives you, what each operation costs, and the methods that do the work.' },
   { id: 'java', label: 'Java fundamentals', blurb: 'The language traps that turn a correct approach into a wrong answer.' },
   { id: 'complexity', label: 'Complexity toolbox', blurb: 'Building blocks you can cite by name, and how to add them up.' },
-  { id: 'maths', label: 'Maths cheat sheet', blurb: 'The arithmetic behind the Big-O, and how to size an input from its constraints.' },
+  { id: 'maths', label: 'Maths cheat sheet', blurb: 'The arithmetic behind the Big-O, number theory, bits, geometry and randomness — each with where it turns up.' },
+  { id: 'ascii', label: 'ASCII & characters', blurb: 'Characters are numbers. The codes worth knowing, and the char arithmetic string problems quietly depend on.' },
 ];
 
 /** The reference half of the app: everything you should know before the quiz asks. */
@@ -45,6 +62,7 @@ export function ReferencePage() {
       {tab === 'java' && <Fundamentals />}
       {tab === 'complexity' && <Complexity />}
       {tab === 'maths' && <Maths />}
+      {tab === 'ascii' && <Ascii />}
     </main>
   );
 }
@@ -180,6 +198,7 @@ function Fundamentals() {
 function Complexity() {
   return (
     <div className="stack">
+      <Growth />
       {TOOLBOX.map((g) => (
         <section key={g.group} className="card">
           <h2 style={{ marginTop: 0 }}>{g.group}</h2>
@@ -243,6 +262,135 @@ function Maths() {
           </div>
         </section>
       ))}
+    </div>
+  );
+}
+
+/** What each complexity costs at real sizes, and how long that takes. */
+function Growth() {
+  return (
+    <section className="card">
+      <h2 style={{ marginTop: 0 }}>What the letters cost</h2>
+      <p className="small muted">
+        Operations at each input size, and how long that takes at about 10⁸ simple operations a second. Green fits a
+        1-second time limit; amber is borderline; red times out. Read your constraint, find its column, and this tells you
+        which complexities are even allowed.
+      </p>
+      <div className="table-wrap">
+        <table className="table growth">
+          <thead>
+            <tr>
+              <th>Complexity</th>
+              {GROWTH_SIZES.map((n) => (
+                <th key={n} className="mono">
+                  n = {formatCount(Math.log10(n))}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {GROWTH_FNS.map((f) => (
+              <tr key={f.label}>
+                <td>
+                  <strong className="mono small">{f.label}</strong>
+                  <div className="tiny muted">{f.example}</div>
+                </td>
+                {GROWTH_SIZES.map((n) => {
+                  const l = f.log10(n);
+                  return (
+                    <td key={n} className={`growth-${verdict(l)}`}>
+                      <div className="mono small">{formatCount(l)}</div>
+                      <div className="tiny">{formatDuration(l)}</div>
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function Ascii() {
+  return (
+    <div className="stack">
+      <section className="card">
+        <h2 style={{ marginTop: 0 }}>Four numbers to know by heart</h2>
+        <div className="ascii-anchors">
+          {ASCII_ANCHORS.map((a) => (
+            <div key={a.char} className="ascii-anchor">
+              <span className="mono ascii-anchor-char">{a.char}</span>
+              <span className="mono ascii-anchor-code">{a.code}</span>
+              <span className="tiny muted">{a.why}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {ASCII_BLOCKS.map((b) => (
+        <section key={b.title} className="card">
+          <div className="spread">
+            <h2 style={{ margin: 0 }}>{b.title}</h2>
+            <span className="tag mono">{b.range}</span>
+          </div>
+          <p className="small muted" style={{ margin: '0.4rem 0 0.7rem' }}>
+            {b.blurb}
+          </p>
+          <div className="ascii-grid">
+            {b.cells.map((c) => (
+              <div key={c.code} className="ascii-cell" title={c.name ?? `code ${c.code}`}>
+                <span className="mono ascii-char">{c.char}</span>
+                <span className="mono ascii-code">{c.code}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
+
+      <section className="card">
+        <h2 style={{ marginTop: 0 }}>Char arithmetic</h2>
+        <p className="small muted">A char is a number, so you can add to it, subtract from it, and flip its bits.</p>
+        <div className="table-wrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Java</th>
+                <th>Gives</th>
+                <th>Why it's useful</th>
+              </tr>
+            </thead>
+            <tbody>
+              {CHAR_TRICKS.map((t) => (
+                <tr key={t.expr}>
+                  <td className="mono small" style={{ whiteSpace: 'nowrap' }}>
+                    {t.expr}
+                  </td>
+                  <td className="mono small" style={{ whiteSpace: 'nowrap' }}>
+                    {t.gives}
+                  </td>
+                  <td className="small">
+                    {t.note}
+                    {t.caution && <div className="tiny" style={{ color: 'var(--warn)' }}>⚠ {t.caution}</div>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="card">
+        <h2 style={{ marginTop: 0 }}>A char is not a byte</h2>
+        <ul className="small" style={{ margin: 0, paddingLeft: '1.1rem' }}>
+          {UNICODE_NOTES.map((n) => (
+            <li key={n} style={{ marginBottom: '0.35rem' }}>
+              {n}
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

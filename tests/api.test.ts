@@ -106,6 +106,7 @@ describe('API', () => {
     const view = await (await api('/problems/two-sum?mode=blind')).json();
     expect(view.pattern).toBeNull();
     expect(view.quiz.askPattern).toBe(true);
+    expect(view.complexity, 'the walkthrough gives the answer away').toBeNull();
 
     const { getProblem } = await import('../shared/problems/index.ts');
     const p = getProblem('two-sum')!;
@@ -126,6 +127,9 @@ describe('API', () => {
     const after = await (await api('/problems/two-sum?mode=blind')).json();
     expect(after.pattern).toEqual({ id: 'hashing', name: 'Hash Map / Set' });
     expect(after.progress.attempts).toBe(1);
+    // Answered, so the counting behind the answer comes with it.
+    expect(after.complexity.time.so).toBe('n × O(1) = O(n)');
+    expect(after.complexity.space.steps.length).toBeGreaterThan(0);
   }, 60_000); // compiles real Java first, which is slow while other suites compile too
 
   it.skipIf(!jdk.available)('will not grade an approach until the code compiles', async () => {

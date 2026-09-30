@@ -131,6 +131,22 @@ quiz is not the same as writing the code.
 After every attempt the result card links to the LeetCode editorial, the community solutions, a NeetCode video search
 and takeuforward for that problem.
 
+### After the result: how the complexity adds up
+
+Every one of the 197 problems has a worked complexity derivation, shown on the result card once you have answered.
+It lists each piece of work and its cost, then how they combine, for time and for space:
+
+```
+Time                                          Space
+1. One pass over the n numbers  n iterations  1. The map may store every number
+2. Each: one lookup, one insert  O(1) average     before the pair turns up    up to n entries
+→ n × O(1) = O(n)                             → O(n)
+```
+
+It marks whether your own time and space answers were right. Every derivation ends on exactly the answer the approach
+check grades, and a test holds all 197 to that, so the walkthrough and the quiz can never disagree. It lives with the
+answer key on the server and is sent only after an attempt, because it gives the answer away.
+
 ## Animations
 
 Every one of the 23 patterns has an animation: the technique running on a small example, one step at a time, with
@@ -207,7 +223,7 @@ checked test get a **code verified** badge.
 
 ## Reference
 
-A tab of the things the approach check assumes you already know, in four parts:
+A tab of the things the approach check assumes you already know, in five parts:
 
 - **Data structures** — every Java structure worth knowing, with a cost table per operation, the methods that
   actually do the work (`computeIfAbsent`, `floorKey`, `merge`, `deleteCharAt`…), when to reach for it, and the
@@ -215,12 +231,22 @@ A tab of the things the approach check assumes you already know, in four parts:
 - **Java fundamentals** — the language traps that turn a correct approach into a wrong answer: int overflow in
   `(lo + hi) / 2`, `==` on boxed Integers above 127, integer division truncating toward zero, pass-by-value in
   backtracking, `ConcurrentModificationException`, comparator subtraction overflow.
-- **Complexity toolbox** — the routines you may cite by name with their costs (BFS `O(V + E)`, Dijkstra
-  `O(E log V)`, heap push `O(log n)`, monotonic stack `O(n)` amortised), plus how to add them up: sequential blocks,
-  nested loops, divide and conquer, amortised, output-sensitive.
+- **Complexity toolbox** — opens with a growth table: what `O(1)` through `O(n!)` cost at n = 10 up to 10⁶,
+  and how long that takes at about 10⁸ operations a second, coloured by whether it fits a one-second limit. `O(n²)` at
+  10⁵ is 10 billion operations, about two minutes, so read your constraint and the allowed complexities fall out.
+  Then the routines you may cite by name with their costs (BFS `O(V + E)`, Dijkstra `O(E log V)`, heap push
+  `O(log n)`, monotonic stack `O(n)` amortised), and how to add them up. The table is computed in log₁₀ space, so
+  `2ⁿ` and `n!` stay exact to the order of magnitude instead of overflowing.
 - **Maths cheat sheet** — the series and counting formulas behind the Big-O (why `1 + 2 + … + n` makes a
-  nested loop quadratic, why doubling is amortised `O(1)`), modular arithmetic for the `10^9 + 7` problems, and a
-  constraint table that reads the intended complexity off the input size.
+  nested loop quadratic, why doubling is amortised `O(1)`), modular arithmetic for the `10^9 + 7` problems, a
+  constraint table, and four further groups: number theory (fast exponentiation, the modular inverse, ceiling division
+  `(a + b − 1) / b`, divisor counts), bases and bits (two's complement, the power-of-two test, `x & −x`), geometry
+  (compare squared distances, slopes as reduced fractions, the cross-product turn test, shoelace area) and randomness
+  (reservoir sampling, weighted picks, Fisher–Yates).
+- **ASCII & characters** — the four codes to know by heart (`'0'` 48, `'A'` 65, `'a'` 97, space 32), the digit,
+  letter and punctuation tables generated from real char codes, and the char arithmetic string problems depend on:
+  `c − '0'`, `c − 'a'` into an `int[26]`, and case as a single bit (`c ^ 32` toggles it). Every letters-only trick
+  says so, and a test checks each claim against actual character codes.
 
 ## The timer
 

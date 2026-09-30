@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { patternName } from '../../../shared/patterns/index.ts';
-import type { AttemptResult } from '../../../shared/types.ts';
+import type { AttemptResult, ComplexityDerivation, ComplexityWalkthrough } from '../../../shared/types.ts';
 import { formatDuration, RatingDelta, ScoreRing } from '../components.tsx';
 import { studyLinks } from '../links.ts';
 
@@ -8,12 +8,14 @@ const ICON = { correct: '✓', partial: '~', wrong: '✗', skipped: '–' } as c
 
 interface Props {
   result: AttemptResult;
+  /** How the complexity is counted, when the server has sent it. */
+  complexity?: ComplexityWalkthrough | null;
   nextHref: string | null;
   nextLabel: string;
   onRetake: () => void;
 }
 
-export function ResultCard({ result: r, nextHref, nextLabel, onRetake }: Props) {
+export function ResultCard({ result: r, complexity, nextHref, nextLabel, onRetake }: Props) {
   return (
     <div className="stack">
       <div className="row" style={{ gap: '1rem', alignItems: 'center' }}>
@@ -84,6 +86,8 @@ export function ResultCard({ result: r, nextHref, nextLabel, onRetake }: Props) 
         <div className="small">{r.approach}</div>
       </div>
 
+      {complexity && <ComplexityCard walkthrough={complexity} result={r} />}
+
       <div>
         <div className="small muted" style={{ marginBottom: '0.35rem' }}>Read more</div>
         <div className="row small" style={{ flexWrap: 'wrap' }}>
@@ -108,6 +112,47 @@ export function ResultCard({ result: r, nextHref, nextLabel, onRetake }: Props) 
           {patternName(r.pattern)} lesson
         </Link>
       </div>
+    </div>
+  );
+}
+
+/**
+ * The counting behind the answer: each piece of work and its cost, then how the
+ * pieces combine. Shows whether your own complexity answers were right, too.
+ */
+function ComplexityCard({ walkthrough, result }: { walkthrough: ComplexityWalkthrough; result: AttemptResult }) {
+  const verdict = (key: 'time' | 'space') => result.breakdown.find((q) => q.key === key);
+  return (
+    <div className="cx-card">
+      <div className="cx-title">How the complexity adds up</div>
+      <div className="cx-grid">
+        <Derivation label="Time" d={walkthrough.time} mark={verdict('time')?.verdict} />
+        <Derivation label="Space" d={walkthrough.space} mark={verdict('space')?.verdict} />
+      </div>
+      <div className="tiny muted" style={{ marginTop: '0.5rem' }}>
+        Sequential steps add, and only the biggest term survives. Work inside a loop multiplies by the number of times the
+        loop runs. The <Link to="/reference">Reference</Link> tab has the costs of every routine used here.
+      </div>
+    </div>
+  );
+}
+
+function Derivation({ label, d, mark }: { label: string; d: ComplexityDerivation; mark?: string }) {
+  return (
+    <div className="cx-col">
+      <div className="cx-head">
+        <span className="cx-label">{label}</span>
+        {mark === 'correct' ? <span className="tag tag-good tiny">you had it</span> : mark ? <span className="tag tag-warn tiny">worth a second look</span> : null}
+      </div>
+      <ol className="cx-steps">
+        {d.steps.map(([what, cost], i) => (
+          <li key={i}>
+            <span className="cx-what">{what}</span>
+            <span className="cx-cost mono">{cost}</span>
+          </li>
+        ))}
+      </ol>
+      <div className="cx-so mono">→ {d.so}</div>
     </div>
   );
 }

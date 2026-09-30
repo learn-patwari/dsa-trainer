@@ -1,5 +1,6 @@
 import { createHash, randomInt } from 'node:crypto';
 import { getPattern, isPatternId, patternName, PATTERNS } from '../shared/patterns/index.ts';
+import { COMPLEXITY } from '../shared/problems/complexity.ts';
 import { getProblem, PROBLEMS, problemsForPattern } from '../shared/problems/index.ts';
 import { scoreAttempt, START_RATING, tierFor, updateRating } from '../shared/scoring.ts';
 import { challengeStats } from './challenge.ts';
@@ -120,6 +121,7 @@ export function problemView(p: Progress, slug: string, mode: PracticeMode, opts:
     sessionConfigured: sessionFromEnv() != null,
     requiresRun: opts.requiresRun ?? false,
     codeCurrent: codeIsCurrent(p, slug),
+    complexity: attempted(p, slug) ? (COMPLEXITY[slug] ?? null) : null,
     progress,
     nextInPattern: siblings[idx + 1]?.slug ?? null,
   };
