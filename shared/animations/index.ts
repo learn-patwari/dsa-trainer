@@ -50,3 +50,4 @@ export function animationFor(pattern: PatternId): PatternAnimation {
 }
 
 export const ANIMATED_PATTERNS = Object.keys(BUILDERS) as PatternId[];
+export { sortAnimationFor, SORT_IDS } from './sorts.ts';

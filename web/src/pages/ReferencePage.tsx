@@ -1,10 +1,13 @@
 import { useState } from 'react';
+import { SortAnimation } from '../animation/AnimatedHint.tsx';
+import type { SortAlgorithm } from '../../../shared/reference/index.ts';
 import { Link } from 'react-router';
 import { patternName } from '../../../shared/patterns/index.ts';
 import {
   ASCII_ANCHORS,
   ASCII_BLOCKS,
   CHAR_TRICKS,
+  COMPLEXITY_CLASSES,
   formatCount,
   formatDuration,
   FORMULAS,
@@ -12,6 +15,9 @@ import {
   FUNDAMENTALS,
   GROWTH_FNS,
   GROWTH_SIZES,
+  JAVA_SORTS,
+  NLOGN,
+  SORTS,
   STRUCTURE_GROUPS,
   STRUCTURES,
   TOOLBOX,
@@ -21,10 +27,11 @@ import {
 import type { Structure } from '../../../shared/reference/index.ts';
 import { isPatternId } from '../../../shared/patterns/index.ts';
 
-type Tab = 'structures' | 'java' | 'complexity' | 'maths' | 'ascii';
+type Tab = 'structures' | 'algorithms' | 'java' | 'complexity' | 'maths' | 'ascii';
 
 const TABS: { id: Tab; label: string; blurb: string }[] = [
   { id: 'structures', label: 'Data structures', blurb: 'What Java gives you, what each operation costs, and the methods that do the work.' },
+  { id: 'algorithms', label: 'Algorithms & sorting', blurb: 'Which algorithms give which complexity and why — and the eight classic sorts, each with working Java and an animation.' },
   { id: 'java', label: 'Java fundamentals', blurb: 'The language traps that turn a correct approach into a wrong answer.' },
   { id: 'complexity', label: 'Complexity toolbox', blurb: 'Building blocks you can cite by name, and how to add them up.' },
   { id: 'maths', label: 'Maths cheat sheet', blurb: 'The arithmetic behind the Big-O, number theory, bits, geometry and randomness — each with where it turns up.' },
@@ -59,6 +66,7 @@ export function ReferencePage() {
       </p>
 
       {tab === 'structures' && <Structures filter={filter} setFilter={setFilter} />}
+      {tab === 'algorithms' && <Algorithms />}
       {tab === 'java' && <Fundamentals />}
       {tab === 'complexity' && <Complexity />}
       {tab === 'maths' && <Maths />}
@@ -392,5 +400,198 @@ function Ascii() {
         </ul>
       </section>
     </div>
+  );
+}
+
+function Algorithms() {
+  return (
+    <div className="stack">
+      <section className="card">
+        <h2 style={{ marginTop: 0 }}>Where each complexity comes from</h2>
+        <p className="small muted">
+          Every Big-O comes from a shape of code. Recognise the shape and you know the complexity before you count anything.
+        </p>
+        <div className="cc-grid">
+          {COMPLEXITY_CLASSES.map((c) => (
+            <div key={c.bigO} className="cc-card">
+              <div className="cc-bigo mono">{c.bigO}</div>
+              <div className="small" style={{ fontWeight: 600 }}>
+                {c.shape}
+              </div>
+              <div className="tiny muted" style={{ margin: '0.25rem 0 0.5rem' }}>
+                {c.why}
+              </div>
+              <ul className="cc-examples small">
+                {c.examples.map((e) => (
+                  <li key={e}>{e}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="card">
+        <h2 style={{ marginTop: 0 }}>{NLOGN.title}</h2>
+        <div className="grid grid-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+          {NLOGN.sources.map((src, k) => (
+            <div key={src.name} className="card card-flat">
+              <div className="stat-label">Source {k + 1}</div>
+              <div style={{ fontWeight: 700, margin: '0.2rem 0 0.35rem' }}>{src.name}</div>
+              <div className="small">{src.detail}</div>
+            </div>
+          ))}
+        </div>
+        <div className="callout small" style={{ marginTop: '0.8rem' }}>
+          <strong>Why sorting can't beat it.</strong> {NLOGN.lowerBound}
+        </div>
+      </section>
+
+      <section className="card">
+        <h2 style={{ marginTop: 0 }}>The sorts, side by side</h2>
+        <div className="table-wrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Algorithm</th>
+                <th>Best</th>
+                <th>Average</th>
+                <th>Worst</th>
+                <th>Extra space</th>
+                <th>Stable</th>
+                <th>In place</th>
+              </tr>
+            </thead>
+            <tbody>
+              {SORTS.map((s) => (
+                <tr key={s.id}>
+                  <td>
+                    <a href={`#sort-${s.id}`}>{s.name}</a>
+                  </td>
+                  <td className="mono small">{s.time.best}</td>
+                  <td className="mono small">{s.time.average}</td>
+                  <td className="mono small">{s.time.worst}</td>
+                  <td className="mono small">{s.space}</td>
+                  <td>{s.stable ? <span className="tag tag-good">yes</span> : <span className="tag">no</span>}</td>
+                  <td>{s.inPlace ? <span className="tag tag-good">yes</span> : <span className="tag">no</span>}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <h3 className="ref-h" style={{ marginTop: '1rem' }}>
+          What Java actually uses
+        </h3>
+        <div className="table-wrap">
+          <table className="table">
+            <tbody>
+              {JAVA_SORTS.map((j) => (
+                <tr key={j.call}>
+                  <td className="mono small">{j.call}</td>
+                  <td className="small" style={{ fontWeight: 600 }}>
+                    {j.algorithm}
+                  </td>
+                  <td className="small muted">{j.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {SORTS.map((s) => (
+        <SortCard key={s.id} s={s} />
+      ))}
+    </div>
+  );
+}
+
+function SortCard({ s }: { s: SortAlgorithm }) {
+  const [watch, setWatch] = useState(false);
+  const [copied, setCopied] = useState(false);
+  return (
+    <section className="card" id={`sort-${s.id}`}>
+      <div className="spread">
+        <h2 style={{ margin: 0 }}>{s.name}</h2>
+        <span className="tag tag-accent">{s.family}</span>
+      </div>
+      <p className="small" style={{ margin: '0.4rem 0 0.8rem' }}>
+        {s.idea}
+      </p>
+
+      <div className="split-ref">
+        <div>
+          <h3 className="ref-h">How it works</h3>
+          <ol className="small" style={{ margin: '0 0 0.8rem', paddingLeft: '1.1rem' }}>
+            {s.steps.map((step) => (
+              <li key={step} style={{ marginBottom: '0.2rem' }}>
+                {step}
+              </li>
+            ))}
+          </ol>
+          <h3 className="ref-h">Cost</h3>
+          <div className="sort-costs">
+            <span>
+              best <strong className="mono">{s.time.best}</strong>
+            </span>
+            <span>
+              average <strong className="mono">{s.time.average}</strong>
+            </span>
+            <span>
+              worst <strong className="mono">{s.time.worst}</strong>
+            </span>
+            <span>
+              space <strong className="mono">{s.space}</strong>
+            </span>
+            {s.stable && <span className="tag tag-good">stable</span>}
+            {s.inPlace && <span className="tag tag-good">in place</span>}
+          </div>
+        </div>
+        <div>
+          <h3 className="ref-h">Why that cost</h3>
+          <p className="small" style={{ marginTop: 0 }}>
+            {s.why}
+          </p>
+          <h3 className="ref-h">Use it when</h3>
+          <p className="small muted" style={{ marginTop: 0 }}>
+            {s.useWhen}
+          </p>
+        </div>
+      </div>
+
+      <div style={{ marginTop: '0.4rem' }}>
+        <div>
+          <div className="spread" style={{ marginBottom: '0.4rem' }}>
+            <h3 className="ref-h" style={{ margin: 0 }}>
+              Java
+            </h3>
+            <button
+              className="btn btn-sm"
+              onClick={() => {
+                void navigator.clipboard?.writeText(s.code);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1500);
+              }}
+            >
+              {copied ? 'Copied ✓' : 'Copy'}
+            </button>
+          </div>
+          <pre className="ref-code">{s.code}</pre>
+          <div className="tiny muted" style={{ marginTop: '0.3rem' }}>
+            Compiled and checked against Arrays.sort on hundreds of arrays, including empty, sorted, reversed and all-equal.
+          </div>
+        </div>
+      </div>
+
+      <div style={{ marginTop: '0.9rem' }}>
+        {watch ? (
+          <SortAnimation sort={s.id} />
+        ) : (
+          <button className="btn btn-sm" onClick={() => setWatch(true)}>
+            ▶ Watch it sort
+          </button>
+        )}
+      </div>
+    </section>
   );
 }

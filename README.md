@@ -223,11 +223,18 @@ checked test get a **code verified** badge.
 
 ## Reference
 
-A tab of the things the approach check assumes you already know, in five parts:
+A tab of the things the approach check assumes you already know, in six parts:
 
 - **Data structures** — every Java structure worth knowing, with a cost table per operation, the methods that
   actually do the work (`computeIfAbsent`, `floorKey`, `merge`, `deleteCharAt`…), when to reach for it, and the
   mistakes that cost people offers. Filterable by method name, and each card links to the patterns that use it.
+- **Algorithms & sorting** — where every complexity comes from: the shape of code that produces `O(1)` through
+  `O(n!)` and the named algorithms in each class. A section on where `n log n` comes from: halving plus linear
+  work (merge sort), or `n` operations of `log n` each (heap sort, `n` binary searches), and why no comparison sort can
+  beat it (`log₂(n!)`). Then the eight classic sorts — bubble, selection, insertion, merge, quick, heap, counting,
+  radix — each with how it works, best/average/worst, stability, the counting argument behind its complexity, when
+  to use it, what Java itself uses, working Java, and an animation. Every sort's Java is compiled and checked against
+  `Arrays.sort` on 400 random arrays plus empty, single, all-equal, sorted, reversed and int-extreme inputs.
 - **Java fundamentals** — the language traps that turn a correct approach into a wrong answer: int overflow in
   `(lo + hi) / 2`, `==` on boxed Integers above 127, integer division truncating toward zero, pass-by-value in
   backtracking, `ConcurrentModificationException`, comparator subtraction overflow.

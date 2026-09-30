@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { api } from './api.ts';
 import { ErrorBox, Loading } from './components.tsx';
@@ -10,9 +10,11 @@ import { LeetCodePage } from './pages/LeetCodePage.tsx';
 import { PatternPage } from './pages/PatternPage.tsx';
 import { PatternsPage } from './pages/PatternsPage.tsx';
 import { ProblemPage } from './pages/ProblemPage.tsx';
-import { ReferencePage } from './pages/ReferencePage.tsx';
 import { ReviewPage } from './pages/ReviewPage.tsx';
 import { SettingsPage } from './pages/SettingsPage.tsx';
+
+// The reference tab is mostly text and tables; load it only when it is opened.
+const ReferencePage = lazy(() => import('./pages/ReferencePage.tsx').then((m) => ({ default: m.ReferencePage })));
 
 export function App() {
   const { pathname } = useLocation();
@@ -54,7 +56,14 @@ export function App() {
         <Route path="/finder" element={<FinderPage />} />
         <Route path="/leetcode" element={<LeetCodePage />} />
         <Route path="/review" element={<ReviewPage />} />
-        <Route path="/reference" element={<ReferencePage />} />
+        <Route
+          path="/reference"
+          element={
+            <Suspense fallback={<main className="page"><Loading /></main>}>
+              <ReferencePage />
+            </Suspense>
+          }
+        />
         <Route path="/guide" element={<GuidePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route

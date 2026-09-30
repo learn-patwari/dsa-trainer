@@ -6,3 +6,5 @@ export { TOOLBOX } from './toolbox.ts';
 export { ASCII_ANCHORS, ASCII_BLOCKS, CHAR_TRICKS, UNICODE_NOTES } from './ascii.ts';
 export type { AsciiBlock, AsciiCell, CharTrick } from './ascii.ts';
 export { formatCount, formatDuration, GROWTH_FNS, GROWTH_SIZES, OPS_PER_SECOND, verdict } from './growth.ts';
+export { COMPLEXITY_CLASSES, JAVA_SORTS, NLOGN, SORTS } from './sorting.ts';
+export type { ComplexityClass, SortAlgorithm } from './sorting.ts';

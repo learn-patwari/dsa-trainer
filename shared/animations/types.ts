@@ -125,8 +125,8 @@ export interface Frame {
   layers: Layer[];
 }
 
-export interface PatternAnimation {
-  pattern: PatternId;
+/** Anything the player can play: a title, a setup, frames, and what it computed. */
+export interface Animation {
   title: string;
   /** The input, stated the way a problem would state it. */
   setup: string;
@@ -135,4 +135,16 @@ export interface PatternAnimation {
   result: string;
   /** The one sentence to remember. */
   takeaway: string;
+}
+
+export interface PatternAnimation extends Animation {
+  pattern: PatternId;
+}
+
+export type SortId = 'bubble' | 'selection' | 'insertion' | 'merge' | 'quick' | 'heap' | 'counting' | 'radix';
+
+export interface SortAnimation extends Animation {
+  sort: SortId;
+  /** The input, so tests can check the output is its sorted version. */
+  input: number[];
 }

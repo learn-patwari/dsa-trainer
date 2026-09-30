@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react';
+import type { SortId } from '../../../shared/animations/index.ts';
 import type { PatternId } from '../../../shared/types.ts';
 import { Loading } from '../components.tsx';
 
@@ -9,6 +10,15 @@ export function PatternAnimation({ pattern, autoPlay = false }: { pattern: Patte
   return (
     <Suspense fallback={<Loading label="Loading the animation…" />}>
       <Player pattern={pattern} autoPlay={autoPlay} />
+    </Suspense>
+  );
+}
+
+/** A sorting algorithm, animated. Same lazy chunk as the pattern animations. */
+export function SortAnimation({ sort }: { sort: SortId }) {
+  return (
+    <Suspense fallback={<Loading label="Loading the animation…" />}>
+      <Player sort={sort} autoPlay />
     </Suspense>
   );
 }

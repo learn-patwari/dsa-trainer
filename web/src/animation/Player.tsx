@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { animationFor } from '../../../shared/animations/index.ts';
+import { animationFor, sortAnimationFor } from '../../../shared/animations/index.ts';
+import type { SortId } from '../../../shared/animations/index.ts';
 import type { PatternId } from '../../../shared/types.ts';
 import { Scene } from './Scene.tsx';
 
@@ -25,13 +26,15 @@ function usePrefersReducedMotion(): boolean {
 }
 
 interface Props {
-  pattern: PatternId;
+  /** One of these: a pattern's animation, or a sorting algorithm's. */
+  pattern?: PatternId;
+  sort?: SortId;
   /** Start playing as soon as it's shown — for a hint the learner just asked for. */
   autoPlay?: boolean;
 }
 
-export default function AnimationPlayer({ pattern, autoPlay = false }: Props) {
-  const anim = animationFor(pattern);
+export default function AnimationPlayer({ pattern, sort, autoPlay = false }: Props) {
+  const anim = sort ? sortAnimationFor(sort) : animationFor(pattern!);
   const last = anim.frames.length - 1;
   const reduced = usePrefersReducedMotion();
   const [i, setI] = useState(0);
@@ -43,7 +46,7 @@ export default function AnimationPlayer({ pattern, autoPlay = false }: Props) {
   useEffect(() => {
     setI(0);
     setPlaying(autoPlay && !reduced);
-  }, [pattern, autoPlay, reduced]);
+  }, [pattern, sort, autoPlay, reduced]);
 
   useEffect(() => {
     if (!playing) return;
