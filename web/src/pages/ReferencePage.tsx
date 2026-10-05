@@ -44,12 +44,8 @@ const TABS: { id: Tab; label: string; blurb: string }[] = [
 /** The reference half of the app: everything you should know before the quiz asks. */
 export function ReferencePage() {
   const [params, setParams] = useSearchParams();
-  const requested = TABS.find((t) => t.id === params.get('tab'));
-  const [tab, setTabState] = useState<Tab>(requested?.id ?? 'guide');
-  const setTab = (t: Tab) => {
-    setTabState(t);
-    setParams({ tab: t }, { replace: true });
-  };
+  const tab: Tab = TABS.find((t) => t.id === params.get('tab'))?.id ?? 'guide';
+  const setTab = (t: Tab) => setParams({ tab: t }, { replace: true });
   const [filter, setFilter] = useState('');
   const active = TABS.find((t) => t.id === tab)!;
 

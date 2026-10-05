@@ -225,11 +225,8 @@ const TABS: { id: Tab; label: string }[] = [
 /** Everything that tests whether you can spot the pattern unaided, in one place. */
 export function ChallengePage() {
   const [params, setParams] = useSearchParams();
-  const [tab, setTabState] = useState<Tab>(TABS.find((t) => t.id === params.get('tab'))?.id ?? 'pattern');
-  const setTab = (t: Tab) => {
-    setTabState(t);
-    setParams({ tab: t }, { replace: true });
-  };
+  const tab: Tab = TABS.find((t) => t.id === params.get('tab'))?.id ?? 'pattern';
+  const setTab = (t: Tab) => setParams({ tab: t }, { replace: true });
 
   return (
     <main className="page stack">
