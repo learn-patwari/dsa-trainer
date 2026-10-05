@@ -1,3 +1,5 @@
+import type { Trace } from './trace.ts';
+
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
 export const PATTERN_IDS = [
@@ -171,6 +173,8 @@ export interface ProblemProgress {
   review?: ReviewState;
   /** Everything this problem has cost you, across every visit. */
   time?: TimeSpent;
+  /** Your own step-by-step dry run, kept with the notes. */
+  trace?: Trace;
 }
 
 export interface TimeSpent {

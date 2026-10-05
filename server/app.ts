@@ -13,7 +13,7 @@ import { getProblem as getCurated } from '../shared/problems/index.ts';
 import { setPlan } from './plan.ts';
 import { dueList, reviewSummary, upcomingList } from './review.ts';
 import { fetchMySolution, getProblem, importPublicProfile, importWithSession, LeetCodeError, sessionFromEnv, USERNAME_RE } from './leetcode.ts';
-import { listBackups, readProgress, resetProgress, restoreBackup, updateProgress } from './store.ts';
+import { listBackups, readDrawing, readProgress, resetProgress, restoreBackup, updateProgress, writeDrawing } from './store.ts';
 import {
   dashboard,
   HttpError,
@@ -47,6 +47,34 @@ export function createApp({ webDir = resolve('dist/web') } = {}) {
     }
     next();
   });
+  // Drawings get their own larger limit — a sketch with a pasted screenshot is easily
+  // over a megabyte — and sit after the local-only guard like every other route.
+  app.get('/api/problems/:slug/drawing', async (req, res, next) => {
+    try {
+      requireProblem(req.params.slug);
+      res.json({ scene: await readDrawing(req.params.slug) });
+    } catch (err) {
+      next(err);
+    }
+  });
+  // The scene arrives as a JSON string inside JSON, and escaping it adds a little.
+  app.put('/api/problems/:slug/drawing', express.json({ limit: '12mb' }), async (req, res, next) => {
+    try {
+      requireProblem(req.params.slug);
+      const scene = (req.body as { scene?: unknown } | undefined)?.scene;
+      if (typeof scene !== 'string' || scene.length > 8_000_000) throw new HttpError(400, 'Send the drawing as { "scene": "<json>" }, under 8 MB.');
+      try {
+        JSON.parse(scene);
+      } catch {
+        throw new HttpError(400, 'That drawing is not valid JSON.');
+      }
+      await writeDrawing(req.params.slug, scene);
+      res.json({ ok: true, bytes: scene.length });
+    } catch (err) {
+      next(err);
+    }
+  });
+
   app.use(express.json({ limit: '1mb' }));
 
   const api = express.Router();
@@ -293,6 +321,13 @@ export function createApp({ webDir = resolve('dist/web') } = {}) {
   });
 
   app.use('/api', api);
+
+  // The drawing canvas's fonts, straight from the package. Without this Excalidraw
+  // fetches them from esm.sh, and this app makes no network calls it doesn't have to.
+  const excalidrawAssets = resolve('node_modules/@excalidraw/excalidraw/dist/prod');
+  if (existsSync(join(excalidrawAssets, 'fonts'))) {
+    app.use('/excalidraw', express.static(excalidrawAssets, { immutable: true, maxAge: '30d', index: false }));
+  }
 
   // Serve the built UI (npm start). In development Vite serves it instead.
   if (existsSync(join(webDir, 'index.html'))) {

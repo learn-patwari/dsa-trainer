@@ -12,6 +12,7 @@ import { AiReview } from '../problem/AiReview.tsx';
 import { BUDGET_SEC, TimerBar } from '../problem/TimerBar.tsx';
 import { useTimer } from '../problem/useTimer.ts';
 import { NotesEditor } from '../problem/Workbench.tsx';
+import { VisualNotes } from '../notes/VisualNotes.tsx';
 
 /** "3 months ago", for a unix timestamp in seconds. */
 function describeAge(unixSeconds: number): string {
@@ -294,6 +295,15 @@ export function ProblemPage() {
           </div>
           <div hidden={tab !== 'notes'}>
             <NotesEditor key={slug} savedNotes={v.progress?.notes ?? null} save={(notes) => api.saveWork(slug, { notes })} />
+            <VisualNotes
+              key={`vn-${slug}`}
+              slug={slug}
+              title={v.title}
+              savedTrace={v.progress?.trace ?? null}
+              // Example 1's first argument, e.g. "abcabcbb" or [2,7,11,15].
+              exampleInput={lcProblem?.exampleTestcases[0]?.split('\n')[0] ?? null}
+              saveTrace={(trace) => api.saveWork(slug, { trace })}
+            />
           </div>
           {(v.lcSolved || v.progress?.leetcodeSolution) && (
             <div hidden={tab !== 'solution'}>

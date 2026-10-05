@@ -13,8 +13,15 @@ export default defineConfig(({ mode }) => {
       port: 5178,
       strictPort: true,
       // The API listens on 127.0.0.1 only; name it explicitly (localhost may resolve to ::1 first).
-      proxy: { '/api': `http://127.0.0.1:${apiPort}` },
+      proxy: {
+        '/api': `http://127.0.0.1:${apiPort}`,
+        // The drawing canvas's fonts are served by the API server from node_modules.
+        '/excalidraw': `http://127.0.0.1:${apiPort}`,
+      },
     },
+    // The canvas is a lazy import, so without this Vite finds Excalidraw only when the window
+    // first opens, re-bundles mid-session and serves the old copy as a 504.
+    optimizeDeps: { include: ['@excalidraw/excalidraw'] },
     build: {
       outDir: '../dist/web',
       emptyOutDir: true,

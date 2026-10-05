@@ -195,6 +195,86 @@ describe('API', () => {
     expect(view.progress).toMatchObject({ code: 'int x;', notes: 'count letters', attempts: 0 });
   });
 
+  it('keeps a dry run with the notes, checks it, and deletes it on null', async () => {
+    const slug = 'longest-substring-without-repeating-characters';
+    const put = (body: unknown) => api(`/problems/${slug}/work`, { method: 'PUT', body: JSON.stringify(body) });
+    const view = async () => (await (await api(`/problems/${slug}`)).json()).progress;
+    const trace = {
+      version: 1,
+      input: '"abcabcbb"',
+      pointers: ['L', 'R'],
+      structures: [{ id: 'ds0', kind: 'set', label: 'HashSet' }],
+      steps: [{ note: 'a is new', pointers: { L: 0, R: 0 }, window: true, highlight: [], data: { ds0: [{ id: 'i1', v: 'a' }] } }],
+    };
+
+    expect((await put({ trace })).status).toBe(200);
+    expect((await view()).trace).toEqual(trace);
+
+    // Saving the notes later leaves the trace alone.
+    await put({ notes: 'shrink from the left' });
+    expect(await view()).toMatchObject({ trace, notes: 'shrink from the left', attempts: 0 });
+
+    const bad = await put({ trace: { ...trace, pointers: ['L', 'L'] } });
+    expect(bad.status).toBe(400);
+    expect((await bad.json()).error).toMatch(/can't be saved: two pointers share a name/);
+    expect((await view()).trace).toEqual(trace);
+
+    const huge = await put({ trace: { ...trace, input: 'x'.repeat(400_000) } });
+    expect(huge.status).toBe(400);
+
+    expect((await put({ trace: null })).status).toBe(200);
+    const after = await view();
+    expect(after.trace).toBeUndefined();
+    expect(after.notes).toBe('shrink from the left');
+  });
+
+  it('stores a drawing in its own file and keeps the version before it', async () => {
+    const { readFileSync } = await import('node:fs');
+    const url = '/problems/two-sum/drawing';
+    expect(await (await api(url)).json()).toEqual({ scene: null });
+
+    const first = JSON.stringify({ type: 'excalidraw', version: 2, elements: [{ id: 'first' }], appState: {}, files: {} });
+    const res = await api(url, { method: 'PUT', body: JSON.stringify({ scene: first }) });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true, bytes: first.length });
+    expect(await (await api(url)).json()).toEqual({ scene: first });
+
+    const second = first.replace('first', 'second');
+    await api(url, { method: 'PUT', body: JSON.stringify({ scene: second }) });
+    expect(readFileSync(join(dataDir, 'drawings', 'two-sum.json'), 'utf8')).toBe(second);
+    expect(readFileSync(join(dataDir, 'drawings', 'two-sum.json.prev'), 'utf8')).toBe(first);
+    // A scene can carry pasted images, so it stays out of progress.json.
+    await api('/problems/two-sum/work', { method: 'PUT', body: JSON.stringify({ notes: 'hash the complement' }) });
+    expect(readFileSync(join(dataDir, 'progress.json'), 'utf8')).not.toContain('excalidraw');
+  });
+
+  it('refuses a drawing that is not JSON, too big, for an unknown problem or not sent as JSON', async () => {
+    const put = (path: string, scene: unknown) => api(path, { method: 'PUT', body: JSON.stringify({ scene }) });
+    expect((await put('/problems/two-sum/drawing', '{not json')).status).toBe(400);
+    expect((await put('/problems/two-sum/drawing', 42)).status).toBe(400);
+    expect((await put('/problems/two-sum/drawing', `"${'x'.repeat(8_000_001)}"`)).status).toBe(400);
+    expect((await put('/problems/not-a-problem/drawing', '{}')).status).toBe(404);
+    expect((await api('/problems/not-a-problem/drawing')).status).toBe(404);
+    const form = await realFetch(`${base}/api/problems/two-sum/drawing`, {
+      method: 'PUT',
+      body: 'scene=%7B%7D',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+    expect(form.status).toBe(415);
+  });
+
+  it('serves the drawing canvas fonts itself, and nothing else from node_modules', async () => {
+    const { readdirSync } = await import('node:fs');
+    const font = readdirSync('node_modules/@excalidraw/excalidraw/dist/prod/fonts/Excalifont').find((f) => f.endsWith('.woff2'))!;
+    const res = await realFetch(`${base}/excalidraw/fonts/Excalifont/${font}`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('cache-control')).toMatch(/immutable/);
+    for (const escape of ['%2e%2e/package.json', '..%2fpackage.json', '%2e%2e%2f%2e%2e%2fpackage.json', 'fonts/%2e%2e/%2e%2e/package.json']) {
+      const r = await realFetch(`${base}/excalidraw/${escape}`);
+      expect(await r.text(), escape).not.toContain('"name": "@excalidraw/excalidraw"');
+    }
+  });
+
   it('fetches and caches the LeetCode statement, keeping only the Java snippet', async () => {
     const first = await (await api('/problems/two-sum/leetcode')).json();
     expect(first).toMatchObject({ id: 1, javaSnippet: 'class Solution {}', hints: ['Think about complements.'] });

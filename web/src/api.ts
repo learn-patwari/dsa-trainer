@@ -20,6 +20,7 @@ import type {
   StudyPlan,
   TimeSpent,
 } from '../../shared/types.ts';
+import type { Trace } from '../../shared/trace.ts';
 
 export type Provider = 'openai' | 'anthropic' | 'ollama';
 
@@ -80,7 +81,7 @@ export const api = {
     call<LeetCodeProblem & { stale?: boolean }>(`/problems/${encodeURIComponent(slug)}/leetcode${refresh ? '?refresh=1' : ''}`),
   submit: (slug: string, sub: AttemptSubmission) =>
     call<AttemptResult>(`/problems/${encodeURIComponent(slug)}/attempts`, { method: 'POST', body: sub }),
-  saveWork: (slug: string, work: { code?: string; notes?: string }) =>
+  saveWork: (slug: string, work: { code?: string; notes?: string; trace?: Trace | null }) =>
     call<{ ok: true }>(`/problems/${encodeURIComponent(slug)}/work`, { method: 'PUT', body: work }),
   lookup: (q: string) => call<{ result?: LookupResult; matches?: CatalogMatch[] }>(`/lookup?q=${encodeURIComponent(q)}`),
   challengeNext: (exclude?: string) =>
@@ -102,6 +103,9 @@ export const api = {
   addTime: (slug: string, delta: { elapsedSec: number; activeSec: number }) =>
     call<TimeSpent>(`/problems/${encodeURIComponent(slug)}/time`, { method: 'POST', body: delta }),
   review: () => call<ReviewQueue>('/review'),
+  drawing: (slug: string) => call<{ scene: string | null }>(`/problems/${encodeURIComponent(slug)}/drawing`),
+  saveDrawing: (slug: string, scene: string) =>
+    call<{ ok: true; bytes: number }>(`/problems/${encodeURIComponent(slug)}/drawing`, { method: 'PUT', body: { scene } }),
   aiPrompt: (slug: string) => call<{ prompt: string }>(`/problems/${encodeURIComponent(slug)}/ai-prompt`),
   aiReview: (slug: string) => call<AiReviewResult>(`/problems/${encodeURIComponent(slug)}/ai-review`, { method: 'POST', body: {} }),
   aiConfig: () => call<AiConfigView>('/ai/config'),

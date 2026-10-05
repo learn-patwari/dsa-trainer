@@ -62,7 +62,7 @@ function ArrayView({ l }: { l: ArrayLayer }) {
   const markers = stacked(l.markers ?? []);
   const rows = markers.reduce((n, m) => Math.max(n, m.row + 1), 0);
   return (
-    <div className="anim-block">
+    <div className="anim-block kind-array">
       {l.label && <div className="anim-label">{l.label}</div>}
       <div className="anim-track" style={{ ['--n' as string]: Math.max(1, l.cells.length) }}>
         {(l.spans ?? []).map((s, k) => (
@@ -80,7 +80,7 @@ function ArrayView({ l }: { l: ArrayLayer }) {
           ))}
         </div>
         {markers.length > 0 && (
-          <div className="anim-markers" style={{ height: `${rows * 1.35 + 0.2}rem` }}>
+          <div className="anim-markers" style={{ ['--rows' as string]: rows }}>
             {markers.map((m) => (
               <div key={m.label} className={`anim-marker ${tone(m.tone ?? 'active')}`} style={{ ['--at' as string]: m.at, ['--row' as string]: m.row }}>
                 <span className="anim-caret" aria-hidden>
@@ -98,7 +98,7 @@ function ArrayView({ l }: { l: ArrayLayer }) {
 
 function MapView({ l }: { l: MapLayer }) {
   return (
-    <div className="anim-block">
+    <div className="anim-block kind-map">
       <div className="anim-label">{l.label}</div>
       <div className="anim-map">
         {l.entries.length === 0 && <div className="anim-empty">{l.empty ?? 'empty'}</div>}
@@ -116,7 +116,7 @@ function MapView({ l }: { l: MapLayer }) {
 
 function StackView({ l }: { l: StackLayer }) {
   return (
-    <div className="anim-block">
+    <div className="anim-block kind-stack">
       <div className="anim-label">{l.label}</div>
       <div className={l.kind === 'stack' ? 'anim-stack' : 'anim-queue'}>
         {l.items.length === 0 && <div className="anim-empty">{l.empty ?? 'empty'}</div>}
@@ -146,7 +146,7 @@ function VarsView({ l }: { l: VarsLayer }) {
 function GridView({ l }: { l: GridLayer }) {
   const cols = l.rows[0]?.length ?? 0;
   return (
-    <div className="anim-block">
+    <div className="anim-block kind-grid">
       {l.label && <div className="anim-label">{l.label}</div>}
       <div className="anim-grid" style={{ gridTemplateColumns: `repeat(${cols}, var(--cell))` }}>
         {l.rows.flatMap((row, r) =>
@@ -173,7 +173,7 @@ function GraphView({ l }: { l: GraphLayer }) {
   const byId = new Map(l.nodes.map((n) => [n.id, n]));
 
   return (
-    <div className="anim-block">
+    <div className="anim-block kind-graph">
       {l.label && <div className="anim-label">{l.label}</div>}
       <svg className="anim-svg" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={l.label ?? 'graph'}>
         <defs>
@@ -232,7 +232,7 @@ function ListView({ l }: { l: ListLayer }) {
   const markers = stacked(l.markers ?? []);
 
   return (
-    <div className="anim-block">
+    <div className="anim-block kind-list">
       {l.label && <div className="anim-label">{l.label}</div>}
       <svg className="anim-svg" viewBox={`0 0 ${width} ${H}`} role="img" aria-label={l.label ?? 'linked list'}>
         <defs>

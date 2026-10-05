@@ -1,6 +1,7 @@
 import { createHash, randomInt } from 'node:crypto';
 import { getPattern, isPatternId, patternName, PATTERNS } from '../shared/patterns/index.ts';
 import { COMPLEXITY } from '../shared/problems/complexity.ts';
+import { validateTrace } from '../shared/trace.ts';
 import { getProblem, PROBLEMS, problemsForPattern } from '../shared/problems/index.ts';
 import { scoreAttempt, START_RATING, tierFor, updateRating } from '../shared/scoring.ts';
 import { challengeStats } from './challenge.ts';
@@ -266,6 +267,17 @@ export function saveWork(p: Progress, slug: string, body: unknown): void {
   };
   const code = text(b.code, 'code');
   const notes = text(b.notes, 'notes');
+  // A trace is structured, so it's checked field by field; null deletes it.
+  let trace: ProblemProgressTrace | undefined;
+  if (b.trace === null) trace = null;
+  else if (b.trace !== undefined) {
+    if (JSON.stringify(b.trace).length > 300_000) throw new HttpError(400, 'That trace is too large to save (over 300 KB).');
+    try {
+      trace = validateTrace(b.trace);
+    } catch (err) {
+      throw new HttpError(400, (err as Error).message);
+    }
+  }
   const existing = p.problems[slug];
   // Saving code or notes shouldn't count as an attempt, so keep attempts at 0 until graded.
   p.problems[slug] = {
@@ -277,7 +289,11 @@ export function saveWork(p: Progress, slug: string, body: unknown): void {
     ...(code !== undefined ? { code } : {}),
     ...(notes !== undefined ? { notes } : {}),
   };
+  if (trace === null) delete p.problems[slug]!.trace;
+  else if (trace !== undefined) p.problems[slug]!.trace = trace;
 }
+
+type ProblemProgressTrace = NonNullable<Progress['problems'][string]['trace']> | null;
 
 /** Records a compile & run: the code that ran plus a summary for the "code verified" badge. */
 export function recordRun(p: Progress, slug: string, code: string, result: RunResult): void {

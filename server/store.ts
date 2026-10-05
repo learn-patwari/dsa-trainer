@@ -16,6 +16,8 @@ export const DATA_DIR = resolve(process.env.DSA_DATA_DIR ?? join(HERE, '..', 'da
 const PROGRESS_FILE = join(DATA_DIR, 'progress.json');
 const BACKUP_DIR = join(DATA_DIR, 'backups');
 const PROBLEM_CACHE_DIR = join(DATA_DIR, 'cache', 'problems');
+/** One file per problem: a scene can hold pasted images, too big to rewrite on every progress save. */
+const DRAWING_DIR = join(DATA_DIR, 'drawings');
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const BACKUP_RE = /^progress-[\w.-]+\.json$/;
 
@@ -171,6 +173,30 @@ function serialize<T>(fn: () => Promise<T>): Promise<T> {
   const run = lock.then(fn, fn);
   lock = run.catch(() => undefined);
   return run;
+}
+
+// ---------------------------------------------------------------- drawings
+
+export async function readDrawing(slug: string): Promise<string | null> {
+  try {
+    return await readFile(drawingPath(slug), 'utf8');
+  } catch (err) {
+    if (isErrno(err, 'ENOENT')) return null;
+    throw err;
+  }
+}
+
+/** Keeps the previous version beside it, so one bad save can always be walked back. */
+export async function writeDrawing(slug: string, scene: string): Promise<void> {
+  const file = drawingPath(slug);
+  const prev = await statOrNull(file);
+  if (prev && prev.size > 0) await copyFile(file, `${file}.prev`).catch(() => undefined);
+  await atomicWrite(file, scene);
+}
+
+function drawingPath(slug: string): string {
+  if (!SLUG_RE.test(slug)) throw new Error(`Invalid slug: ${slug}`);
+  return join(DRAWING_DIR, `${slug}.json`);
 }
 
 // ---------------------------------------------------------------- problem cache

@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import type { SortId } from '../../../shared/animations/index.ts';
+import type { Animation, SortId } from '../../../shared/animations/index.ts';
 import type { PatternId } from '../../../shared/types.ts';
 import { Loading } from '../components.tsx';
 
@@ -19,6 +19,15 @@ export function SortAnimation({ sort }: { sort: SortId }) {
   return (
     <Suspense fallback={<Loading label="Loading the animation…" />}>
       <Player sort={sort} autoPlay />
+    </Suspense>
+  );
+}
+
+/** A dry run you built, played back in the video style. */
+export function TracePlayer({ animation }: { animation: Animation }) {
+  return (
+    <Suspense fallback={<Loading label="Loading the player…" />}>
+      <Player animation={animation} video autoPlay />
     </Suspense>
   );
 }
