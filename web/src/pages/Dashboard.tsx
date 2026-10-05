@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import type { DashboardState, DifficultyProgress, PatternSummary } from '../../../shared/types.ts';
 import { api, useLoad } from '../api.ts';
+import { AllProblems } from './AllProblems.tsx';
 import { DifficultyTag, ErrorBox, Loading, ProgressBar, Rating, RatingDelta, TierLabel, timeAgo } from '../components.tsx';
 
 export function Dashboard() {
@@ -190,6 +191,8 @@ export function Dashboard() {
           </div>
         ))}
       </section>
+
+      <AllProblems problems={data.problems} />
 
       <section className="card">
         <h2>Progress by difficulty</h2>

@@ -12,12 +12,14 @@ import type {
   AttemptResult,
   AttemptSubmission,
   CuratedProblem,
+  DashboardProblem,
   DashboardState,
   LeetCodeSolution,
   PatternDetail,
   PatternId,
   PatternSummary,
   PracticeMode,
+  ProblemRow,
   ProblemView,
   Progress,
   Recommendation,
@@ -374,22 +376,36 @@ export function patternSummary(p: Progress, id: PatternId): PatternSummary {
   };
 }
 
+function problemRow(p: Progress, q: CuratedProblem, solvedOnLc: Set<string>): ProblemRow {
+  return {
+    slug: q.slug,
+    id: q.id,
+    title: q.title,
+    difficulty: q.difficulty,
+    attempts: p.problems[q.slug]?.attempts ?? 0,
+    bestPercent: attempted(p, q.slug) ? (p.problems[q.slug]?.bestPercent ?? 0) : null,
+    lcSolved: solvedOnLc.has(q.slug),
+    codeVerified: codeVerified(p, q.slug),
+  };
+}
+
 export function patternDetail(p: Progress, id: PatternId): PatternDetail {
   const solvedOnLc = lcSolvedSet(p);
   return {
     pattern: getPattern(id),
     summary: patternSummary(p, id),
-    problems: problemsForPattern(id).map((q) => ({
-      slug: q.slug,
-      id: q.id,
-      title: q.title,
-      difficulty: q.difficulty,
-      attempts: p.problems[q.slug]?.attempts ?? 0,
-      bestPercent: attempted(p, q.slug) ? (p.problems[q.slug]?.bestPercent ?? 0) : null,
-      lcSolved: solvedOnLc.has(q.slug),
-      codeVerified: codeVerified(p, q.slug),
-    })),
+    problems: problemsForPattern(id).map((q) => problemRow(p, q, solvedOnLc)),
   };
+}
+
+/** Every bank problem in curriculum order, for the dashboard's full list. */
+function allProblemRows(p: Progress): DashboardProblem[] {
+  const solvedOnLc = lcSolvedSet(p);
+  return PROBLEMS.map((q) => ({
+    ...problemRow(p, q, solvedOnLc),
+    pattern: q.pattern,
+    patternName: getPattern(q.pattern).name,
+  }));
 }
 
 /** Rated attempts before a pattern's rating is considered settled (and "Up next" moves on). */
@@ -505,5 +521,6 @@ export function dashboard(p: Progress, sessionConfigured: boolean): DashboardSta
     plan: studyPlan(p),
     streak: streak(p),
     difficulty: difficultyProgress(p),
+    problems: allProblemRows(p),
   };
 }

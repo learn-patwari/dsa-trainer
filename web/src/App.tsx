@@ -1,12 +1,10 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Link, NavLink, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router';
+import { Link, Navigate, NavLink, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { api } from './api.ts';
 import { ErrorBox, Loading } from './components.tsx';
 import { ChallengePage } from './pages/ChallengePage.tsx';
 import { CompaniesPage } from './pages/CompaniesPage.tsx';
 import { Dashboard } from './pages/Dashboard.tsx';
-import { FinderPage } from './pages/FinderPage.tsx';
-import { GuidePage } from './pages/GuidePage.tsx';
 import { LeetCodePage } from './pages/LeetCodePage.tsx';
 import { PatternPage } from './pages/PatternPage.tsx';
 import { PatternsPage } from './pages/PatternsPage.tsx';
@@ -39,12 +37,9 @@ export function App() {
           <NavLink to="/patterns">Patterns</NavLink>
           <NavLink to="/review">Review</NavLink>
           <NavLink to="/companies">Companies</NavLink>
-          <NavLink to="/reference">Reference</NavLink>
-          <NavLink to="/blind">Blind practice</NavLink>
+          <NavLink to="/reference">Reference &amp; guide</NavLink>
           <NavLink to="/challenge">Challenge</NavLink>
-          <NavLink to="/finder">Pattern finder</NavLink>
           <NavLink to="/leetcode">LeetCode</NavLink>
-          <NavLink to="/guide">Guide</NavLink>
           <NavLink to="/settings">Settings</NavLink>
         </nav>
       </header>
@@ -55,7 +50,7 @@ export function App() {
         <Route path="/problems/:slug" element={<ProblemPage />} />
         <Route path="/blind" element={<BlindRedirect />} />
         <Route path="/challenge" element={<ChallengePage />} />
-        <Route path="/finder" element={<FinderPage />} />
+        <Route path="/finder" element={<Navigate to="/challenge?tab=finder" replace />} />
         <Route path="/leetcode" element={<LeetCodePage />} />
         <Route path="/review" element={<ReviewPage />} />
         <Route path="/companies" element={<CompaniesPage />} />
@@ -67,7 +62,7 @@ export function App() {
             </Suspense>
           }
         />
-        <Route path="/guide" element={<GuidePage />} />
+        <Route path="/guide" element={<Navigate to="/reference?tab=guide" replace />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route
           path="*"

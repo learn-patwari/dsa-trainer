@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router';
+import { GuideContent } from './GuidePage.tsx';
 import { SortAnimation } from '../animation/AnimatedHint.tsx';
 import type { SortAlgorithm } from '../../../shared/reference/index.ts';
 import { Link } from 'react-router';
@@ -27,9 +29,10 @@ import {
 import type { Structure } from '../../../shared/reference/index.ts';
 import { isPatternId } from '../../../shared/patterns/index.ts';
 
-type Tab = 'structures' | 'algorithms' | 'java' | 'complexity' | 'maths' | 'ascii';
+type Tab = 'guide' | 'structures' | 'algorithms' | 'java' | 'complexity' | 'maths' | 'ascii';
 
 const TABS: { id: Tab; label: string; blurb: string }[] = [
+  { id: 'guide', label: 'Guide', blurb: 'How to use this app, in what order to learn, and where to go when it runs out of road.' },
   { id: 'structures', label: 'Data structures', blurb: 'What Java gives you, what each operation costs, and the methods that do the work.' },
   { id: 'algorithms', label: 'Algorithms & sorting', blurb: 'Which algorithms give which complexity and why — and the eight classic sorts, each with working Java and an animation.' },
   { id: 'java', label: 'Java fundamentals', blurb: 'The language traps that turn a correct approach into a wrong answer.' },
@@ -40,17 +43,23 @@ const TABS: { id: Tab; label: string; blurb: string }[] = [
 
 /** The reference half of the app: everything you should know before the quiz asks. */
 export function ReferencePage() {
-  const [tab, setTab] = useState<Tab>('structures');
+  const [params, setParams] = useSearchParams();
+  const requested = TABS.find((t) => t.id === params.get('tab'));
+  const [tab, setTabState] = useState<Tab>(requested?.id ?? 'guide');
+  const setTab = (t: Tab) => {
+    setTabState(t);
+    setParams({ tab: t }, { replace: true });
+  };
   const [filter, setFilter] = useState('');
   const active = TABS.find((t) => t.id === tab)!;
 
   return (
     <main className="page stack">
       <div>
-        <h1>Reference</h1>
+        <h1>Reference &amp; guide</h1>
         <p className="muted" style={{ margin: 0 }}>
-          The facts the approach check assumes you already have. Nothing here is graded — it's the sheet you'd want open
-          the night before.
+          How to work through the app, plus the facts the approach check assumes you already have. Nothing here is graded —
+          it's the sheet you'd want open the night before.
         </p>
       </div>
 
@@ -65,6 +74,7 @@ export function ReferencePage() {
         {active.blurb}
       </p>
 
+      {tab === 'guide' && <GuideContent />}
       {tab === 'structures' && <Structures filter={filter} setFilter={setFilter} />}
       {tab === 'algorithms' && <Algorithms />}
       {tab === 'java' && <Fundamentals />}

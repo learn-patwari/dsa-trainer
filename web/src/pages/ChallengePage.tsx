@@ -1,18 +1,19 @@
 import DOMPurify from 'dompurify';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { PATTERNS } from '../../../shared/patterns/index.ts';
 import type { ChallengeAnswer, ChallengeQuestion, PatternId } from '../../../shared/types.ts';
 import { api } from '../api.ts';
 import { DifficultyTag, ErrorBox, formatDuration, Loading } from '../components.tsx';
+import { FinderTool } from './FinderPage.tsx';
 
 const GROUPS = [...new Set(PATTERNS.map((p) => p.group))];
 
 /**
- * Challenge mode: one question, always the same one — which pattern does this need?
+ * Pattern challenge: one question, always the same one — which pattern does this need?
  * Problems come from the whole LeetCode catalog, not just the curated bank.
  */
-export function ChallengePage() {
+function PatternChallenge() {
   const [question, setQuestion] = useState<ChallengeQuestion | null>(null);
   const [answer, setAnswer] = useState<ChallengeAnswer | null>(null);
   const [chosen, setChosen] = useState<PatternId | null>(null);
@@ -58,10 +59,10 @@ export function ChallengePage() {
   const elapsed = Math.max(0, Math.round((now - startedAt.current) / 1000));
 
   return (
-    <main className="page stack">
+    <div className="stack">
       <div className="spread">
         <div>
-          <h1>Challenge</h1>
+          <h2 style={{ margin: 0 }}>Pattern challenge</h2>
           <p className="muted" style={{ margin: 0 }}>
             One question, any problem on LeetCode: which pattern does it need? No options narrowed down, no pattern name in
             sight — exactly what an unseen interview problem feels like.
@@ -144,7 +145,7 @@ export function ChallengePage() {
           </section>
         </div>
       )}
-    </main>
+    </div>
   );
 }
 
@@ -209,6 +210,66 @@ function Stat({ label, value }: { label: string; value: string | number }) {
     <div>
       <div className="tiny muted">{label}</div>
       <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{value}</div>
+    </div>
+  );
+}
+
+type Tab = 'pattern' | 'blind' | 'finder';
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'pattern', label: 'Pattern challenge' },
+  { id: 'blind', label: 'Blind practice' },
+  { id: 'finder', label: 'Pattern finder' },
+];
+
+/** Everything that tests whether you can spot the pattern unaided, in one place. */
+export function ChallengePage() {
+  const [params, setParams] = useSearchParams();
+  const [tab, setTabState] = useState<Tab>(TABS.find((t) => t.id === params.get('tab'))?.id ?? 'pattern');
+  const setTab = (t: Tab) => {
+    setTabState(t);
+    setParams({ tab: t }, { replace: true });
+  };
+
+  return (
+    <main className="page stack">
+      <div>
+        <h1>Challenge</h1>
+        <p className="muted" style={{ margin: 0 }}>
+          Spot the pattern without being told. Take a surprise problem from all of LeetCode, practise your bank with the pattern
+          hidden, or look up what pattern any problem needs.
+        </p>
+      </div>
+      <div className="tabs" role="tablist">
+        {TABS.map((t) => (
+          <button key={t.id} role="tab" aria-selected={tab === t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {/* Kept mounted so switching tabs doesn't throw away a question you're halfway through. */}
+      <div hidden={tab !== 'pattern'}>
+        <PatternChallenge />
+      </div>
+      {tab === 'blind' && <BlindPractice />}
+      {tab === 'finder' && <FinderTool />}
+    </main>
+  );
+}
+
+function BlindPractice() {
+  return (
+    <div className="card stack">
+      <h2 style={{ margin: 0 }}>Blind practice</h2>
+      <p className="muted" style={{ margin: 0 }}>
+        Opens a problem from your five weakest patterns with the pattern name hidden. Read it, sketch an approach, then answer —
+        spotting the pattern yourself is worth 3 points. You can also reach it from the dashboard.
+      </p>
+      <div>
+        <Link className="btn btn-primary" to="/blind">
+          Start blind practice
+        </Link>
+      </div>
     </div>
   );
 }

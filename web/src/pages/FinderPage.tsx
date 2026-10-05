@@ -5,7 +5,7 @@ import { api, type CatalogMatch } from '../api.ts';
 import { DifficultyTag, ErrorBox } from '../components.tsx';
 
 /** Paste any LeetCode problem and find out which pattern it needs, plus what else is like it. */
-export function FinderPage() {
+export function FinderTool() {
   const [query, setQuery] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,9 +30,9 @@ export function FinderPage() {
   };
 
   return (
-    <main className="page stack">
+    <div className="stack">
       <div>
-        <h1>Pattern finder</h1>
+        <h2 style={{ margin: 0 }}>Pattern finder</h2>
         <p className="muted">
           Paste a LeetCode link, a slug, or part of a title. You get the pattern it needs — hand-assigned when the problem is in
           your bank, inferred from its topic tags and wording otherwise — plus problems that drill the same idea.
@@ -79,7 +79,7 @@ export function FinderPage() {
       )}
 
       {result && <Result result={result} />}
-    </main>
+    </div>
   );
 }
 

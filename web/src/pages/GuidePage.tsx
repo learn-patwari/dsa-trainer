@@ -6,19 +6,16 @@ import { PORTALS } from '../links.ts';
  * The prep guide: how to use this app, in what order, at what pace, and which
  * of the well-known portals to open when this one runs out of road.
  */
-export function GuidePage() {
+export function GuideContent() {
   const groups = [...new Set(PATTERNS.map((p) => p.group))];
 
   return (
-    <main className="page stack">
-      <div>
-        <h1>The guide</h1>
-        <p className="muted" style={{ margin: 0 }}>
+    <div className="stack">
+      <p className="muted" style={{ margin: 0 }}>
           What to do, in what order, and where to go when you need more than this app has. Everything below is the
           consensus of the lists people actually use — NeetCode's roadmap, Striver's A2Z sheet and Grind 75 — adapted to
           the way this app rates you.
-        </p>
-      </div>
+      </p>
 
       <section className="card">
         <h2>The loop</h2>
@@ -183,7 +180,7 @@ export function GuidePage() {
           </section>
         ))}
       </section>
-    </main>
+    </div>
   );
 }
 

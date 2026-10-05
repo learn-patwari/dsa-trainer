@@ -473,6 +473,8 @@ export interface DashboardState {
   plan: StudyPlan | null;
   streak: StreakInfo;
   difficulty: DifficultyProgress[];
+  /** Every bank problem with your progress on it, in curriculum order. */
+  problems: DashboardProblem[];
 }
 
 export interface ProblemRow {
@@ -485,6 +487,11 @@ export interface ProblemRow {
   lcSolved: boolean;
   /** Your saved code compiled and passed every checked example test. */
   codeVerified: boolean;
+}
+
+export interface DashboardProblem extends ProblemRow {
+  pattern: PatternId;
+  patternName: string;
 }
 
 export interface PatternDetail {

@@ -217,5 +217,7 @@ describe('dashboard', () => {
     expect(d.overallTier).toBe('Solid');
     expect(d.patterns).toHaveLength(23);
     expect(d.totalProblems).toBe(197);
+    expect(d.problems).toHaveLength(197);
+    expect(d.problems.every((q) => q.patternName.length > 0)).toBe(true);
   });
 });
