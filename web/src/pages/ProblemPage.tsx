@@ -13,6 +13,7 @@ import { BUDGET_SEC, TimerBar } from '../problem/TimerBar.tsx';
 import { useTimer } from '../problem/useTimer.ts';
 import { NotesEditor } from '../problem/Workbench.tsx';
 import { VisualNotes } from '../notes/VisualNotes.tsx';
+import { AskedAt } from '../problem/AskedAt.tsx';
 
 /** "3 months ago", for a unix timestamp in seconds. */
 function describeAge(unixSeconds: number): string {
@@ -224,6 +225,7 @@ export function ProblemPage() {
             onRevealHint={() => setHintsShown((h) => h + 1)}
             hintsCost={!shown}
           />
+          <AskedAt slug={slug} />
           <AnimatedHint pattern={v.pattern?.id ?? null} revealed={animHint} costs={!shown} onReveal={() => setAnimHint(true)} />
         </section>
 

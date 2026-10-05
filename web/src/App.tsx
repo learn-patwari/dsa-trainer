@@ -3,6 +3,7 @@ import { Link, NavLink, Route, Routes, useLocation, useNavigate, useSearchParams
 import { api } from './api.ts';
 import { ErrorBox, Loading } from './components.tsx';
 import { ChallengePage } from './pages/ChallengePage.tsx';
+import { CompaniesPage } from './pages/CompaniesPage.tsx';
 import { Dashboard } from './pages/Dashboard.tsx';
 import { FinderPage } from './pages/FinderPage.tsx';
 import { GuidePage } from './pages/GuidePage.tsx';
@@ -37,6 +38,7 @@ export function App() {
           </NavLink>
           <NavLink to="/patterns">Patterns</NavLink>
           <NavLink to="/review">Review</NavLink>
+          <NavLink to="/companies">Companies</NavLink>
           <NavLink to="/reference">Reference</NavLink>
           <NavLink to="/blind">Blind practice</NavLink>
           <NavLink to="/challenge">Challenge</NavLink>
@@ -56,6 +58,7 @@ export function App() {
         <Route path="/finder" element={<FinderPage />} />
         <Route path="/leetcode" element={<LeetCodePage />} />
         <Route path="/review" element={<ReviewPage />} />
+        <Route path="/companies" element={<CompaniesPage />} />
         <Route
           path="/reference"
           element={
