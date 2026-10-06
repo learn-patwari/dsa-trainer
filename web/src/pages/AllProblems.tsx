@@ -13,7 +13,21 @@ const STATUSES: { id: Status; label: string }[] = [
 ];
 
 /** Every problem in the bank in one filterable list, so nothing is hidden behind a pattern page. */
-export function AllProblems({ problems }: { problems: DashboardProblem[] }) {
+export function AllProblems({
+  problems,
+  title = 'All problems',
+  intro,
+  emptyText = 'No problems match those filters.',
+  showStatus = true,
+}: {
+  problems: DashboardProblem[];
+  title?: string;
+  /** A line under the heading explaining what this list holds. */
+  intro?: string;
+  emptyText?: string;
+  /** Show the All / Not attempted / Attempted / Solved chips (off when the list is already one of those). */
+  showStatus?: boolean;
+}) {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<Status>('all');
   const [difficulty, setDifficulty] = useState<Difficulty | 'all'>('all');
@@ -42,11 +56,16 @@ export function AllProblems({ problems }: { problems: DashboardProblem[] }) {
   return (
     <section className="card stack">
       <div className="spread">
-        <h2 style={{ margin: 0 }}>All problems</h2>
+        <h2 style={{ margin: 0 }}>{title}</h2>
         <span className="small muted">
           {shown.length === problems.length ? `${problems.length} problems` : `${shown.length} of ${problems.length}`}
         </span>
       </div>
+      {intro && (
+        <p className="small muted" style={{ margin: 0 }}>
+          {intro}
+        </p>
+      )}
       <div className="row">
         <input
           type="search"
@@ -80,6 +99,7 @@ export function AllProblems({ problems }: { problems: DashboardProblem[] }) {
           ))}
         </select>
       </div>
+      {showStatus && (
       <div className="chips">
         {STATUSES.map((s) => (
           <button key={s.id} className={`chip${status === s.id ? ' selected' : ''}`} onClick={() => setStatus(s.id)}>
@@ -87,8 +107,9 @@ export function AllProblems({ problems }: { problems: DashboardProblem[] }) {
           </button>
         ))}
       </div>
+      )}
       {shown.length === 0 ? (
-        <p className="muted">No problems match those filters.</p>
+        <p className="muted">{emptyText}</p>
       ) : (
         <div className="table-wrap">
           <table className="table">

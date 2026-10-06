@@ -1,24 +1,102 @@
-import { Link } from 'react-router';
-import type { ReviewItem } from '../../../shared/types.ts';
+import { useMemo } from 'react';
+import { Link, useSearchParams } from 'react-router';
+import type { ReviewItem, ReviewSummary } from '../../../shared/types.ts';
 import { api, useLoad } from '../api.ts';
 import { DifficultyTag, ErrorBox, Loading, ProgressBar } from '../components.tsx';
+import { AllProblems } from './AllProblems.tsx';
 
-/** The spaced-repetition queue: what you'd otherwise quietly forget. */
+type Tab = 'problems' | 'solved' | 'review';
+
+/**
+ * Your problems in one place: the ones still to do, the ones you've done, and the
+ * spaced-repetition queue of what you'd otherwise quietly forget.
+ */
 export function ReviewPage() {
-  const { data, error, reload } = useLoad(api.review, []);
-  if (error) return <main className="page"><ErrorBox message={error} onRetry={reload} /></main>;
-  if (!data) return <main className="page"><Loading /></main>;
-  const { summary, due, upcoming } = data;
+  const [params, setParams] = useSearchParams();
+  const tab: Tab = (['problems', 'solved', 'review'] as const).find((t) => t === params.get('tab')) ?? 'problems';
+  const setTab = (t: Tab) => setParams({ tab: t }, { replace: true });
+
+  const review = useLoad(api.review, []);
+  const state = useLoad(api.state, []);
+
+  // "Solved" means you have attempted the approach check here, or solved it on LeetCode.
+  const { todo, done } = useMemo(() => {
+    const all = state.data?.problems ?? [];
+    const isDone = (p: (typeof all)[number]) => p.attempts > 0 || p.lcSolved;
+    return { todo: all.filter((p) => !isDone(p)), done: all.filter(isDone) };
+  }, [state.data]);
+
+  const error = review.error ?? state.error;
+  if (error) {
+    return (
+      <main className="page">
+        <ErrorBox
+          message={error}
+          onRetry={() => {
+            review.reload();
+            state.reload();
+          }}
+        />
+      </main>
+    );
+  }
+  if (!review.data || !state.data) return <main className="page"><Loading /></main>;
+
+  const tabs: { id: Tab; label: string }[] = [
+    { id: 'problems', label: `Problems (${todo.length})` },
+    { id: 'solved', label: `Solved (${done.length})` },
+    { id: 'review', label: `Review (${review.data.summary.due} due)` },
+  ];
 
   return (
     <main className="page stack">
       <div>
         <h1>Review</h1>
         <p className="muted" style={{ margin: 0 }}>
-          Solving a problem once doesn't keep it. Every attempt schedules the next one — a day later, then three, a week,
-          three weeks, two months — and a weak score sends a problem back to the start.
+          What is left to do, what you have done, and what is due for another look.
         </p>
       </div>
+
+      <div className="tabs" role="tablist">
+        {tabs.map((t) => (
+          <button key={t.id} role="tab" aria-selected={tab === t.id} className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'problems' && (
+        <AllProblems
+          problems={todo}
+          title="Problems to do"
+          intro="Problems you haven't attempted here and haven't solved on LeetCode."
+          emptyText={todo.length === 0 ? 'You have been through every problem. Use the Review tab to keep them fresh.' : undefined}
+          showStatus={false}
+        />
+      )}
+      {tab === 'solved' && (
+        <AllProblems
+          problems={done}
+          title="Solved"
+          intro="Problems you have attempted here or solved on LeetCode. Open one to retake it as practice."
+          emptyText={done.length === 0 ? 'Nothing yet. Attempt a problem and it shows up here.' : undefined}
+          showStatus={false}
+        />
+      )}
+      {tab === 'review' && <ReviewQueue data={review.data} />}
+    </main>
+  );
+}
+
+/** The spaced-repetition queue: due now, then what is coming up. */
+function ReviewQueue({ data }: { data: { summary: ReviewSummary; due: ReviewItem[]; upcoming: ReviewItem[] } }) {
+  const { summary, due, upcoming } = data;
+  return (
+    <>
+      <p className="muted" style={{ margin: 0 }}>
+        Solving a problem once doesn't keep it. Every attempt schedules the next one — a day later, then three, a week, three weeks,
+        two months — and a weak score sends a problem back to the start.
+      </p>
 
       <section className="grid grid-stats">
         <div className="card">
@@ -63,7 +141,7 @@ export function ReviewPage() {
           <Table items={upcoming} />
         </section>
       )}
-    </main>
+    </>
   );
 }
 
