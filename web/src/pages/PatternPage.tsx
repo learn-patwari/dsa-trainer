@@ -111,9 +111,14 @@ export function PatternPage() {
             <tbody>
               {problems.map((q) => (
                 <tr key={q.slug}>
-                  <td className="mono muted">{q.id}</td>
+                  <td className="mono muted">{q.source ? '—' : q.id}</td>
                   <td>
                     <Link to={`/problems/${q.slug}?mode=pattern`}>{q.title}</Link>
+                    {q.source && (
+                      <span className="tag" style={{ marginLeft: '0.4rem' }} title="Not a LeetCode problem">
+                        {q.source}
+                      </span>
+                    )}
                   </td>
                   <td>
                     <DifficultyTag difficulty={q.difficulty} />

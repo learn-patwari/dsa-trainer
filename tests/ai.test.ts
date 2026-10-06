@@ -3,6 +3,7 @@ import { buildReviewPrompt, statementToText, type ReviewContext } from '../share
 import type { AttemptResult, RunResult } from '../shared/types.ts';
 
 const base: ReviewContext = {
+  url: 'https://leetcode.com/problems/two-sum/',
   slug: 'two-sum',
   id: 1,
   title: 'Two Sum',

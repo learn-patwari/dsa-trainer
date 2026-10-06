@@ -13,9 +13,11 @@ interface Props {
   nextHref: string | null;
   nextLabel: string;
   onRetake: () => void;
+  /** Set for problems that are not on LeetCode, which have no editorial or solutions page to link. */
+  source?: { name: string; url: string } | null;
 }
 
-export function ResultCard({ result: r, complexity, nextHref, nextLabel, onRetake }: Props) {
+export function ResultCard({ result: r, complexity, nextHref, nextLabel, onRetake, source }: Props) {
   return (
     <div className="stack">
       <div className="row" style={{ gap: '1rem', alignItems: 'center' }}>
@@ -91,7 +93,10 @@ export function ResultCard({ result: r, complexity, nextHref, nextLabel, onRetak
       <div>
         <div className="small muted" style={{ marginBottom: '0.35rem' }}>Read more</div>
         <div className="row small" style={{ flexWrap: 'wrap' }}>
-          {studyLinks(r.slug, r.title).map((l) => (
+          {(source
+            ? [{ label: `Original on ${source.name}`, href: source.url, note: 'The problem where it was published, with its own discussion' }, ...studyLinks(r.slug, r.title).filter((l) => l.label === 'NeetCode video' || l.label === 'takeuforward')]
+            : studyLinks(r.slug, r.title)
+          ).map((l) => (
             <a key={l.label} className="btn btn-sm btn-ghost" href={l.href} target="_blank" rel="noreferrer" title={l.note}>
               {l.label} ↗
             </a>

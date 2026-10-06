@@ -27,28 +27,29 @@ interface Props {
 }
 
 export function Statement({ slug, problem, error, onRetry, showTags, hintsShown, onRevealHint, hintsCost }: Props) {
-  const url = `https://leetcode.com/problems/${slug}/`;
+  const origin = problem?.source ?? { name: 'LeetCode', url: `https://leetcode.com/problems/${slug}/` };
+  const url = origin.url;
   if (error) {
     return (
       <div className="stack">
-        <ErrorBox message={`Couldn't load the problem from LeetCode: ${error}`} onRetry={onRetry} />
+        <ErrorBox message={`Couldn't load the problem: ${error}`} onRetry={onRetry} />
         <p className="small">
           You can still read it on{' '}
           <a href={url} target="_blank" rel="noreferrer">
-            leetcode.com
+            {new URL(url).hostname}
           </a>{' '}
           and answer the approach check here.
         </p>
       </div>
     );
   }
-  if (!problem) return <Loading label="Fetching the problem from LeetCode…" />;
+  if (!problem) return <Loading label="Fetching the problem…" />;
 
   return (
     <div className="stack" style={{ gap: '0.75rem' }}>
       <div className="row small">
         <a className="btn btn-sm" href={url} target="_blank" rel="noreferrer">
-          Open on LeetCode ↗
+          Open on {origin.name} ↗
         </a>
         {problem.stale && <span className="tag tag-warn">Offline copy from {new Date(problem.fetchedAt).toLocaleDateString()}</span>}
         {showTags && problem.topicTags.map((t) => <span key={t.slug} className="tag">{t.name}</span>)}

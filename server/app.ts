@@ -369,6 +369,7 @@ async function reviewContext(slug: string) {
   const attempted = (progress?.attempts ?? 0) > 0;
   return {
     slug,
+    url: curated?.external?.source.url ?? `https://leetcode.com/problems/${slug}/`,
     id: problem.id,
     title: problem.title,
     difficulty: problem.difficulty,

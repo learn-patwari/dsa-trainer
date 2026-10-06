@@ -173,13 +173,22 @@ export function ProblemPage() {
             )}
           </div>
           <h1 style={{ margin: '0.2rem 0 0.4rem' }}>
-            <span className="muted mono" style={{ fontWeight: 500 }}>
-              {v.id}.
-            </span>{' '}
+            {v.source ? null : (
+              <>
+                <span className="muted mono" style={{ fontWeight: 500 }}>
+                  {v.id}.
+                </span>{' '}
+              </>
+            )}
             {v.title}
           </h1>
           <div className="row small">
             <DifficultyTag difficulty={v.difficulty} />
+            {v.source && (
+              <a className="tag" href={v.source.url} target="_blank" rel="noreferrer" title="This problem is not on LeetCode">
+                {v.source.name} ↗
+              </a>
+            )}
             {v.pattern ? <span className="tag tag-accent">{v.pattern.name}</span> : <span className="tag">Pattern hidden</span>}
             {v.lcSolved && (
               <span className="tag tag-good">
@@ -225,7 +234,7 @@ export function ProblemPage() {
             onRevealHint={() => setHintsShown((h) => h + 1)}
             hintsCost={!shown}
           />
-          <AskedAt slug={slug} />
+          <AskedAt slug={slug} reported={v.askedAt} />
           <AnimatedHint pattern={v.pattern?.id ?? null} revealed={animHint} costs={!shown} onReveal={() => setAnimHint(true)} />
         </section>
 
@@ -243,7 +252,7 @@ export function ProblemPage() {
 
           <div hidden={tab !== 'approach'}>
             {shown ? (
-              <ResultCard result={shown} complexity={v.complexity} nextHref={next.href} nextLabel={next.label} onRetake={retake} />
+              <ResultCard result={shown} complexity={v.complexity} nextHref={next.href} nextLabel={next.label} onRetake={retake} source={v.source} />
             ) : (
               <div className="stack" style={{ gap: '0.75rem' }}>
                 <div className="callout small">
@@ -270,6 +279,7 @@ export function ProblemPage() {
               <JavaEditor
                 key={slug}
                 slug={slug}
+                source={v.source}
                 savedCode={v.progress?.code ?? null}
                 starter={lcProblem?.javaSnippet ?? null}
                 save={(code) => api.saveWork(slug, { code })}

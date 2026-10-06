@@ -3,6 +3,9 @@ import { hashingProblems, slidingWindowProblems, twoPointerProblems } from './ar
 import { binarySearchProblems, prefixSumProblems } from './arrays-b.ts';
 import { bitProblems, dp1dProblems, dp2dProblems, trieProblems } from './dp.ts';
 import { extraArrayProblems, extraStackListProblems, extraTreeHeapProblems } from './extra-a.ts';
+import { externalArraysA } from './external-a.ts';
+import { externalDpGreedy } from './external-b.ts';
+import { externalGraphsTrees } from './external-c.ts';
 import { extraDpProblems, extraGraphProblems, extraTechniqueProblems } from './extra-b.ts';
 import { graphTraversalProblems, shortestPathProblems, topoSortProblems, unionFindProblems } from './graphs.ts';
 import { fastSlowProblems, linkedListProblems, monotonicStackProblems, stackProblems } from './lists.ts';
@@ -40,6 +43,10 @@ const all: CuratedProblem[] = [
   ...extraTechniqueProblems,
   ...extraGraphProblems,
   ...extraDpProblems,
+  // Problems from outside LeetCode.
+  ...externalArraysA,
+  ...externalDpGreedy,
+  ...externalGraphsTrees,
 ];
 
 const DIFFICULTY_ORDER = { Easy: 0, Medium: 1, Hard: 2 } as const;

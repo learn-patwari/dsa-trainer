@@ -25,6 +25,8 @@ const FALLBACK = 'class Solution {\n    \n}\n';
 
 interface Props {
   slug: string;
+  /** Set for problems that are not on LeetCode. */
+  source?: { name: string; url: string } | null;
   savedCode: string | null;
   starter: string | null;
   save: (code: string) => Promise<unknown>;
@@ -35,7 +37,7 @@ interface Props {
   onReview?: () => void;
 }
 
-export default function JavaEditor({ slug, savedCode, starter, save, onRan, onCodeChange, onReview }: Props) {
+export default function JavaEditor({ slug, source, savedCode, starter, save, onRan, onCodeChange, onReview }: Props) {
   const [code, setCode] = useState<string | null>(savedCode);
   const [status, edit] = useAutosave(save);
   const dark = usePrefersDark();
@@ -151,8 +153,8 @@ export default function JavaEditor({ slug, savedCode, starter, save, onRan, onCo
             AI review
           </button>
         )}
-        <a className="btn btn-sm btn-ghost" href={`https://leetcode.com/problems/${slug}/`} target="_blank" rel="noreferrer">
-          Submit on LeetCode ↗
+        <a className="btn btn-sm btn-ghost" href={source?.url ?? `https://leetcode.com/problems/${slug}/`} target="_blank" rel="noreferrer">
+          {source ? `Open on ${source.name} ↗` : 'Submit on LeetCode ↗'}
         </a>
       </div>
       {runError && <div className="callout bad small">{runError}</div>}

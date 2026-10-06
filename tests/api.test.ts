@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { request, type Server } from 'node:http';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { PROBLEMS } from '../shared/problems/index.ts';
 
 const dataDir = mkdtempSync(join(tmpdir(), 'dsa-api-'));
 process.env.DSA_DATA_DIR = dataDir;
@@ -87,7 +88,7 @@ describe('API', () => {
     const res = await api('/state');
     expect(res.status).toBe(200);
     const state = await res.json();
-    expect(state).toMatchObject({ overall: null, totalProblems: 197, attemptedProblems: 0, sessionConfigured: false });
+    expect(state).toMatchObject({ overall: null, totalProblems: PROBLEMS.length, attemptedProblems: 0, sessionConfigured: false });
     expect(state.upNext[0].slug).toBe('contains-duplicate');
   });
 
@@ -427,7 +428,7 @@ class Solution {
     expect(state.plan).toMatchObject({ size: 60, weeks: 6 });
     expect(state.streak).toMatchObject({ current: 1, activeToday: true });
     expect(state.difficulty.map((d: { difficulty: string }) => d.difficulty)).toEqual(['Easy', 'Medium', 'Hard']);
-    expect(state.difficulty.reduce((n: number, d: { total: number }) => n + d.total, 0)).toBe(197);
+    expect(state.difficulty.reduce((n: number, d: { total: number }) => n + d.total, 0)).toBe(PROBLEMS.length);
 
     expect((await api('/plan', { method: 'DELETE', body: JSON.stringify({}) })).status).toBe(200);
     expect((await (await api('/state')).json()).plan).toBeNull();

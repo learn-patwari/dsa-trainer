@@ -13,6 +13,8 @@ export interface ReviewContext {
   id: number;
   difficulty: Difficulty;
   slug: string;
+  /** Where the original problem lives. */
+  url: string;
   /** The statement, as plain text. */
   statement: string | null;
   /** The pattern, once you've earned the right to see it. */
@@ -75,7 +77,7 @@ function runSection(run: RunResult | null): string {
 }
 
 export function buildReviewPrompt(ctx: ReviewContext): string {
-  const header = `# ${ctx.id}. ${ctx.title} (${ctx.difficulty})\nhttps://leetcode.com/problems/${ctx.slug}/`;
+  const header = `# ${ctx.id}. ${ctx.title} (${ctx.difficulty})\n${ctx.url}`;
 
   return [
     ROLE,

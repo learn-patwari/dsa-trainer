@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from 'react-router';
 import { COMPANY_NAMES, PROBLEM_ASKS } from '../../../shared/companies.ts';
 import { COMPANY_TOP } from '../../../shared/company-top.ts';
+import { api, useLoad } from '../api.ts';
 import { DifficultyTag } from '../components.tsx';
 import { frequencyLabel } from '../companies.ts';
 
@@ -37,6 +38,9 @@ export function CompaniesPage() {
   const company = requested && COMPANY_TOP[requested] ? requested : COMPANY_NAMES[0]!;
   const { reported, questions } = COMPANY_TOP[company]!;
   const inBank = questions.filter(([slug]) => PROBLEM_ASKS[slug]).length;
+  // Problems from outside LeetCode that candidates report from this company.
+  const state = useLoad(api.state, []);
+  const offSite = (state.data?.problems ?? []).filter((p) => p.askedAt.includes(company));
 
   return (
     <main className="page stack">
@@ -105,6 +109,24 @@ export function CompaniesPage() {
           community data, not an official list, and companies change their questions.
         </p>
       </section>
+
+      {offSite.length > 0 && (
+        <section className="card stack">
+          <h2 style={{ margin: 0 }}>Also reported at {company}, not on LeetCode</h2>
+          <p className="small muted" style={{ margin: 0 }}>
+            These come from GeeksforGeeks, HackerRank, CSES and interview write-ups. Practise them here with the same approach check and Java tests.
+          </p>
+          <div className="stack" style={{ gap: '0.25rem' }}>
+            {offSite.map((p, i) => (
+              <div key={p.slug} className="row" style={{ padding: '0.4rem 0', borderTop: i ? '1px solid var(--border)' : 'none' }}>
+                <Link to={`/problems/${p.slug}?mode=pattern`}>{p.title}</Link>
+                <DifficultyTag difficulty={p.difficulty} />
+                {p.source && <span className="tag">{p.source}</span>}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="card stack">
         <h2 style={{ margin: 0 }}>More on {company} interviews</h2>

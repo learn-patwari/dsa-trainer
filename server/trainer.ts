@@ -105,6 +105,8 @@ export function problemView(p: Progress, slug: string, mode: PracticeMode, opts:
   const idx = siblings.findIndex((s) => s.slug === slug);
   return {
     slug,
+    source: problem.external?.source ?? null,
+    askedAt: problem.external?.askedAt ?? [],
     id: problem.id,
     title: problem.title,
     difficulty: problem.difficulty,
@@ -379,6 +381,8 @@ export function patternSummary(p: Progress, id: PatternId): PatternSummary {
 function problemRow(p: Progress, q: CuratedProblem, solvedOnLc: Set<string>): ProblemRow {
   return {
     slug: q.slug,
+    source: q.external?.source.name ?? null,
+    askedAt: q.external?.askedAt ?? [],
     id: q.id,
     title: q.title,
     difficulty: q.difficulty,

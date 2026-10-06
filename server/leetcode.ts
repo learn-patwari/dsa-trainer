@@ -1,5 +1,6 @@
 import type { Difficulty, LeetCodeImport, LeetCodeProblem, LeetCodeSolution, LeetCodeTagCount } from '../shared/types.ts';
 import { readCachedProblem, writeCachedProblem } from './store.ts';
+import { externalProblem } from './external.ts';
 
 /**
  * Minimal client for LeetCode's public (unofficial) GraphQL API and, optionally,
@@ -142,6 +143,8 @@ const inFlight = new Map<string, Promise<LeetCodeProblem>>();
 
 /** Returns a problem from the local cache, fetching (and caching) it from LeetCode when needed. */
 export async function getProblem(slug: string, { refresh = false } = {}): Promise<LeetCodeProblem & { stale?: boolean }> {
+  const own = externalProblem(slug); // not on LeetCode: the bank holds the whole problem
+  if (own) return own;
   const cached = await readCachedProblem(slug);
   if (cached && !refresh && cached.cacheVersion === CACHE_VERSION) return cached;
   try {

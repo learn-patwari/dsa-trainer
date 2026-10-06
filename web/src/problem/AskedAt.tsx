@@ -1,9 +1,32 @@
 import { Link } from 'react-router';
-import { PROBLEM_ASKS } from '../../../shared/companies.ts';
+import { COMPANY_NAMES, PROBLEM_ASKS } from '../../../shared/companies.ts';
 import { frequencyLabel } from '../companies.ts';
 
 /** Which companies candidates report being asked this problem, from public community-reported lists. */
-export function AskedAt({ slug }: { slug: string }) {
+export function AskedAt({ slug, reported }: { slug: string; reported?: string[] }) {
+  if (reported && reported.length > 0) {
+    return (
+      <div className="stack" style={{ gap: '0.5rem', marginTop: '1rem' }}>
+        <h3 style={{ margin: 0 }}>Asked at</h3>
+        <div className="chips">
+          {reported.map((company) =>
+            COMPANY_NAMES.includes(company) ? (
+              <Link key={company} to={`/companies?c=${encodeURIComponent(company)}`} className="tag tag-accent">
+                {company}
+              </Link>
+            ) : (
+              <span key={company} className="tag tag-accent">
+                {company}
+              </span>
+            ),
+          )}
+        </div>
+        <p className="tiny muted" style={{ margin: 0 }}>
+          Candidates report these companies asking this. Collected from interview write-ups, so treat it as a signal rather than a promise.
+        </p>
+      </div>
+    );
+  }
   const entry = PROBLEM_ASKS[slug];
   if (!entry || entry.total === 0) return null;
   return (

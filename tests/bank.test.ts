@@ -5,15 +5,15 @@ import { PATTERN_IDS } from '../shared/types.ts';
 import meta from './fixtures/leetcode-meta.json';
 
 describe('curated problem bank', () => {
-  it('has ~200 unique problems', () => {
-    expect(PROBLEMS.length).toBe(197);
+  it('has ~200 LeetCode problems, and every problem is unique', () => {
+    expect(PROBLEMS.filter((p) => !p.external)).toHaveLength(197);
     expect(new Set(PROBLEMS.map((p) => p.slug)).size).toBe(PROBLEMS.length);
     expect(new Set(PROBLEMS.map((p) => p.id)).size).toBe(PROBLEMS.length);
   });
 
   it('matches metadata verified against LeetCode (slug, id, title, difficulty, free)', () => {
     const bySlug = new Map(meta.map((m) => [m.slug, m]));
-    for (const p of PROBLEMS) {
+    for (const p of PROBLEMS.filter((q) => !q.external)) {
       const m = bySlug.get(p.slug);
       expect(m, `${p.slug} missing from the verified fixture`).toBeDefined();
       expect({ slug: p.slug, id: p.id, title: p.title, difficulty: p.difficulty, pattern: p.pattern }).toEqual({

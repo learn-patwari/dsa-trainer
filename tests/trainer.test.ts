@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getProblem, problemsForPattern } from '../shared/problems/index.ts';
+import { getProblem, PROBLEMS, problemsForPattern } from '../shared/problems/index.ts';
 import { START_RATING } from '../shared/scoring.ts';
 import type { AttemptSubmission, LeetCodeImport } from '../shared/types.ts';
 import { emptyProgress } from '../server/store.ts';
@@ -136,7 +136,9 @@ describe('recommendations', () => {
     p.leetcode = lc;
     const recs = recommendations(p);
     expect(recs[0]!.pattern).toBe('trie');
-    expect(recs[0]!.slug).toBe('design-add-and-search-words-data-structure');
+    // The first trie problem that is not the one already solved on LeetCode.
+    expect(recs[0]!.slug).toBe(problemsForPattern('trie').find((q) => q.slug !== 'implement-trie-prefix-tree')!.slug);
+    expect(recs[0]!.slug).not.toBe('implement-trie-prefix-tree');
     expect(recs[0]!.reason).toMatch(/solved only 0 related problems/);
   });
 
@@ -216,8 +218,8 @@ describe('dashboard', () => {
     expect(d.overall).toBe(1400);
     expect(d.overallTier).toBe('Solid');
     expect(d.patterns).toHaveLength(23);
-    expect(d.totalProblems).toBe(197);
-    expect(d.problems).toHaveLength(197);
+    expect(d.totalProblems).toBe(PROBLEMS.length);
+    expect(d.problems).toHaveLength(PROBLEMS.length);
     expect(d.problems.every((q) => q.patternName.length > 0)).toBe(true);
   });
 });

@@ -5,7 +5,7 @@ import { PROBLEMS } from '../shared/problems/index.ts';
 
 describe('company data', () => {
   it('has an entry for every problem in the bank', () => {
-    const missing = PROBLEMS.filter((p) => !PROBLEM_ASKS[p.slug]).map((p) => p.slug);
+    const missing = PROBLEMS.filter((p) => !p.external && !PROBLEM_ASKS[p.slug]).map((p) => p.slug);
     expect(missing).toEqual([]);
   });
 

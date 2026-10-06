@@ -18,8 +18,11 @@ export function AllProblems({ problems }: { problems: DashboardProblem[] }) {
   const [status, setStatus] = useState<Status>('all');
   const [difficulty, setDifficulty] = useState<Difficulty | 'all'>('all');
   const [pattern, setPattern] = useState('all');
+  const [origin, setOrigin] = useState('all');
 
   const patterns = useMemo(() => [...new Map(problems.map((p) => [p.pattern, p.patternName]))], [problems]);
+
+  const sources = useMemo(() => [...new Set(problems.flatMap((p) => (p.source ? [p.source] : [])))].sort(), [problems]);
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -27,13 +30,14 @@ export function AllProblems({ problems }: { problems: DashboardProblem[] }) {
       (p) =>
         (pattern === 'all' || p.pattern === pattern) &&
         (difficulty === 'all' || p.difficulty === difficulty) &&
+        (origin === 'all' || (origin === 'leetcode' ? p.source == null : p.source === origin)) &&
         (status === 'all' ||
           (status === 'todo' && p.attempts === 0) ||
           (status === 'attempted' && p.attempts > 0) ||
           (status === 'lc' && p.lcSolved)) &&
         (!q || p.title.toLowerCase().includes(q) || String(p.id) === q),
     );
-  }, [problems, query, status, difficulty, pattern]);
+  }, [problems, query, status, difficulty, pattern, origin]);
 
   return (
     <section className="card stack">
@@ -66,6 +70,15 @@ export function AllProblems({ problems }: { problems: DashboardProblem[] }) {
           <option>Medium</option>
           <option>Hard</option>
         </select>
+        <select aria-label="Source" value={origin} onChange={(e) => setOrigin(e.target.value)}>
+          <option value="all">Any source</option>
+          <option value="leetcode">LeetCode</option>
+          {sources.map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="chips">
         {STATUSES.map((s) => (
@@ -93,9 +106,14 @@ export function AllProblems({ problems }: { problems: DashboardProblem[] }) {
             <tbody>
               {shown.map((q) => (
                 <tr key={q.slug}>
-                  <td className="mono muted">{q.id}</td>
+                  <td className="mono muted">{q.source ? '—' : q.id}</td>
                   <td>
                     <Link to={`/problems/${q.slug}?mode=pattern`}>{q.title}</Link>
+                    {q.source && (
+                      <span className="tag" style={{ marginLeft: '0.4rem' }} title="Not a LeetCode problem">
+                        {q.source}
+                      </span>
+                    )}
                   </td>
                   <td>
                     <Link to={`/patterns/${q.pattern}`} className="small">

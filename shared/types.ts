@@ -48,6 +48,37 @@ export interface Pattern {
 
 type Four = readonly [string, string, string, string];
 
+/** Problems from outside LeetCode get ids from here up, so they never collide with a real LeetCode number. */
+export const EXTERNAL_ID_BASE = 100_000;
+
+/** Where a non-LeetCode problem comes from. */
+export interface ProblemSource {
+  name: string;
+  url: string;
+}
+
+/**
+ * What a problem needs when it is not on LeetCode: our own statement, signature and examples
+ * (written for this app, not copied), so the editor and Java test harness work exactly as they do
+ * for LeetCode problems.
+ */
+export interface ExternalSpec {
+  source: ProblemSource;
+  /** The statement as HTML, without examples (they are rendered from `examples`). */
+  statement: string;
+  /** Starter code shown in the editor; derived from the signature when left out. */
+  snippet?: string;
+  /** The method the tests call, in LeetCode's metaData vocabulary (integer, string, integer[], list<integer>, ...). */
+  signature: { name: string; params: { name: string; type: string }[]; returns: string };
+  /** Each input is one line per parameter, written the way LeetCode writes them. */
+  examples: { input: string[]; output: string; explain?: string }[];
+  hints?: string[];
+  /** Companies that candidates report being asked this, where there is evidence for it. */
+  askedAt?: string[];
+  /** A correct Java solution. A test compiles it and runs every example, so the key can't drift from the tests. */
+  reference: string;
+}
+
 /**
  * A curated problem and its answer key. By convention the FIRST option of
  * every multiple-choice question is the correct one; the server shuffles
@@ -71,6 +102,8 @@ export interface CuratedProblem {
   edgeCases: string[];
   /** Reference approach, revealed after an attempt. */
   approach: string;
+  /** Present for problems that are not on LeetCode. */
+  external?: ExternalSpec;
 }
 
 export type PracticeMode = 'pattern' | 'blind';
@@ -310,6 +343,8 @@ export interface LeetCodeProblem {
   similarQuestions: string | null;
   /** Expected outputs scraped from the statement, aligned with exampleTestcases. */
   exampleOutputs: string[];
+  /** Set for problems that are not on LeetCode. */
+  source?: ProblemSource;
   fetchedAt: string;
   cacheVersion?: number;
 }
@@ -479,6 +514,10 @@ export interface DashboardState {
 
 export interface ProblemRow {
   slug: string;
+  /** The site a non-LeetCode problem comes from. */
+  source: string | null;
+  /** Companies reported asking a non-LeetCode problem. */
+  askedAt: string[];
   id: number;
   title: string;
   difficulty: Difficulty;
@@ -502,6 +541,10 @@ export interface PatternDetail {
 
 export interface ProblemView {
   slug: string;
+  /** Set when the problem is not on LeetCode. */
+  source: ProblemSource | null;
+  /** Companies reported asking a non-LeetCode problem (LeetCode ones are in the company data). */
+  askedAt: string[];
   id: number;
   title: string;
   difficulty: Difficulty;

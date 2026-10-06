@@ -1,4 +1,5 @@
 import type { ComplexityWalkthrough } from '../types.ts';
+import { EXTERNAL_COMPLEXITY } from './complexity-external.ts';
 
 /**
  * How each problem's time and space complexity is actually counted, shown after an
@@ -6,7 +7,7 @@ import type { ComplexityWalkthrough } from '../types.ts';
  * which tests/complexity.test.ts enforces, so the walkthrough and the quiz can
  * never disagree. Server-side only, like the rest of the answer key.
  */
-export const COMPLEXITY: Record<string, ComplexityWalkthrough> = {
+const LEETCODE_COMPLEXITY: Record<string, ComplexityWalkthrough> = {
   // ------------------------------------------------------------ hashing
   "contains-duplicate": {
     time: { steps: [["One pass over the n values", "n iterations"], ["Each: one HashSet add, which also answers \"seen before?\"", "O(1) average"]], so: "n × O(1) = O(n)" },
@@ -819,3 +820,5 @@ export const COMPLEXITY: Record<string, ComplexityWalkthrough> = {
     space: { steps: [["A counter and the answer — or just ones and twos with the bit trick", "O(1)"]], so: "O(1)" },
   },
 };
+
+export const COMPLEXITY: Record<string, ComplexityWalkthrough> = { ...LEETCODE_COMPLEXITY, ...EXTERNAL_COMPLEXITY };
