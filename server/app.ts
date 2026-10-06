@@ -10,7 +10,7 @@ import { compileAndRun, javaStatus } from './java-run.ts';
 import { lookup } from './lookup.ts';
 import { buildReviewPrompt, statementToText } from '../shared/ai-prompt.ts';
 import { getProblem as getCurated } from '../shared/problems/index.ts';
-import { setPlan } from './plan.ts';
+import { delayedList, setPlan } from './plan.ts';
 import { dueList, reviewSummary, upcomingList } from './review.ts';
 import { fetchMySolution, getProblem, importPublicProfile, importWithSession, LeetCodeError, sessionFromEnv, USERNAME_RE } from './leetcode.ts';
 import { listBackups, readDrawing, readProgress, resetProgress, restoreBackup, updateProgress, writeDrawing } from './store.ts';
@@ -270,7 +270,14 @@ export function createApp({ webDir = resolve('dist/web') } = {}) {
   /** The whole spaced-repetition queue: due now, then what's scheduled. */
   api.get('/review', async (_req, res) => {
     const p = await readProgress();
-    res.json({ summary: reviewSummary(p), due: dueList(p), upcoming: upcomingList(p, 30) });
+    res.json({
+      summary: reviewSummary(p),
+      due: dueList(p),
+      upcoming: upcomingList(p, 30),
+      // Problems the study plan wanted done by now, oldest first.
+      delayed: delayedList(p),
+      hasPlan: p.plan != null,
+    });
   });
 
   /** Start (or restart) a study plan: N problems over W weeks. */

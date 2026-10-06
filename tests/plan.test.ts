@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { emptyProgress } from '../server/store.ts';
-import { difficultyProgress, setPlan, streak, studyPlan } from '../server/plan.ts';
+import { delayedList, difficultyProgress, setPlan, streak, studyPlan } from '../server/plan.ts';
 import { PROBLEMS } from '../shared/problems/index.ts';
 import type { AttemptResult, Progress } from '../shared/types.ts';
 
@@ -100,5 +100,55 @@ describe('difficultyProgress', () => {
     expect(rows.reduce((n, r) => n + r.total, 0)).toBe(PROBLEMS.length);
     expect(rows[0]).toMatchObject({ attempted: 1, lcSolved: 1 });
     expect(rows[1]).toMatchObject({ attempted: 0, lcSolved: 0 });
+  });
+});
+
+describe('delayedList', () => {
+  const attempt = (p: Progress, slug: string) => {
+    p.problems[slug] = { attempts: 1, bestPercent: 80, lastPercent: 80, lastAt: new Date().toISOString() };
+  };
+
+  it('is empty without a plan, and on the first day', () => {
+    expect(delayedList(emptyProgress())).toEqual([]);
+    const p = emptyProgress();
+    setPlan(p, 56, 8);
+    expect(delayedList(p)).toEqual([]);
+  });
+
+  it('moves the problems of each missed day into the list, oldest first and later each day', () => {
+    const p = emptyProgress();
+    setPlan(p, 56, 8); // one a day
+    p.plan!.startedAt = daysAgo(3); // days 1-3 are over, today is day 4
+    const late = delayedList(p);
+    expect(late.map((d) => d.slug)).toEqual(PROBLEMS.slice(0, 3).map((q) => q.slug));
+    expect(late.map((d) => d.daysLate)).toEqual([3, 2, 1]);
+  });
+
+  it('drops a problem once it has been attempted, and the next one takes its place', () => {
+    const p = emptyProgress();
+    setPlan(p, 56, 8);
+    p.plan!.startedAt = daysAgo(3);
+    attempt(p, PROBLEMS[0]!.slug);
+    const late = delayedList(p);
+    expect(late).toHaveLength(2);
+    expect(late.map((d) => d.slug)).toEqual([PROBLEMS[1]!.slug, PROBLEMS[2]!.slug]);
+  });
+
+  it('is empty when you are on schedule or ahead', () => {
+    const p = emptyProgress();
+    setPlan(p, 56, 8);
+    p.plan!.startedAt = daysAgo(3);
+    for (const q of PROBLEMS.slice(0, 3)) attempt(p, q.slug);
+    expect(delayedList(p)).toEqual([]);
+  });
+
+  it('keeps ageing the leftovers after the plan has ended', () => {
+    const p = emptyProgress();
+    setPlan(p, 7, 1); // one a day for a week
+    p.plan!.startedAt = daysAgo(10);
+    const late = delayedList(p);
+    expect(late).toHaveLength(7);
+    expect(late[0]).toMatchObject({ slug: PROBLEMS[0]!.slug, daysLate: 10 });
+    expect(late[6]!.daysLate).toBe(4);
   });
 });

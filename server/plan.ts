@@ -1,5 +1,6 @@
+import { patternName } from '../shared/patterns/index.ts';
 import { PROBLEMS } from '../shared/problems/index.ts';
-import type { Difficulty, DifficultyProgress, Progress, StreakInfo, StudyPlan } from '../shared/types.ts';
+import type { DelayedItem, Difficulty, DifficultyProgress, Progress, StreakInfo, StudyPlan } from '../shared/types.ts';
 
 /** Study plan, daily target and streak — the scheduling side of the trainer. */
 
@@ -53,6 +54,42 @@ export function studyPlan(p: Progress): StudyPlan | null {
   const remainingDays = Math.max(1, daysTotal - daysElapsed + 1);
   const todayTarget = Math.max(0, Math.ceil((size - done) / remainingDays));
   return { size, weeks, startedAt, done, daysElapsed, daysTotal, todayTarget, doneToday, behindBy: shouldHaveDone - done };
+}
+
+/**
+ * Problems the study plan wanted done on a day that is now over, but you haven't attempted.
+ *
+ * The plan spreads its problems evenly over its days, in curriculum order: problem number j
+ * (counting from 0) is due on day floor(j / perDay) + 1. You've done `done` of them, so the next
+ * unattempted problems are the ones owed. Each is "late" by the days since its own day, so a
+ * missed day's problems keep ageing until you attempt them, and a problem the plan wouldn't
+ * have asked for yet never appears.
+ */
+export function delayedList(p: Progress, now = Date.now()): DelayedItem[] {
+  if (!p.plan) return [];
+  const { size, weeks, startedAt } = p.plan;
+  const daysTotal = Math.max(1, weeks * 7);
+  // Uncapped: after the plan's last day, whatever is left keeps getting later.
+  const dayNumber = Math.floor((now - Date.parse(startedAt)) / DAY_MS) + 1;
+  const perDay = size / daysTotal;
+  const owedByNow = dayNumber > daysTotal ? size : Math.min(size, Math.ceil(perDay * (dayNumber - 1)));
+  const done = Object.values(p.problems).filter((v) => v.attempts > 0 && v.lastAt >= startedAt).length;
+  const owed = owedByNow - done;
+  if (owed <= 0) return [];
+
+  const todo = PROBLEMS.filter((q) => (p.problems[q.slug]?.attempts ?? 0) === 0).slice(0, owed);
+  return todo.map((q, i) => {
+    const dueDay = Math.floor((done + i) / perDay) + 1;
+    return {
+      slug: q.slug,
+      title: q.title,
+      difficulty: q.difficulty,
+      pattern: q.pattern,
+      patternName: patternName(q.pattern),
+      source: q.external?.source.name ?? null,
+      daysLate: Math.max(1, dayNumber - dueDay),
+    };
+  });
 }
 
 export function difficultyProgress(p: Progress): DifficultyProgress[] {

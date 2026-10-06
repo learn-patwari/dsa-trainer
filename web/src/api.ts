@@ -5,6 +5,7 @@ import type {
   ChallengeAnswer,
   ChallengeQuestion,
   DashboardState,
+  DelayedItem,
   Difficulty,
   LookupResult,
   JavaStatus,
@@ -52,6 +53,9 @@ export interface ReviewQueue {
   summary: ReviewSummary;
   due: ReviewItem[];
   upcoming: ReviewItem[];
+  /** Plan problems that are past their day. */
+  delayed: DelayedItem[];
+  hasPlan: boolean;
 }
 
 export interface CatalogMatch {

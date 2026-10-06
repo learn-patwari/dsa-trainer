@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import type { ReviewItem, ReviewSummary } from '../../../shared/types.ts';
+import type { DelayedItem, ReviewItem, ReviewSummary } from '../../../shared/types.ts';
 import { api, useLoad } from '../api.ts';
 import { DifficultyTag, ErrorBox, Loading, ProgressBar } from '../components.tsx';
 import { AllProblems } from './AllProblems.tsx';
@@ -45,7 +45,7 @@ export function ReviewPage() {
   const tabs: { id: Tab; label: string }[] = [
     { id: 'problems', label: `Problems (${todo.length})` },
     { id: 'solved', label: `Solved (${done.length})` },
-    { id: 'review', label: `Review (${review.data.summary.due} due)` },
+    { id: 'review', label: reviewLabel(review.data.summary.due, review.data.delayed.length) },
   ];
 
   return (
@@ -89,10 +89,61 @@ export function ReviewPage() {
 }
 
 /** The spaced-repetition queue: due now, then what is coming up. */
-function ReviewQueue({ data }: { data: { summary: ReviewSummary; due: ReviewItem[]; upcoming: ReviewItem[] } }) {
-  const { summary, due, upcoming } = data;
+function ReviewQueue({ data }: { data: { summary: ReviewSummary; due: ReviewItem[]; upcoming: ReviewItem[]; delayed: DelayedItem[]; hasPlan: boolean } }) {
+  const { summary, due, upcoming, delayed, hasPlan } = data;
   return (
     <>
+      {delayed.length > 0 ? (
+        <section className="card">
+          <div className="spread">
+            <h2 style={{ margin: 0 }}>Delayed from your plan ({delayed.length})</h2>
+            <span className="small muted">Oldest first</span>
+          </div>
+          <p className="small muted">
+            Your study plan wanted these done on days that have passed. They stay here, getting later each day, until you attempt them.
+          </p>
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Problem</th>
+                  <th>Pattern</th>
+                  <th>Delayed by</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {delayed.map((d) => (
+                  <tr key={d.slug}>
+                    <td>
+                      <Link to={`/problems/${d.slug}?mode=pattern`}>{d.title}</Link> <DifficultyTag difficulty={d.difficulty} />
+                      {d.source && <span className="tag" style={{ marginLeft: '0.4rem' }}>{d.source}</span>}
+                    </td>
+                    <td className="small">
+                      <Link to={`/patterns/${d.pattern}`}>{d.patternName}</Link>
+                    </td>
+                    <td>
+                      <span className="tag tag-warn">{d.daysLate === 1 ? '1 day' : `${d.daysLate} days`}</span>
+                    </td>
+                    <td>
+                      <Link className="btn btn-sm btn-primary" to={`/problems/${d.slug}?mode=pattern`}>
+                        Do it now
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : (
+        <p className="small muted" style={{ margin: 0 }}>
+          {hasPlan
+            ? 'You are on schedule: no problems are delayed.'
+            : 'Start a study plan on the dashboard and any day you miss will move its problems here, with how many days they are delayed.'}
+        </p>
+      )}
+
       <p className="muted" style={{ margin: 0 }}>
         Solving a problem once doesn't keep it. Every attempt schedules the next one — a day later, then three, a week, three weeks,
         two months — and a weak score sends a problem back to the start.
@@ -186,6 +237,12 @@ function Table({ items, showOverdue = false }: { items: ReviewItem[]; showOverdu
       </table>
     </div>
   );
+}
+
+function reviewLabel(due: number, delayed: number): string {
+  const parts = [`${due} due`];
+  if (delayed > 0) parts.push(`${delayed} late`);
+  return `Review (${parts.join(', ')})`;
 }
 
 function dueLabel(days: number): string {

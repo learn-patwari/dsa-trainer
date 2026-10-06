@@ -243,6 +243,19 @@ export interface ReviewItem {
   lastPercent: number;
 }
 
+/** A problem your study plan wanted done by now that you haven't attempted yet. */
+export interface DelayedItem {
+  slug: string;
+  title: string;
+  difficulty: Difficulty;
+  pattern: PatternId;
+  patternName: string;
+  /** The site a non-LeetCode problem comes from. */
+  source: string | null;
+  /** Whole days since the day the plan wanted it done. */
+  daysLate: number;
+}
+
 export interface ReviewSummary {
   due: number;
   /** Due in the next seven days. */
