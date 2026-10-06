@@ -5,8 +5,8 @@ import { PATTERN_IDS } from '../shared/types.ts';
 import meta from './fixtures/leetcode-meta.json';
 
 describe('curated problem bank', () => {
-  it('has ~200 LeetCode problems, and every problem is unique', () => {
-    expect(PROBLEMS.filter((p) => !p.external)).toHaveLength(197);
+  it('has 228 LeetCode problems, and every problem is unique', () => {
+    expect(PROBLEMS.filter((p) => !p.external)).toHaveLength(228);
     expect(new Set(PROBLEMS.map((p) => p.slug)).size).toBe(PROBLEMS.length);
     expect(new Set(PROBLEMS.map((p) => p.id)).size).toBe(PROBLEMS.length);
   });

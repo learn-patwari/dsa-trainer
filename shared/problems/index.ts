@@ -6,6 +6,7 @@ import { extraArrayProblems, extraStackListProblems, extraTreeHeapProblems } fro
 import { externalArraysA } from './external-a.ts';
 import { externalDpGreedy } from './external-b.ts';
 import { externalGraphsTrees } from './external-c.ts';
+import { classicProblems } from './extra-c.ts';
 import { extraDpProblems, extraGraphProblems, extraTechniqueProblems } from './extra-b.ts';
 import { graphTraversalProblems, shortestPathProblems, topoSortProblems, unionFindProblems } from './graphs.ts';
 import { fastSlowProblems, linkedListProblems, monotonicStackProblems, stackProblems } from './lists.ts';
@@ -43,6 +44,8 @@ const all: CuratedProblem[] = [
   ...extraTechniqueProblems,
   ...extraGraphProblems,
   ...extraDpProblems,
+  // Third pass: the most-reported classics that were missing.
+  ...classicProblems,
   // Problems from outside LeetCode.
   ...externalArraysA,
   ...externalDpGreedy,

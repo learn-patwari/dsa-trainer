@@ -1,4 +1,5 @@
 import type { ComplexityWalkthrough } from '../types.ts';
+import { MORE_COMPLEXITY } from './complexity-more.ts';
 import { EXTERNAL_COMPLEXITY } from './complexity-external.ts';
 
 /**
@@ -821,4 +822,4 @@ const LEETCODE_COMPLEXITY: Record<string, ComplexityWalkthrough> = {
   },
 };
 
-export const COMPLEXITY: Record<string, ComplexityWalkthrough> = { ...LEETCODE_COMPLEXITY, ...EXTERNAL_COMPLEXITY };
+export const COMPLEXITY: Record<string, ComplexityWalkthrough> = { ...LEETCODE_COMPLEXITY, ...MORE_COMPLEXITY, ...EXTERNAL_COMPLEXITY };

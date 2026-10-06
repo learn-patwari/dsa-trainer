@@ -1574,5 +1574,253 @@
   "difficulty": "Medium",
   "pattern": "bit-manipulation",
   "paidOnly": false
+ },
+ {
+  "slug": "longest-common-prefix",
+  "id": 14,
+  "title": "Longest Common Prefix",
+  "difficulty": "Easy",
+  "pattern": "two-pointers",
+  "paidOnly": false
+ },
+ {
+  "slug": "palindrome-number",
+  "id": 9,
+  "title": "Palindrome Number",
+  "difficulty": "Easy",
+  "pattern": "two-pointers",
+  "paidOnly": false
+ },
+ {
+  "slug": "spiral-matrix",
+  "id": 54,
+  "title": "Spiral Matrix",
+  "difficulty": "Medium",
+  "pattern": "two-pointers",
+  "paidOnly": false
+ },
+ {
+  "slug": "merge-sorted-array",
+  "id": 88,
+  "title": "Merge Sorted Array",
+  "difficulty": "Easy",
+  "pattern": "two-pointers",
+  "paidOnly": false
+ },
+ {
+  "slug": "string-compression",
+  "id": 443,
+  "title": "String Compression",
+  "difficulty": "Medium",
+  "pattern": "two-pointers",
+  "paidOnly": false
+ },
+ {
+  "slug": "majority-element",
+  "id": 169,
+  "title": "Majority Element",
+  "difficulty": "Easy",
+  "pattern": "hashing",
+  "paidOnly": false
+ },
+ {
+  "slug": "rotate-image",
+  "id": 48,
+  "title": "Rotate Image",
+  "difficulty": "Medium",
+  "pattern": "two-pointers",
+  "paidOnly": false
+ },
+ {
+  "slug": "integer-to-roman",
+  "id": 12,
+  "title": "Integer to Roman",
+  "difficulty": "Medium",
+  "pattern": "greedy",
+  "paidOnly": false
+ },
+ {
+  "slug": "roman-to-integer",
+  "id": 13,
+  "title": "Roman to Integer",
+  "difficulty": "Easy",
+  "pattern": "hashing",
+  "paidOnly": false
+ },
+ {
+  "slug": "remove-duplicates-from-sorted-array",
+  "id": 26,
+  "title": "Remove Duplicates from Sorted Array",
+  "difficulty": "Easy",
+  "pattern": "two-pointers",
+  "paidOnly": false
+ },
+ {
+  "slug": "next-permutation",
+  "id": 31,
+  "title": "Next Permutation",
+  "difficulty": "Medium",
+  "pattern": "two-pointers",
+  "paidOnly": false
+ },
+ {
+  "slug": "minimum-absolute-difference",
+  "id": 1200,
+  "title": "Minimum Absolute Difference",
+  "difficulty": "Easy",
+  "pattern": "two-pointers",
+  "paidOnly": false
+ },
+ {
+  "slug": "first-unique-character-in-a-string",
+  "id": 387,
+  "title": "First Unique Character in a String",
+  "difficulty": "Easy",
+  "pattern": "hashing",
+  "paidOnly": false
+ },
+ {
+  "slug": "first-missing-positive",
+  "id": 41,
+  "title": "First Missing Positive",
+  "difficulty": "Hard",
+  "pattern": "hashing",
+  "paidOnly": false
+ },
+ {
+  "slug": "rotate-array",
+  "id": 189,
+  "title": "Rotate Array",
+  "difficulty": "Medium",
+  "pattern": "two-pointers",
+  "paidOnly": false
+ },
+ {
+  "slug": "reverse-words-in-a-string",
+  "id": 151,
+  "title": "Reverse Words in a String",
+  "difficulty": "Medium",
+  "pattern": "two-pointers",
+  "paidOnly": false
+ },
+ {
+  "slug": "valid-palindrome-ii",
+  "id": 680,
+  "title": "Valid Palindrome II",
+  "difficulty": "Easy",
+  "pattern": "two-pointers",
+  "paidOnly": false
+ },
+ {
+  "slug": "lfu-cache",
+  "id": 460,
+  "title": "LFU Cache",
+  "difficulty": "Hard",
+  "pattern": "hashing",
+  "paidOnly": false
+ },
+ {
+  "slug": "powx-n",
+  "id": 50,
+  "title": "Pow(x, n)",
+  "difficulty": "Medium",
+  "pattern": "bit-manipulation",
+  "paidOnly": false
+ },
+ {
+  "slug": "making-a-large-island",
+  "id": 827,
+  "title": "Making A Large Island",
+  "difficulty": "Hard",
+  "pattern": "graph-traversal",
+  "paidOnly": false
+ },
+ {
+  "slug": "maximum-profit-in-job-scheduling",
+  "id": 1235,
+  "title": "Maximum Profit in Job Scheduling",
+  "difficulty": "Hard",
+  "pattern": "dp-1d",
+  "paidOnly": false
+ },
+ {
+  "slug": "restore-ip-addresses",
+  "id": 93,
+  "title": "Restore IP Addresses",
+  "difficulty": "Medium",
+  "pattern": "backtracking",
+  "paidOnly": false
+ },
+ {
+  "slug": "maximal-square",
+  "id": 221,
+  "title": "Maximal Square",
+  "difficulty": "Medium",
+  "pattern": "dp-2d",
+  "paidOnly": false
+ },
+ {
+  "slug": "text-justification",
+  "id": 68,
+  "title": "Text Justification",
+  "difficulty": "Hard",
+  "pattern": "greedy",
+  "paidOnly": false
+ },
+ {
+  "slug": "burst-balloons",
+  "id": 312,
+  "title": "Burst Balloons",
+  "difficulty": "Hard",
+  "pattern": "dp-2d",
+  "paidOnly": false
+ },
+ {
+  "slug": "search-suggestions-system",
+  "id": 1268,
+  "title": "Search Suggestions System",
+  "difficulty": "Medium",
+  "pattern": "trie",
+  "paidOnly": false
+ },
+ {
+  "slug": "wildcard-matching",
+  "id": 44,
+  "title": "Wildcard Matching",
+  "difficulty": "Hard",
+  "pattern": "dp-2d",
+  "paidOnly": false
+ },
+ {
+  "slug": "bus-routes",
+  "id": 815,
+  "title": "Bus Routes",
+  "difficulty": "Hard",
+  "pattern": "graph-traversal",
+  "paidOnly": false
+ },
+ {
+  "slug": "find-k-closest-elements",
+  "id": 658,
+  "title": "Find K Closest Elements",
+  "difficulty": "Medium",
+  "pattern": "binary-search",
+  "paidOnly": false
+ },
+ {
+  "slug": "best-time-to-buy-and-sell-stock-ii",
+  "id": 122,
+  "title": "Best Time to Buy and Sell Stock II",
+  "difficulty": "Medium",
+  "pattern": "greedy",
+  "paidOnly": false
+ },
+ {
+  "slug": "delete-and-earn",
+  "id": 740,
+  "title": "Delete and Earn",
+  "difficulty": "Medium",
+  "pattern": "dp-1d",
+  "paidOnly": false
  }
 ]
